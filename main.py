@@ -75,9 +75,10 @@ class TilingDrawing(object):
         OBS_COLOR = (255,0,0)
         REQ_COLOR = (0,0,255)
         HIGHLIGHTED_COLOR = (0,255,0)
-        RAD = 5
-        THICK = 3
+        RAD =33
+        THICK = 2
         tw, th = self.tiling.dimensions
+        hover_index = self.get_point_req_index(pygame.mouse.get_pos())
         if SHADING:
             self.draw_shaded_cells(Surface)
         if PRETTY_POINTS:
@@ -94,9 +95,12 @@ class TilingDrawing(object):
             if PRETTY_POINTS and any(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
                 continue
             draw_gridded_perm(Surface, loc, OBS_COLOR, RAD, True)
-        for reqlist in self.requirement_locs:
+        for i,reqlist in enumerate(self.requirement_locs):
+            if PRETTY_POINTS and any(p in self.tiling.point_cells for req in self.tiling.requirements[i] for p in req.pos):
+                continue
+            col = HIGHLIGHTED_COLOR if hover_index != None and i == hover_index[0]else REQ_COLOR
             for loc in reqlist:
-                draw_gridded_perm(Surface, loc, REQ_COLOR, RAD, True)
+                draw_gridded_perm(Surface, loc, col, RAD, True)
 
     def get_cell(self, mpos):
         tw,th = self.tiling.dimensions
