@@ -1,5 +1,11 @@
 # GUI FOR TILINGS
 
+## RUN:
+
+python main.py basis
+
+Example: python main.py 1234_1324
+
 ## CONTROLS:
 
 - Left/right to switch strategies, strategy is visible in window title
