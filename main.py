@@ -3,12 +3,16 @@ from permuta import Perm
 from permuta.misc import DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST
 from tilings import Tiling, Obstruction, Requirement, GriddedPerm
 from tilescopethree.strategies.inferral_strategies.row_and_column_separation import row_and_column_separation as real_row_and_col_sep
+from tilescopethree.strategies.inferral_strategies.obstruction_transitivity import obstruction_transitivity as real_obs_trans
+from tilescopethree.strategies.inferral_strategies.subobstruction_inferral import empty_cell_inferral as real_empty_cell_inferral
 from tilescopethree.strategies.equivalence_strategies.point_placements import place_point_of_requirement
 from pygame.locals import *
 from pygame import draw
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
+SHADING = True
+PRETTY_POINTS = True
 
 def gridded_perm_initial_locations(gp, gridsz, cellsz):
     colcount = [0]*gridsz[0]
@@ -49,6 +53,23 @@ class TilingDrawing(object):
         self.requirement_locs = [[gridded_perm_initial_locations(gp, (tw, th), (SCREEN_WIDTH//tw, SCREEN_HEIGHT//th)) for gp in reqlist] for reqlist in self.tiling.requirements]
         self.rect = rect
 
+    def cell_to_rect(self, c):
+        cx, cy = c
+        tw, th = self.tiling.dimensions
+        cw, ch = self.rect.width//tw, self.rect.height//th
+        return Rect(cx*cw, cy*ch, cw, ch)
+
+    def draw_shaded_cells(self, Surface):
+        SHADING_COLOR = (127,127,127)
+        for c in self.tiling.empty_cells:
+            draw.rect(Surface, SHADING_COLOR, self.cell_to_rect(c))
+
+    def draw_point_cells(self, Surface):
+        POINT_COLOR = (0,0,0)
+        RAD = 10
+        for c in self.tiling.point_cells:
+            draw.circle(Surface, POINT_COLOR, self.cell_to_rect(c).center, RAD)
+
     def draw(self, Surface):
         GRID_COLOR = (0,0,0)
         OBS_COLOR = (255,0,0)
@@ -57,13 +78,21 @@ class TilingDrawing(object):
         RAD = 5
         THICK = 3
         tw, th = self.tiling.dimensions
+        if SHADING:
+            self.draw_shaded_cells(Surface)
+        if PRETTY_POINTS:
+            self.draw_point_cells(Surface)
         for i in range(tw):
             x = self.rect.left + self.rect.width*i//tw
             draw.line(Surface, GRID_COLOR, (x, self.rect.bottom), (x, self.rect.top), THICK)
         for i in range(th):
             y = self.rect.top + self.rect.height*i//th
             draw.line(Surface, GRID_COLOR, (self.rect.left, y), (self.rect.right, y), THICK)
-        for loc in self.obstruction_locs:
+        for i,loc in enumerate(self.obstruction_locs):
+            if SHADING and self.tiling.obstructions[i].is_point_obstr():
+                continue
+            if PRETTY_POINTS and any(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
+                continue
             draw_gridded_perm(Surface, loc, OBS_COLOR, RAD, True)
         for reqlist in self.requirement_locs:
             for loc in reqlist:
@@ -92,9 +121,6 @@ class TilingDrawing(object):
             for j,loc in enumerate(reqlist):
                 for k,v in enumerate(loc):
                     if distsq((mx,my), v) <= 100:
-                        print("MOUSE: ", mx, my)
-                        print("REQ:   ", v[0], v[1])
-                        print(distsq((mx, my), v))
                         return (i,j,k)
 
 #def draw_gridded_perm(Surface, gp, color, pos, gridsz, cellsz, radius, lines=False):
@@ -132,12 +158,6 @@ def cell_insertion(t):
         return t.tiling.add_single_cell_obstruction(Perm((0,)), (cx, cy))
 
 
-def row_and_col_separation(t):
-    lb,mb,rb = pygame.mouse.get_pressed()
-    if lb and not mb and not rb:
-        x = real_row_and_col_sep(t.tiling)
-        if x:
-            return x.comb_classes[0]
 
 def place_point(t, force_dir=DIR_NONE):
     lb,mb,rb = pygame.mouse.get_pressed()
@@ -163,6 +183,28 @@ def place_point_west(t):
 def place_point_east(t):
     return place_point(t, DIR_EAST)
 
+
+# INFERRAL
+def row_and_col_separation(t):
+    lb,mb,rb = pygame.mouse.get_pressed()
+    if lb or mb or rb:
+        x = real_row_and_col_sep(t.tiling)
+        if x:
+            return x.comb_classes[0]
+
+def obstruction_transitivity(t):
+    lb,mb,rb = pygame.mouse.get_pressed()
+    if lb or mb or rb:
+        x = real_obs_trans(t.tiling)
+        if x:
+            return x.comb_classes[0]
+
+def empty_cell_inferral(t):
+    lb,mb,rb = pygame.mouse.get_pressed()
+    if lb or mb or rb:
+        x = real_empty_cell_inferral(t.tiling)
+        if x and x.comb_classes[0] != t.tiling:
+            return x.comb_classes[0]
 
 def main():
     #Initialize Everything
@@ -193,12 +235,14 @@ def main():
     empty_stack = [t.is_empty()]
     t = stck[0]
     strats = [cell_insertion, 
-              row_and_col_separation,
               place_point_north,
               place_point_south,
               place_point_east,
               place_point_west,
-              factor]
+              factor,
+              row_and_col_separation,
+              obstruction_transitivity,
+              empty_cell_inferral]
     cur_strat = 0
     
     #Display The Background
@@ -232,8 +276,10 @@ def main():
                 print(t.get_point_req_index(mpos))
             elif event.type == MOUSEBUTTONDOWN:
                 try:
-                    stck.append(TilingDrawing(strats[cur_strat](t), trect))
-                    empty_stack.append(stck[-1].tiling.is_empty())
+                    new_tiling = strats[cur_strat](t)
+                    if new_tiling != None:
+                        stck.append(TilingDrawing(new_tiling, trect))
+                        empty_stack.append(stck[-1].tiling.is_empty())
                 except Exception as e:
                     print(e)
                 t = stck[-1]
