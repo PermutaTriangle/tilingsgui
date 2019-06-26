@@ -263,6 +263,7 @@ def on_mouse_press(x, y, button, modifiers):
         new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
         if new_tiling != None:
             tiling_drawing = TilingDrawing(new_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+            print(tiling_drawing.tiling)
             stack.append(tiling_drawing)
     except Exception as e:
         raise e
@@ -299,6 +300,7 @@ def main():
     global tiling_drawing
     start_tiling = Tiling.from_string(sys.argv[1])
     tiling_drawing = TilingDrawing(start_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    print(tiling_drawing.tiling)
     stack.append(tiling_drawing)
 
     @window.event
