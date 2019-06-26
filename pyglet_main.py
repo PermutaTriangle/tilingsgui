@@ -253,19 +253,42 @@ strats = [cell_insertion,
           obstruction_transitivity]
 cur_strat = 0
 stack = []
+selected_point = None
 
 window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
-    global tiling_drawing
-    try:
-        new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
-        if new_tiling != None:
-            tiling_drawing = TilingDrawing(new_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
-            stack.append(tiling_drawing)
-    except Exception as e:
-        raise e
+    global tiling_drawing, selected_point
+    if modifiers == 0:
+        try:
+            new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
+            if new_tiling != None:
+                tiling_drawing = TilingDrawing(new_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+                stack.append(tiling_drawing)
+        except Exception as e:
+            raise e
+    elif button == pyglet.window.mouse.LEFT and modifiers == pyglet.window.key.MOD_SHIFT:
+        selected_point = tiling_drawing.get_point_obs_index((x, y))
+        if selected_point == None:
+            selected_point = tiling.drawing.get_point_req_index((x, y))
+
+@window.event
+def on_mouse_release(x, y, button, modifiers):
+    global selected_point
+    if button == pyglet.window.mouse.LEFT:
+        selected_point = None
+
+@window.event
+def on_mouse_drag(x, y, dx, dy, button, modifiers):
+    if selected_point == None:
+        return
+    elif len(selected_point) == 2:
+        i,j = selected_point
+        tiling_drawing.obstruction_locs[i][j] = (x, y)
+    elif len(selected_point) == 3:
+        i,j,k = selected_point
+        tiling_drawing.obstruction_locs[i][j][k] = (x, y)
 
 @window.event
 def on_key_press(symbol, modifiers):
@@ -284,6 +307,7 @@ def on_key_press(symbol, modifiers):
         if len(stack) > 1:
             stack.pop()
             tiling_drawing = stack[-1]
+
 
 def draw():
     if any(len(obs) == 0 for obs in tiling_drawing.tiling.obstructions):
