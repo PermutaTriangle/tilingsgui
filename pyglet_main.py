@@ -323,6 +323,7 @@ def main():
     global tiling_drawing
     start_tiling = Tiling.from_string(sys.argv[1])
     tiling_drawing = TilingDrawing(start_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    print(tiling_drawing.tiling)
     stack.append(tiling_drawing)
 
     @window.event
