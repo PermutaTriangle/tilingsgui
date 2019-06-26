@@ -75,8 +75,8 @@ class TilingDrawing(object):
         OBS_COLOR = (255,0,0)
         REQ_COLOR = (0,0,255)
         HIGHLIGHTED_COLOR = (0,255,0)
-        RAD =33
-        THICK = 2
+        RAD = 5
+        THICK = 3
         tw, th = self.tiling.dimensions
         hover_index = self.get_point_req_index(pygame.mouse.get_pos())
         if SHADING:

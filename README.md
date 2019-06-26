@@ -1,10 +1,14 @@
 # GUI FOR TILINGS
 
+## REQUIRES:
+pyglet 
+tilescopethree
+
 ## RUN:
 
-python main.py basis
+python pyglet_main.py basis
 
-Example: python main.py 1234_1324
+Example: python pyglet_main.py 1234_1324
 
 ## CONTROLS:
 
@@ -13,7 +17,7 @@ Example: python main.py 1234_1324
 - Backspace to go back (pop the stack)
 - Escape to close
 
-## macOS Mojave
+## macOS Mojave (outdated warning)
 There are issues on Mojave with PyGame. Install with these steps (uninstall pygame first if you have it)
 
 1. brew install sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_net sdl2_ttf
