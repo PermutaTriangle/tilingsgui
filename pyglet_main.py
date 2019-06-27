@@ -270,12 +270,11 @@ def obstruction_transitivity(t, x, y, button, modifiers):
             return x.comb_classes[0]
 
 
-#def empty_cell_inferral(t):
-#    lb,mb,rb = pygame.mouse.get_pressed()
-#    if lb or mb or rb:
-#        x = real_empty_cell_inferral(t.tiling)
-#        if x and x.comb_classes[0] != t.tiling:
-#            return x.comb_classes[0]
+def empty_cell_inferral(t, x, y, button, modifiers):
+    if button == pyglet.window.mouse.LEFT:
+        x = real_empty_cell_inferral(t.tiling)
+        if x and x.comb_classes[0] != t.tiling:
+            return x.comb_classes[0]
 
 tiling_drawing = None
 

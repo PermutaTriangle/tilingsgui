@@ -16,6 +16,8 @@ Example: python pyglet_main.py 1234_1324
 - O to toggle crossing obstructions
 - L to toggle localized obstructions/requirements
 - P to toggle pretty points
+- C to toggle highlighting on obstructions in cell
+- ctrl+click+drag to move obstruction (no restriction on movement)
 - shift+click+drag to move points
 - Ctrl+S to print tiling string
 - Ctrl+R to print tiling repr
