@@ -19,6 +19,9 @@ window = pyglet.window.Window(height=INITIAL_HEIGHT,
                               resizable=True)
 window.set_minimum_size(MIN_WIDTH, MIN_HEIGHT)
 
+def clamp(x, mnx, mxx):
+    return min(mxx, max(x, mnx))
+
 def fill_background(color):
     cols = [x/255.0 for x in color]
     cols.append(1)
@@ -66,7 +69,7 @@ def draw_filled_rectangle(loc, sz, color=[0,0,0]):
     x,y = loc
     w,h = sz
     N = 4
-    verts = [x,y,x,y+h,x+w,y,x+w,y+h]
+    verts = [x, y, x, y+h, x+w, y, x+w, y+h]
     cols = color * N
     pyglet.graphics.draw(N,
                          pyglet.gl.GL_TRIANGLE_STRIP,
@@ -275,12 +278,14 @@ strats = [cell_insertion,
 cur_strat = 0
 stack = []
 selected_point = None
+point_move_bounds = None
+
 
 window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
-    global tiling_drawing, selected_point
+    global tiling_drawing, selected_point, point_move_bounds
     if modifiers == 0:
         try:
             new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
@@ -291,14 +296,39 @@ def on_mouse_press(x, y, button, modifiers):
             raise e
     elif button == pyglet.window.mouse.LEFT and modifiers == pyglet.window.key.MOD_SHIFT:
         selected_point = tiling_drawing.get_point_obs_index((x, y))
-        if selected_point == None:
-            selected_point = tiling.drawing.get_point_req_index((x, y))
+        if selected_point != None:
+            i,j = selected_point
+            gploc = tiling_drawing.obstruction_locs[i]
+            gp = tiling_drawing.tiling.obstructions[i]
+        else:
+            selected_point = tiling_drawing.get_point_req_index((x, y))
+            if selected_point != None:
+                a,i,j = selected_point
+                gploc = tiling_drawing.requirement_locs[a][i]
+                gp = tiling_drawing.tiling.requirements[a][i]
+        if selected_point != None:
+            v = gp.patt[j]
+            cell = gp.pos[j]
+            loc, sz = tiling_drawing.cell_to_rect(cell)
+            mnx, mny = loc
+            mxx, mxy = loc[0]+sz[0], loc[1]+sz[1]
+            for k in range(len(gp)):
+                if k == j-1:
+                    mnx = max(mnx, gploc[k][0])
+                if k == j+1:
+                    mxx = min(mxx, gploc[k][0])
+                if gp.patt[k] == v-1:
+                    mny = max(mny, gploc[k][1])
+                if gp.patt[k] == v+1:
+                    mxy = min(mxy, gploc[k][1])
+            point_move_bounds = (mnx, mxx, mny, mxy)
 
 @window.event
 def on_mouse_release(x, y, button, modifiers):
     global selected_point
     if button == pyglet.window.mouse.LEFT:
         selected_point = None
+        point_move_bounds = None
 
 @window.event
 def on_mouse_drag(x, y, dx, dy, button, modifiers):
@@ -306,10 +336,12 @@ def on_mouse_drag(x, y, dx, dy, button, modifiers):
         return
     elif len(selected_point) == 2:
         i,j = selected_point
-        tiling_drawing.obstruction_locs[i][j] = (x, y)
+        mnx, mxx, mny, mxy = point_move_bounds
+        tiling_drawing.obstruction_locs[i][j] = (clamp(x, mnx, mxx), clamp(y, mny, mxy))
     elif len(selected_point) == 3:
         i,j,k = selected_point
-        tiling_drawing.obstruction_locs[i][j][k] = (x, y)
+        mnx, mxx, mny, mxy = point_move_bounds
+        tiling_drawing.requirement_locs[i][j][k] = (clamp(x, mnx, mxx), clamp(y, mny, mxy))
 
 @window.event
 def on_key_press(symbol, modifiers):
