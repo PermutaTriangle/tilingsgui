@@ -7,14 +7,17 @@ from tilescopethree.strategies.inferral_strategies.obstruction_transitivity impo
 from tilescopethree.strategies.inferral_strategies.subobstruction_inferral import empty_cell_inferral as real_empty_cell_inferral
 from tilescopethree.strategies.equivalence_strategies.point_placements import place_point_of_requirement
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 1000
+MIN_WIDTH = 300
+MIN_HEIGHT = 300
+INITIAL_WIDTH = 600
+INITIAL_HEIGHT = 600
 SHADING = True
 PRETTY_POINTS = True
 
-window = pyglet.window.Window(height=SCREEN_HEIGHT,
-                              width=SCREEN_WIDTH)
-
+window = pyglet.window.Window(height=INITIAL_HEIGHT,
+                              width=INITIAL_WIDTH,
+                              resizable=True)
+window.set_minimum_size(MIN_WIDTH, MIN_HEIGHT)
 
 def fill_background(color):
     cols = [x/255.0 for x in color]
@@ -104,13 +107,31 @@ def distsq(v, w):
 class TilingDrawing(object):
     def __init__(self, tiling, x, y, w, h):
         self.tiling = tiling
-        tw, th = self.tiling.dimensions
-        self.obstruction_locs = [gridded_perm_initial_locations(gp, (tw, th), (SCREEN_WIDTH//tw, SCREEN_HEIGHT//th)) for gp in self.tiling.obstructions]
-        self.requirement_locs = [[gridded_perm_initial_locations(gp, (tw, th), (SCREEN_WIDTH//tw, SCREEN_HEIGHT//th)) for gp in reqlist] for reqlist in self.tiling.requirements]
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        tw, th = self.tiling.dimensions
+        self.obstruction_locs = [gridded_perm_initial_locations(gp, (tw, th), (self.w//tw, self.h//th)) 
+                                 for gp in self.tiling.obstructions]
+        self.requirement_locs = [[gridded_perm_initial_locations(gp, (tw, th), (self.w//tw, self.h//th)) 
+                                  for gp in reqlist] 
+                                 for reqlist in self.tiling.requirements]
+
+    def set_size(self, width, height):
+        for obs in self.obstruction_locs:
+            for j in range(len(obs)):
+                xratio = obs[j][0]/self.w
+                yratio = obs[j][1]/self.h
+                obs[j] = (xratio*width, yratio*height)
+        for reqlist in self.requirement_locs:
+            for req in reqlist:
+                for j in range(len(req)):
+                    xratio = req[j][0]/self.w
+                    yratio = req[j][1]/self.h
+                    req[j] = (xratio*width, yratio*height)
+        self.w = width
+        self.h = height
 
     def cell_to_rect(self, c):
         cx, cy = c
@@ -264,7 +285,7 @@ def on_mouse_press(x, y, button, modifiers):
         try:
             new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
             if new_tiling != None:
-                tiling_drawing = TilingDrawing(new_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+                tiling_drawing = TilingDrawing(new_tiling, 0, 0, *window.get_size())
                 stack.append(tiling_drawing)
         except Exception as e:
             raise e
@@ -309,6 +330,10 @@ def on_key_press(symbol, modifiers):
             tiling_drawing = stack[-1]
 
 
+@window.event
+def on_resize(width, height):
+    tiling_drawing.set_size(width, height)
+
 def draw():
     if any(len(obs) == 0 for obs in tiling_drawing.tiling.obstructions):
         fill_background([127,127,127])
@@ -322,7 +347,7 @@ def update(time):
 def main():
     global tiling_drawing
     start_tiling = Tiling.from_string(sys.argv[1])
-    tiling_drawing = TilingDrawing(start_tiling, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    tiling_drawing = TilingDrawing(start_tiling, 0, 0, *window.get_size())
     print(tiling_drawing.tiling)
     stack.append(tiling_drawing)
 
