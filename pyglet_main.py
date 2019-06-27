@@ -15,6 +15,8 @@ SHADING = True
 PRETTY_POINTS = True
 SHOW_CROSSING = True
 SHOW_LOCALIZED = True
+HIGHLIGHT_TOUCHING_CELL = False
+MOUSE_POS = (0,0) 
 
 window = pyglet.window.Window(height=INITIAL_HEIGHT,
                               width=INITIAL_WIDTH,
@@ -162,10 +164,11 @@ class TilingDrawing(object):
         GRID_COLOR = (0,0,0)
         OBS_COLOR = (255,0,0)
         REQ_COLOR = (0,0,255)
-        HIGHLIGHTED_COLOR = (0,255,0)
+        HIGHLIGHTED_COLOR = (0,0,0)
         RAD = 5
         THICK = 3
         tw, th = self.tiling.dimensions
+        hover_cell = self.get_cell(MOUSE_POS)
         hover_index = None
         #hover_index = self.get_point_req_index(pygame.mouse.get_pos())
         if SHADING:
@@ -183,9 +186,12 @@ class TilingDrawing(object):
                 continue
             if PRETTY_POINTS and any(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
                 continue
+            col = OBS_COLOR
+            if HIGHLIGHT_TOUCHING_CELL and any(p == hover_cell for p in self.tiling.obstructions[i].pos):
+                col = HIGHLIGHTED_COLOR
             localized = self.tiling.obstructions[i].is_localized()
             if (localized and SHOW_LOCALIZED) or (not localized and SHOW_CROSSING):
-                draw_gridded_perm(loc, RAD, OBS_COLOR, True)
+                draw_gridded_perm(loc, RAD, col, True)
         for i,reqlist in enumerate(self.requirement_locs):
             if PRETTY_POINTS and any(p in self.tiling.point_cells for req in self.tiling.requirements[i]
                                                                   for p in req.pos):
@@ -285,13 +291,14 @@ cur_strat = 0
 stack = []
 selected_point = None
 point_move_bounds = None
+move_type = "none"
 
 
 window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
-    global tiling_drawing, selected_point, point_move_bounds
+    global tiling_drawing, selected_point, point_move_bounds, move_type
     if modifiers == 0:
         try:
             new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
@@ -300,7 +307,12 @@ def on_mouse_press(x, y, button, modifiers):
                 stack.append(tiling_drawing)
         except Exception as e:
             raise e
-    elif button == pyglet.window.mouse.LEFT and modifiers == pyglet.window.key.MOD_SHIFT:
+    elif button == pyglet.window.mouse.LEFT and (modifiers == pyglet.window.key.MOD_SHIFT
+         or modifiers == pyglet.window.key.MOD_CTRL):
+        if modifiers == pyglet.window.key.MOD_SHIFT:
+            move_type = "point"
+        elif modifiers == pyglet.window.key.MOD_CTRL:
+            move_type = "gp"
         selected_point = tiling_drawing.get_point_obs_index((x, y))
         if selected_point != None:
             i,j = selected_point
@@ -316,34 +328,50 @@ def on_mouse_press(x, y, button, modifiers):
             v = gp.patt[j]
             cell = gp.pos[j]
             loc, sz = tiling_drawing.cell_to_rect(cell)
-            mnx, mny = loc
-            mxx, mxy = loc[0]+sz[0], loc[1]+sz[1]
+            MIN_SPACE = 10 # SPACING
+            mnx, mny = loc[0] + MIN_SPACE, loc[1] + MIN_SPACE
+            mxx, mxy = loc[0]+sz[0] - MIN_SPACE, loc[1]+sz[1] - MIN_SPACE
             for k in range(len(gp)):
                 if k == j-1:
-                    mnx = max(mnx, gploc[k][0])
+                    mnx = max(mnx, gploc[k][0] + MIN_SPACE)
                 if k == j+1:
-                    mxx = min(mxx, gploc[k][0])
+                    mxx = min(mxx, gploc[k][0] - MIN_SPACE)
                 if gp.patt[k] == v-1:
-                    mny = max(mny, gploc[k][1])
+                    mny = max(mny, gploc[k][1] + MIN_SPACE)
                 if gp.patt[k] == v+1:
-                    mxy = min(mxy, gploc[k][1])
+                    mxy = min(mxy, gploc[k][1] - MIN_SPACE)
             point_move_bounds = (mnx, mxx, mny, mxy)
 
 @window.event
+def on_mouse_motion(x, y, dx, dy):
+    global MOUSE_POS
+    MOUSE_POS = (x, y)
+
+@window.event
 def on_mouse_release(x, y, button, modifiers):
-    global selected_point
+    global selected_point, point_move_bounds, move_type
     if button == pyglet.window.mouse.LEFT:
         selected_point = None
         point_move_bounds = None
+        move_type = "none"
 
 @window.event
 def on_mouse_drag(x, y, dx, dy, button, modifiers):
+    global MOUSE_POS
+    MOUSE_POS = (x, y)
     if selected_point == None:
         return
     elif len(selected_point) == 2:
         i,j = selected_point
         mnx, mxx, mny, mxy = point_move_bounds
-        tiling_drawing.obstruction_locs[i][j] = (clamp(x, mnx, mxx), clamp(y, mny, mxy))
+        if move_type == "point":
+            tiling_drawing.obstruction_locs[i][j] = (clamp(x, mnx, mxx), clamp(y, mny, mxy))
+        else:
+            for k in range(len(tiling_drawing.obstruction_locs[i])):
+                ox, oy = tiling_drawing.obstruction_locs[i][k]
+                ox += dx
+                oy += dy
+                tiling_drawing.obstruction_locs[i][k] = (ox, oy)
     elif len(selected_point) == 3:
         i,j,k = selected_point
         mnx, mxx, mny, mxy = point_move_bounds
@@ -354,7 +382,8 @@ def on_key_press(symbol, modifiers):
     global cur_strat, tiling_drawing
     global SHOW_LOCALIZED, SHOW_CROSSING
     global PRETTY_POINTS, SHADING
-    
+    global HIGHLIGHT_TOUCHING_CELL
+
     # PREVIOUS STRATEGY
     if symbol == pyglet.window.key.LEFT:
         cur_strat -= 1
@@ -399,6 +428,10 @@ def on_key_press(symbol, modifiers):
     # TOGGLE SHADING
     if symbol == pyglet.window.key.S:
         SHADING = not SHADING
+
+    # TOGGLE HIGHLIGHT TOUCHING CELL
+    if symbol == pyglet.window.key.C:
+        HIGHLIGHT_TOUCHING_CELL = not HIGHLIGHT_TOUCHING_CELL
 
 @window.event
 def on_resize(width, height):
