@@ -12,10 +12,18 @@ Example: python pyglet_main.py 1234_1324
 
 ## CONTROLS:
 
+- S to toggle shading empty cells
+- O to toggle crossing obstructions
+- L to toggle localized obstructions/requirements
+- P to toggle pretty points
+- shift+click+drag to move points
+- Ctrl+S to print tiling string
+- Ctrl+R to print tiling repr
 - Left/right to switch strategies, strategy is visible in window title
 - Left click to apply strategy at mouse position (right click for obstruction in cell insertion)
 - Backspace to go back (pop the stack)
 - Escape to close
+
 
 ## macOS Mojave (outdated warning)
 There are issues on Mojave with PyGame. Install with these steps (uninstall pygame first if you have it)

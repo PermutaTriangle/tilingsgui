@@ -13,6 +13,8 @@ INITIAL_WIDTH = 600
 INITIAL_HEIGHT = 600
 SHADING = True
 PRETTY_POINTS = True
+SHOW_CROSSING = True
+SHOW_LOCALIZED = True
 
 window = pyglet.window.Window(height=INITIAL_HEIGHT,
                               width=INITIAL_WIDTH,
@@ -181,14 +183,18 @@ class TilingDrawing(object):
                 continue
             if PRETTY_POINTS and any(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
                 continue
-            draw_gridded_perm(loc, RAD, OBS_COLOR, True)
+            localized = self.tiling.obstructions[i].is_localized()
+            if (localized and SHOW_LOCALIZED) or (not localized and SHOW_CROSSING):
+                draw_gridded_perm(loc, RAD, OBS_COLOR, True)
         for i,reqlist in enumerate(self.requirement_locs):
             if PRETTY_POINTS and any(p in self.tiling.point_cells for req in self.tiling.requirements[i]
                                                                   for p in req.pos):
                 continue
             col = HIGHLIGHTED_COLOR if hover_index != None and i == hover_index[0]else REQ_COLOR
-            for loc in reqlist:
-                draw_gridded_perm(loc, RAD, col, True)
+            for j,loc in enumerate(reqlist):
+                localized = self.tiling.requirements[i][j].is_localized()
+                if (localized and SHOW_LOCALIZED) or (not localized and SHOW_CROSSING):
+                    draw_gridded_perm(loc, RAD, col, True)
 
     def get_cell(self, mpos):
         tw,th = self.tiling.dimensions
@@ -346,21 +352,53 @@ def on_mouse_drag(x, y, dx, dy, button, modifiers):
 @window.event
 def on_key_press(symbol, modifiers):
     global cur_strat, tiling_drawing
+    global SHOW_LOCALIZED, SHOW_CROSSING
+    global PRETTY_POINTS, SHADING
+    
+    # PREVIOUS STRATEGY
     if symbol == pyglet.window.key.LEFT:
         cur_strat -= 1
         cur_strat %= len(strats)
         window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 
+    # NEXT STRATEGY
     if symbol == pyglet.window.key.RIGHT:
         cur_strat += 1
         cur_strat %= len(strats)
         window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 
+    # PRINT TILING REPR
+    if symbol == pyglet.window.key.R and modifiers == pyglet.window.key.MOD_CTRL:
+        print(repr(tiling_drawing.tiling))
+    
+    # PRINT TILING STRING
+    if symbol == pyglet.window.key.S and modifiers == pyglet.window.key.MOD_CTRL:
+        try:
+            print(str(tiling_drawing.tiling))
+        except UnicodeEncodeError:
+            print("Unicode error, make sure your terminal/font support unicode then try running the command:")
+            print("export PYTHONIOENCODING=UTF-8")
+    # UNDO
     if symbol == pyglet.window.key.BACKSPACE:
         if len(stack) > 1:
             stack.pop()
             tiling_drawing = stack[-1]
+    
+    # TOGGLE LOCALIZED
+    if symbol == pyglet.window.key.L:
+        SHOW_LOCALIZED = not SHOW_LOCALIZED
+    
+    # TOGGLE CROSSING
+    if symbol == pyglet.window.key.O:
+        SHOW_CROSSING = not SHOW_CROSSING
+    
+    # TOGGLE PRETTY POINTS
+    if symbol == pyglet.window.key.P:
+        PRETTY_POINTS = not PRETTY_POINTS
 
+    # TOGGLE SHADING
+    if symbol == pyglet.window.key.S:
+        SHADING = not SHADING
 
 @window.event
 def on_resize(width, height):
@@ -380,7 +418,6 @@ def main():
     global tiling_drawing
     start_tiling = Tiling.from_string(sys.argv[1])
     tiling_drawing = TilingDrawing(start_tiling, 0, 0, *window.get_size())
-    print(tiling_drawing.tiling)
     stack.append(tiling_drawing)
 
     @window.event
