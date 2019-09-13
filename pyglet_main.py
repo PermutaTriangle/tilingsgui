@@ -6,6 +6,7 @@ from tilescopethree.strategies.inferral_strategies.row_and_column_separation imp
 from tilescopethree.strategies.inferral_strategies.obstruction_transitivity import obstruction_transitivity as real_obs_trans
 from tilescopethree.strategies.inferral_strategies.subobstruction_inferral import empty_cell_inferral as real_empty_cell_inferral
 from tilescopethree.strategies.equivalence_strategies.point_placements import place_point_of_requirement
+from tilescopethree.strategies.equivalence_strategies.partial_point_placements import partial_place_point_of_requirement
 
 MIN_WIDTH = 300
 MIN_HEIGHT = 300
@@ -232,6 +233,13 @@ def cell_insertion(t, x, y, button, modifiers):
     elif button == pyglet.window.mouse.RIGHT:
         return t.tiling.add_single_cell_obstruction(Perm((0,)), (cx, cy))
 
+def cell_insertion_12(t, x, y, button, modifiers):
+    cx,cy = t.get_cell((x,y))
+    if button == pyglet.window.mouse.LEFT:
+        return t.tiling.add_single_cell_requirement(Perm((0, 1)), (cx, cy))
+    elif button == pyglet.window.mouse.RIGHT:
+        return t.tiling.add_single_cell_obstruction(Perm((0, 1)), (cx, cy))
+
 
 
 def place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
@@ -239,6 +247,12 @@ def place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
         ind = t.get_point_req_index((x,y))
         if ind != None:
             return place_point_of_requirement(t.tiling, ind[0], ind[2], force_dir)
+
+def partial_place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
+    if button == pyglet.window.mouse.LEFT:
+        ind = t.get_point_req_index((x,y))
+        if ind != None:
+            return partial_place_point_of_requirement(t.tiling, ind[0], ind[2], force_dir)
 
 def factor(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
@@ -256,6 +270,15 @@ def place_point_west(t, x, y, button, modifiers):
     return place_point(t, x, y, button, modifiers, DIR_WEST)
 def place_point_east(t, x, y, button, modifiers):
     return place_point(t, x, y, button, modifiers, DIR_EAST)
+
+def partial_place_point_south(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_SOUTH)
+def partial_place_point_north(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_NORTH)
+def partial_place_point_west(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_WEST)
+def partial_place_point_east(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_EAST)
 
 def row_and_col_separation(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
@@ -279,10 +302,15 @@ def empty_cell_inferral(t, x, y, button, modifiers):
 tiling_drawing = None
 
 strats = [cell_insertion,
+          cell_insertion_12,
           place_point_north,
           place_point_south,
           place_point_west,
           place_point_east,
+          partial_place_point_north,
+          partial_place_point_south,
+          partial_place_point_west,
+          partial_place_point_east,
           factor,
           row_and_col_separation,
           obstruction_transitivity]
