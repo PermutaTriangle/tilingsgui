@@ -184,7 +184,7 @@ class TilingDrawing(object):
         for i,loc in enumerate(self.obstruction_locs):
             if SHADING and self.tiling.obstructions[i].is_point_obstr():
                 continue
-            if PRETTY_POINTS and any(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
+            if PRETTY_POINTS and all(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
                 continue
             col = OBS_COLOR
             if HIGHLIGHT_TOUCHING_CELL and any(p == hover_cell for p in self.tiling.obstructions[i].pos):
