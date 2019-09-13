@@ -233,6 +233,13 @@ def cell_insertion(t, x, y, button, modifiers):
     elif button == pyglet.window.mouse.RIGHT:
         return t.tiling.add_single_cell_obstruction(Perm((0,)), (cx, cy))
 
+def cell_insertion_12(t, x, y, button, modifiers):
+    cx,cy = t.get_cell((x,y))
+    if button == pyglet.window.mouse.LEFT:
+        return t.tiling.add_single_cell_requirement(Perm((0, 1)), (cx, cy))
+    elif button == pyglet.window.mouse.RIGHT:
+        return t.tiling.add_single_cell_obstruction(Perm((0, 1)), (cx, cy))
+
 
 
 def place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
@@ -295,6 +302,7 @@ def empty_cell_inferral(t, x, y, button, modifiers):
 tiling_drawing = None
 
 strats = [cell_insertion,
+          cell_insertion_12,
           place_point_north,
           place_point_south,
           place_point_west,
