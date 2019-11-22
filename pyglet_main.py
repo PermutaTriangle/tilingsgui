@@ -120,9 +120,9 @@ class TilingDrawing(object):
         self.w = w
         self.h = h
         tw, th = self.tiling.dimensions
-        self.obstruction_locs = [gridded_perm_initial_locations(gp, (tw, th), (self.w//tw, self.h//th)) 
+        self.obstruction_locs = [gridded_perm_initial_locations(gp, (tw, th), (self.w/tw, self.h/th))
                                  for gp in self.tiling.obstructions]
-        self.requirement_locs = [[gridded_perm_initial_locations(gp, (tw, th), (self.w//tw, self.h//th)) 
+        self.requirement_locs = [[gridded_perm_initial_locations(gp, (tw, th), (self.w/tw, self.h/th))
                                   for gp in reqlist] 
                                  for reqlist in self.tiling.requirements]
 
