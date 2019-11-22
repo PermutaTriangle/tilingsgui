@@ -23,7 +23,8 @@ Example: python pyglet_main.py 1234_1324
 - Ctrl+R to print tiling repr
 - Left/right to switch strategies, strategy is visible in window title
 - Left click to apply strategy at mouse position (right click for obstruction in cell insertion)
-- Backspace to go back (pop the stack)
+- Backspace to go back
+- R to go forward (when applicable)
 - Escape to close
 
 

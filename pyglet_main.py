@@ -316,12 +316,14 @@ strats = [cell_insertion,
           obstruction_transitivity]
 cur_strat = 0
 stack = []
+fwd_stack = []
 selected_point = None
 point_move_bounds = None
 move_type = "none"
 
 
 window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
+
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
@@ -331,8 +333,10 @@ def on_mouse_press(x, y, button, modifiers):
         try:
             new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
             if new_tiling != None:
-                tiling_drawing = TilingDrawing(new_tiling, 0, 0, *window.get_size())
                 stack.append(tiling_drawing)
+                tiling_drawing = TilingDrawing(new_tiling, 0, 0, *window.get_size())
+                fwd_stack.clear()
+
         except Exception as e:
             raise e
     elif button == pyglet.window.mouse.LEFT and (modifiers & pyglet.window.key.MOD_SHIFT
@@ -437,9 +441,19 @@ def on_key_press(symbol, modifiers):
             print("export PYTHONIOENCODING=UTF-8")
     # UNDO
     if symbol == pyglet.window.key.BACKSPACE:
-        if len(stack) > 1:
-            stack.pop()
-            tiling_drawing = stack[-1]
+        if len(stack) >= 1:
+            fwd_stack.append(tiling_drawing)
+            tiling_drawing = stack.pop()
+            (w, h) = window.get_size()
+            tiling_drawing.set_size(w, h)
+
+    # REDO
+    if symbol == pyglet.window.key.R:
+        if len(fwd_stack) >= 1:
+            stack.append(tiling_drawing)
+            tiling_drawing = fwd_stack.pop()
+            (w, h) = window.get_size()
+            tiling_drawing.set_size(w, h)
     
     # TOGGLE LOCALIZED
     if symbol == pyglet.window.key.L:
@@ -479,7 +493,6 @@ def main():
     global tiling_drawing
     start_tiling = Tiling.from_string(sys.argv[1])
     tiling_drawing = TilingDrawing(start_tiling, 0, 0, *window.get_size())
-    stack.append(tiling_drawing)
 
     @window.event
     def on_draw():
