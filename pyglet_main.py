@@ -326,7 +326,8 @@ window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 @window.event
 def on_mouse_press(x, y, button, modifiers):
     global tiling_drawing, selected_point, point_move_bounds, move_type
-    if modifiers == 0:
+    if not (modifiers & pyglet.window.key.MOD_SHIFT
+         or modifiers & pyglet.window.key.MOD_CTRL):
         try:
             new_tiling = strats[cur_strat](tiling_drawing, x, y, button, modifiers)
             if new_tiling != None:
@@ -334,11 +335,11 @@ def on_mouse_press(x, y, button, modifiers):
                 stack.append(tiling_drawing)
         except Exception as e:
             raise e
-    elif button == pyglet.window.mouse.LEFT and (modifiers == pyglet.window.key.MOD_SHIFT
-         or modifiers == pyglet.window.key.MOD_CTRL):
-        if modifiers == pyglet.window.key.MOD_SHIFT:
+    elif button == pyglet.window.mouse.LEFT and (modifiers & pyglet.window.key.MOD_SHIFT
+         or modifiers & pyglet.window.key.MOD_CTRL):
+        if modifiers & pyglet.window.key.MOD_SHIFT:
             move_type = "point"
-        elif modifiers == pyglet.window.key.MOD_CTRL:
+        elif modifiers & pyglet.window.key.MOD_CTRL:
             move_type = "gp"
         selected_point = tiling_drawing.get_point_obs_index((x, y))
         if selected_point != None:
@@ -424,11 +425,11 @@ def on_key_press(symbol, modifiers):
         window.set_caption("Tilings GUI - strat: {}".format(strats[cur_strat].__name__))
 
     # PRINT TILING REPR
-    if symbol == pyglet.window.key.R and modifiers == pyglet.window.key.MOD_CTRL:
+    if symbol == pyglet.window.key.R and modifiers & pyglet.window.key.MOD_CTRL:
         print(repr(tiling_drawing.tiling))
     
     # PRINT TILING STRING
-    if symbol == pyglet.window.key.S and modifiers == pyglet.window.key.MOD_CTRL:
+    if symbol == pyglet.window.key.S and modifiers & pyglet.window.key.MOD_CTRL:
         try:
             print(str(tiling_drawing.tiling))
         except UnicodeEncodeError:
