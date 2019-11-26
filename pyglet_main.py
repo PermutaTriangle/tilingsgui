@@ -1,4 +1,4 @@
-import copy, math, pyglet, sys
+import math, pyglet, sys
 from permuta import Perm
 from permuta.misc import DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST
 from tilings import Tiling, Obstruction, Requirement, GriddedPerm
