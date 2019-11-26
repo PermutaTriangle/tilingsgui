@@ -1,4 +1,4 @@
-import math, pyglet, sys
+import copy, math, pyglet, sys
 from permuta import Perm
 from permuta.misc import DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST
 from tilings import Tiling, Obstruction, Requirement, GriddedPerm
@@ -261,6 +261,26 @@ def factor(t, x, y, button, modifiers):
         for i in range(len(facs)):
             if c in maps[i]:
                 return facs[i]
+    if button == pyglet.window.mouse.RIGHT:
+        facs,maps = t.tiling.find_factors(regions=True)
+        cell = t.get_cell((x,y))
+
+        component = set() # Set of cells belonging to the selected component
+        for i in range(len(facs)):
+            if cell in maps[i]:
+                component.update(maps[i].keys())
+
+        # Filter out obstructions intersecting the component
+        obs = filter(lambda x: set(x.pos) & component == set(), t.tiling.obstructions)
+
+        # And the same for requirements
+        reqs = []
+        for req in t.tiling.requirements:
+            stripped_r = tuple(filter(lambda x: set(x.pos) & component == set(), req))
+            if len(stripped_r) > 0:
+                reqs.append(stripped_r)
+
+        return Tiling(tuple(obs), tuple(reqs))
 
 def place_point_south(t, x, y, button, modifiers):
     return place_point(t, x, y, button, modifiers, DIR_SOUTH)
