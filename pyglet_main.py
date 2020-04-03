@@ -2,11 +2,11 @@ import math, pyglet, sys
 from permuta import Perm
 from permuta.misc import DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST
 from tilings import Tiling, Obstruction, Requirement, GriddedPerm
-from tilescopethree.strategies.inferral_strategies.row_and_column_separation import row_and_column_separation as real_row_and_col_sep
-from tilescopethree.strategies.inferral_strategies.obstruction_transitivity import obstruction_transitivity as real_obs_trans
-from tilescopethree.strategies.inferral_strategies.subobstruction_inferral import empty_cell_inferral as real_empty_cell_inferral
-from tilescopethree.strategies.equivalence_strategies.point_placements import place_point_of_requirement
-from tilescopethree.strategies.equivalence_strategies.partial_point_placements import partial_place_point_of_requirement
+# from tilescopethree.strategies.inferral_strategies.row_and_column_separation import row_and_column_separation as real_row_and_col_sep
+# from tilescopethree.strategies.inferral_strategies.obstruction_transitivity import obstruction_transitivity as real_obs_trans
+# from tilescopethree.strategies.inferral_strategies.subobstruction_inferral import empty_cell_inferral as real_empty_cell_inferral
+# from tilescopethree.strategies.equivalence_strategies.point_placements import place_point_of_requirement
+# from tilescopethree.strategies.equivalence_strategies.partial_point_placements import partial_place_point_of_requirement
 
 MIN_WIDTH = 300
 MIN_HEIGHT = 300
@@ -246,7 +246,7 @@ def place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
     if button == pyglet.window.mouse.LEFT:
         ind = t.get_point_req_index((x,y))
         if ind != None:
-            return place_point_of_requirement(t.tiling, ind[0], ind[2], force_dir)
+            return t.tiling.place_point_of_gridded_permutation(t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir)
 
 def partial_place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
     if button == pyglet.window.mouse.LEFT:
