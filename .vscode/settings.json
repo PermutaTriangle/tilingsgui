@@ -1,0 +1,47 @@
+{
+  "python.pythonPath": "C:/Users/jonst/AppData/Local/pypoetry/Cache/virtualenvs/tilingsgui-wowLHCFI-py3.8/Scripts/python.exe",
+  "python.linting.flake8Path": "C:/Users/jonst/AppData/Local/pypoetry/Cache/virtualenvs/tilingsgui-wowLHCFI-py3.8/Scripts/flake8.exe",
+  "python.linting.pylintPath": "C:/Users/jonst/AppData/Local/pypoetry/Cache/virtualenvs/tilingsgui-wowLHCFI-py3.8/Scripts/pylint.exe",
+  "python.formatting.blackPath": "C:/Users/jonst/AppData/Local/pypoetry/Cache/virtualenvs/tilingsgui-wowLHCFI-py3.8/Scripts/black.exe",
+  "python.linting.mypyPath": "C:/Users/jonst/AppData/Local/pypoetry/Cache/virtualenvs/tilingsgui-wowLHCFI-py3.8/Scripts/mypy.exe",
+  "python.linting.mypyEnabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true,
+  "[python]": {
+    "editor.rulers": [
+      88
+    ],
+  },
+  "python.formatting.provider": "black",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveTimeout": 3000,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    ".pytest_cache/": true,
+    ".mypy_cache": true,
+    "**.egg-info": true,
+    "**/__pycache__": true,
+    "dist/": true,
+    "poetry.lock": true,
+    "LICENSE": true,
+    ".gitignore": true,
+    ".gitattribute": true,
+    ".flake8": true,
+    ".pylintrc": true,
+    "mypy.ini": true,
+    ".editorconfig": true,
+    ".travis.yml": true,
+  },
+}
