@@ -1,13 +1,13 @@
 """Entrypoint.
 """
 
-from gui import TilingGui
+from .gui import TilingGui
 
 
 def main() -> None:
     """The application's starting point.
     """
-    app = TilingGui()
+    app = TilingGui(resizable=True)
     app.initial_configure()
     TilingGui.start()
 

@@ -16,9 +16,9 @@ class Point:
 
 
 class LineSegment:
-    def __init__(self, start: Point, end: Point) -> None:
-        self.start = start
-        self.end = end
+    def __init__(self, x1: float, y1: float, x2: float, y2: float) -> None:
+        self.start = Point(x1, y1)
+        self.end = Point(x2, y2)
 
     def as_vertices(self) -> List[float]:
         return [self.start.x, self.start.y, self.end.x, self.end.y]

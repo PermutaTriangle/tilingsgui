@@ -20,6 +20,9 @@ black = "^19.10b0"
 pylint = "^2.5.3"
 mypy = "^0.780"
 
+[tool.poetry.scripts]
+tilingsgui = 'tilingsgui.main:main'
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
