@@ -1,28 +1,25 @@
 """[TODO]
 """
 
+from typing import ClassVar, Tuple
 import pyglet
-from . import colors
+from .graphics import Color, Point, PointPath
 
 
 class TilingGui(pyglet.window.Window):
     """[summary]
     """
 
-    TITLE = "Tilings GUI"
+    TITLE: ClassVar[str] = "Tilings GUI"
 
-    MIN_WIDTH = 300
-    MIN_HEIGHT = 300
-    INITIAL_WIDTH = 600
-    INITIAL_HEIGHT = 600
+    MIN_WIDTH: ClassVar[int] = 300
+    MIN_HEIGHT: ClassVar[int] = 300
+    INITIAL_WIDTH: ClassVar[int] = 600
+    INITIAL_HEIGHT: ClassVar[int] = 600
 
-    CLEAR_COLOR = colors.alpha_extend_and_scale_to_01(colors.WHITE)
-
-    @staticmethod
-    def start() -> None:
-        """[summary]
-        """
-        pyglet.app.run()
+    CLEAR_COLOR: ClassVar[Tuple[float, ...]] = Color.alpha_extend_and_scale_to_01(
+        Color.WHITE
+    )
 
     def __init__(self, *args, **kargs) -> None:
         """[summary]
@@ -35,9 +32,13 @@ class TilingGui(pyglet.window.Window):
             **kargs
         )
 
-    def initial_configure(self) -> None:
+    def start(self) -> None:
         """[summary]
         """
+        self._initial_config()
+        pyglet.app.run()
+
+    def _initial_config(self):
         screen = pyglet.canvas.Display().get_default_screen()
         self.set_location(
             (screen.width - self.width) // 2, (screen.height - self.height) // 2
