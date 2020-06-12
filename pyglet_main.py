@@ -280,7 +280,7 @@ def partial_place_point_east(t, x, y, button, modifiers):
 
 def row_and_col_separation(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
-        return t.tiling.row_and_column_seperation()
+        return t.tiling.row_and_column_separation()
 
 def obstruction_transitivity(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
