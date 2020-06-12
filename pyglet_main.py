@@ -1,12 +1,8 @@
 import math, pyglet, sys
 from permuta import Perm
 from permuta.misc import DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST
-from tilings import Tiling, Obstruction, Requirement, GriddedPerm
-# from tilescopethree.strategies.inferral_strategies.row_and_column_separation import row_and_column_separation as real_row_and_col_sep
-# from tilescopethree.strategies.inferral_strategies.obstruction_transitivity import obstruction_transitivity as real_obs_trans
-# from tilescopethree.strategies.inferral_strategies.subobstruction_inferral import empty_cell_inferral as real_empty_cell_inferral
-# from tilescopethree.strategies.equivalence_strategies.point_placements import place_point_of_requirement
-# from tilescopethree.strategies.equivalence_strategies.partial_point_placements import partial_place_point_of_requirement
+from tilings import Tiling, GriddedPerm
+from tilings.algorithms import Factor
 
 MIN_WIDTH = 300
 MIN_HEIGHT = 300
@@ -183,7 +179,7 @@ class TilingDrawing(object):
             y = self.y + self.h*i/th
             draw_line_segment((self.x, y), (self.x+self.w, y), GRID_COLOR)
         for i,loc in enumerate(self.obstruction_locs):
-            if SHADING and self.tiling.obstructions[i].is_point_obstr():
+            if SHADING and self.tiling.obstructions[i].is_point_perm():
                 continue
             if PRETTY_POINTS and all(p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos):
                 continue
@@ -252,15 +248,17 @@ def partial_place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
     if button == pyglet.window.mouse.LEFT:
         ind = t.get_point_req_index((x,y))
         if ind != None:
-            return partial_place_point_of_requirement(t.tiling, ind[0], ind[2], force_dir)
+            return t.tiling.partial_place_point_of_gridded_permutation(t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir)
 
 def factor(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
-        facs,maps = t.tiling.find_factors(regions=True)
-        c = t.get_cell((x,y))
-        for i in range(len(facs)):
-            if c in maps[i]:
-                return facs[i]
+        fac_algo = Factor(t.tiling)
+        components = fac_algo.get_components()
+        facs = fac_algo.factors()
+        cell = t.get_cell((x, y))
+        for fac, component in zip(facs, components):
+            if cell in component:
+                return fac
 
 def place_point_south(t, x, y, button, modifiers):
     return place_point(t, x, y, button, modifiers, DIR_SOUTH)
@@ -282,22 +280,11 @@ def partial_place_point_east(t, x, y, button, modifiers):
 
 def row_and_col_separation(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
-        x = real_row_and_col_sep(t.tiling)
-        if x:
-            return x.comb_classes[0]
+        return t.tiling.row_and_column_seperation()
 
 def obstruction_transitivity(t, x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
-        x = real_obs_trans(t.tiling)
-        if x:
-            return x.comb_classes[0]
-
-
-def empty_cell_inferral(t, x, y, button, modifiers):
-    if button == pyglet.window.mouse.LEFT:
-        x = real_empty_cell_inferral(t.tiling)
-        if x and x.comb_classes[0] != t.tiling:
-            return x.comb_classes[0]
+        return t.tiling.obstruction_transitivity()
 
 tiling_drawing = None
 
