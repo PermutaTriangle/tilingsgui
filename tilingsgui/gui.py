@@ -3,7 +3,7 @@
 
 from typing import ClassVar, Tuple
 import pyglet
-from .graphics import Color, Point, PointPath
+from .graphics import Color
 
 
 class TilingGui(pyglet.window.Window):
