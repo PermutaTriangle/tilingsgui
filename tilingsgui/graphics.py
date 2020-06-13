@@ -2,9 +2,11 @@
 """
 
 from __future__ import annotations
-from typing import Tuple, List, ClassVar
-from math import cos, sin, pi
+
 from abc import ABC, abstractmethod
+from math import cos, pi, sin
+from typing import ClassVar, List, Tuple
+
 import pyglet
 
 
@@ -24,58 +26,44 @@ class Drawable(ABC):  # pylint: disable=too-few-public-methods
         """
 
 
-class Point:
-    """A 2d point.
-    """
+class Point(Drawable):
+
+    DRAW_SIZE: ClassVar[float] = 5.0
 
     def __init__(self, x: float, y: float) -> None:
-        """[TODO]
-
-        Args:
-            x (float): x coordinate
-            y (float): y coordinate
-        """
         self.x = x
         self.y = y
 
+    def as_vertices(self):
+        verts = [self.x, self.y]
+        for i in range(31):
+            ang = 2 * pi * i / 30
+            verts.append(self.x + cos(ang) * Point.DRAW_SIZE)
+            verts.append(self.y + sin(ang) * Point.DRAW_SIZE)
+        return verts
+
     def dist_squared_to(self, other: Point) -> float:
-        """TODO
-
-        Args:
-            other (Point): [TODO]
-
-        Returns:
-            float: [TODO]
-        """
         return (self.x - other.x) ** 2 + (self.y - other.y) ** 2
 
     def __iter__(self):
         yield self.x
         yield self.y
 
+    def draw(self, color: Tuple[float, ...]):
+        pyglet.graphics.draw(
+            32,
+            pyglet.gl.GL_TRIANGLE_FAN,
+            (Drawable._VERTEX_MODE, self.as_vertices()),
+            (Drawable._COLOR_MODE, color * 32),
+        )
+
 
 class LineSegment(Drawable):
-    """A 2d line segment.
-    """
-
     def __init__(self, x1: float, y1: float, x2: float, y2: float) -> None:
-        """[TODO]
-
-        Args:
-            x1 (float): [TODO]
-            y1 (float): [TODO]
-            x2 (float): [TODO]
-            y2 (float): [TODO]
-        """
         self.start: Point = Point(x1, y1)
         self.end: Point = Point(x2, y2)
 
     def as_vertices(self) -> List[float]:
-        """[TODO]
-
-        Returns:
-            List[float]: [TODO]
-        """
         return [self.start.x, self.start.y, self.end.x, self.end.y]
 
     def draw(self, color: Tuple[float, ...]) -> None:
@@ -88,29 +76,13 @@ class LineSegment(Drawable):
 
 
 class Rectangle(Drawable):
-    """[TODO]
-    """
-
     def __init__(self, x: float, y: float, w: float, h: float) -> None:
-        """[TODO]
-
-        Args:
-            x (float): [TODO]
-            y (float): [TODO]
-            w (float): [TODO]
-            h (float): [TODO]
-        """
         self.x: float = x
         self.y: float = y
         self.w: float = w
         self.h: float = h
 
     def as_vertices(self) -> List[float]:
-        """[TODO]
-
-        Returns:
-            List[float]: [TODO]
-        """
         return [
             self.x,
             self.y,
@@ -131,82 +103,43 @@ class Rectangle(Drawable):
         )
 
 
-class Circle(Drawable):
-    """[TODO]
-    """
-
-    def __init__(self, x: float, y: float, r: float) -> None:
-        """[TODO]
-
-        Args:
-            x (float): [TODO]
-            y (float): [TODO]
-            r (float): [TODO]
-        """
-        self.center: Point = Point(x, y)
-        self.r: float = r
-
-    def as_vertices(self) -> List[float]:
-        """[TODO]
-
-        Returns:
-            List[float]: [TODO]
-        """
-        verts = [self.center.x, self.center.y]
-        for i in range(31):
-            ang = 2 * pi * i / 30
-            verts.append(self.center.x + cos(ang) * self.r)
-            verts.append(self.center.y + sin(ang) * self.r)
-        return verts
-
-    def draw(self, color: Tuple[float, ...]) -> None:
-        pyglet.graphics.draw(
-            32,
-            pyglet.gl.GL_TRIANGLE_FAN,
-            (Drawable._VERTEX_MODE, self.as_vertices()),
-            (Drawable._COLOR_MODE, color * 32),
-        )
-
-
 class PointPath(Drawable):
-    """[TODO]
-
-    Args:
-        Drawable ([type]): [TODO]
-    """
+    @staticmethod
+    def create_empty():
+        return PointPath([])
 
     def __init__(self, pnts: List[Point]):
-        """[TODO]
-
-        Args:
-            pnts (List[Point]): [TODO]
-        """
         self.path: List[Point] = pnts
 
-    def as_vertices(self) -> List[float]:
-        """[TODO]
+    def __str__(self):
+        s = ""
+        for p in self.path:
+            s += f"({p.x},{p.y}), "
+        return s
 
-        Returns:
-            List[float]: [TODO]
-        """
+    def as_vertices(self) -> List[float]:
         return [coordinate for pnt in self.path for coordinate in pnt]
 
     def draw(self, color: Tuple[float, ...]) -> None:
         n = len(self.path)
-        pyglet.graphics.draw(
-            n,
-            pyglet.gl.GL_LINE_STRIP,
-            (Drawable._VERTEX_MODE, self.as_vertices()),
-            (Drawable._COLOR_MODE, color * n),
-        )
+        if n > 0:
+            pyglet.graphics.draw(
+                n,
+                pyglet.gl.GL_LINE_STRIP,
+                (Drawable._VERTEX_MODE, self.as_vertices()),
+                (Drawable._COLOR_MODE, color * n),
+            )
+            for pnt in self.path:
+                pnt.draw(color)
 
     def append(self, point: Point) -> None:
-        """[Todo]
-
-        Args:
-            point (Point): [Todo]
-        """
         self.path.append(point)
+
+    def __len__(self):
+        return len(self.path)
+
+    def __getitem__(self, key):
+        return self.path[key]
 
 
 class Color:
