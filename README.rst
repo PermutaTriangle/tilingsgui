@@ -1,6 +1,3 @@
-# GUI FOR TILINGS
+.. code:: bash
 
-## Run
-```sh
-poetry run tilingsgui
-```
+       poetry run tilingsgui
