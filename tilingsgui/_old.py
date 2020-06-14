@@ -183,13 +183,13 @@ class TilingDrawing(object):
         GRID_COLOR = (0, 0, 0)
         OBS_COLOR = (255, 0, 0)
         REQ_COLOR = (0, 0, 255)
-        HIGHLIGHTED_COLOR = (0, 0, 0)
+        HIGHLIGHTED_COLOR = (255, 255, 0)
         RAD = 5
         THICK = 3
         tw, th = self.tiling.dimensions
         hover_cell = self.get_cell(MOUSE_POS)
         hover_index = None
-        # hover_index = self.get_point_req_index(pygame.mouse.get_pos())
+        hover_index = self.get_point_req_index(MOUSE_POS)
         if SHADING:
             self.draw_shaded_cells()
         if PRETTY_POINTS:

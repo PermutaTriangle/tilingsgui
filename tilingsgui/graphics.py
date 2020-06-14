@@ -1,145 +1,79 @@
 """Drawable objects
 """
 
-from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from math import cos, pi, sin
 from typing import ClassVar, List, Tuple
 
 import pyglet
 
+from .geo import Point
 
-class Drawable(ABC):  # pylint: disable=too-few-public-methods
-    """Abstract class with
-    """
 
+class GeoDrawer:
     _VERTEX_MODE: ClassVar[str] = "v2f"
     _COLOR_MODE: ClassVar[str] = "c3B"
 
-    @abstractmethod
-    def draw(self, color: Tuple[float, ...]) -> None:
-        """Draw the object.
-
-        Args:
-            color (Tuple[float, ...]): color value for drawing.
-        """
-
-
-class Point(Drawable):
-
-    DRAW_SIZE: ClassVar[float] = 5.0
-
-    def __init__(self, x: float, y: float) -> None:
-        self.x = x
-        self.y = y
-
-    def as_vertices(self):
-        verts = [self.x, self.y]
-        for i in range(31):
-            ang = 2 * pi * i / 30
-            verts.append(self.x + cos(ang) * Point.DRAW_SIZE)
-            verts.append(self.y + sin(ang) * Point.DRAW_SIZE)
-        return verts
-
-    def dist_squared_to(self, other: Point) -> float:
-        return (self.x - other.x) ** 2 + (self.y - other.y) ** 2
-
-    def __iter__(self):
-        yield self.x
-        yield self.y
-
-    def draw(self, color: Tuple[float, ...]):
-        pyglet.graphics.draw(
-            32,
-            pyglet.gl.GL_TRIANGLE_FAN,
-            (Drawable._VERTEX_MODE, self.as_vertices()),
-            (Drawable._COLOR_MODE, color * 32),
-        )
-
-
-class LineSegment(Drawable):
-    def __init__(self, x1: float, y1: float, x2: float, y2: float) -> None:
-        self.start: Point = Point(x1, y1)
-        self.end: Point = Point(x2, y2)
-
-    def as_vertices(self) -> List[float]:
-        return [self.start.x, self.start.y, self.end.x, self.end.y]
-
-    def draw(self, color: Tuple[float, ...]) -> None:
+    @staticmethod
+    def draw_line_segment(x1, y1, x2, y2, color):
         pyglet.graphics.draw(
             2,
             pyglet.gl.GL_LINE_STRIP,
-            (Drawable._VERTEX_MODE, self.as_vertices()),
-            (Drawable._COLOR_MODE, color * 2),
+            (GeoDrawer._VERTEX_MODE, [x1, y1, x2, y2]),
+            (GeoDrawer._COLOR_MODE, color * 2),
         )
 
+    @staticmethod
+    def draw_circle(x, y, r, color, splits=30):
+        vertices = [x, y]
+        for i in range(splits + 1):
+            ang = 2 * pi * i / splits
+            vertices.append(x + cos(ang) * r)
+            vertices.append(y + sin(ang) * r)
+        pyglet.graphics.draw(
+            splits + 2,
+            pyglet.gl.GL_TRIANGLE_FAN,
+            (GeoDrawer._VERTEX_MODE, vertices),
+            (GeoDrawer._COLOR_MODE, color * (splits + 2)),
+        )
 
-class Rectangle(Drawable):
-    def __init__(self, x: float, y: float, w: float, h: float) -> None:
-        self.x: float = x
-        self.y: float = y
-        self.w: float = w
-        self.h: float = h
+    @staticmethod
+    def draw_point(point, size, color):
+        GeoDrawer.draw_circle(point.x, point.y, size, color)
 
-    def as_vertices(self) -> List[float]:
-        return [
-            self.x,
-            self.y,
-            self.x,
-            self.y + self.h,
-            self.x + self.w,
-            self.y,
-            self.x + self.w,
-            self.y + self.h,
+    @staticmethod
+    def draw_filled_rectangle(x, y, w, h, color):
+        vertices = [
+            x,
+            y,
+            x,
+            y + h,
+            x + w,
+            y,
+            x + w,
+            y + h,
         ]
-
-    def draw(self, color: Tuple[float, ...]) -> None:
         pyglet.graphics.draw(
             4,
             pyglet.gl.GL_TRIANGLE_STRIP,
-            (Drawable._VERTEX_MODE, self.as_vertices()),
-            (Drawable._COLOR_MODE, color * 4),
+            (GeoDrawer._VERTEX_MODE, vertices),
+            (GeoDrawer._COLOR_MODE, color * 4),
         )
 
-
-class PointPath(Drawable):
     @staticmethod
-    def create_empty():
-        return PointPath([])
-
-    def __init__(self, pnts: List[Point]):
-        self.path: List[Point] = pnts
-
-    def __str__(self):
-        s = ""
-        for p in self.path:
-            s += f"({p.x},{p.y}), "
-        return s
-
-    def as_vertices(self) -> List[float]:
-        return [coordinate for pnt in self.path for coordinate in pnt]
-
-    def draw(self, color: Tuple[float, ...]) -> None:
-        n = len(self.path)
+    def draw_point_path(pnt_path: List[Point], color, point_size):
+        n = len(pnt_path)
         if n > 0:
-            pyglet.graphics.draw(
-                n,
-                pyglet.gl.GL_LINE_STRIP,
-                (Drawable._VERTEX_MODE, self.as_vertices()),
-                (Drawable._COLOR_MODE, color * n),
-            )
-            for pnt in self.path:
-                pnt.draw(color)
-
-    def append(self, point: Point) -> None:
-        self.path.append(point)
-
-    def __len__(self):
-        return len(self.path)
-
-    def __getitem__(self, key):
-        return self.path[key]
+            if n > 1:
+                vertices = [coord for pnt in pnt_path for coord in pnt]
+                pyglet.graphics.draw(
+                    n,
+                    pyglet.gl.GL_LINE_STRIP,
+                    (GeoDrawer._VERTEX_MODE, vertices),
+                    (GeoDrawer._COLOR_MODE, color * n),
+                )
+            for pnt in pnt_path:
+                GeoDrawer.draw_point(pnt, point_size, color)
 
 
 class Color:

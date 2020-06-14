@@ -1,10 +1,11 @@
 
 
-from typing import ClassVar, Tuple
+from typing import ClassVar, List, Tuple
 
 import pyglet
 
 from .graphics import Color
+from .interface import Drawable, EventListener
 from .tplot import TPlotManager
 
 
@@ -30,7 +31,15 @@ class TilingGui(pyglet.window.Window):
             **kargs
         )
 
-        self.tplot_man = TPlotManager(self.width, self.height)
+        tplot_man = TPlotManager(self.width, self.height)
+
+        self.drawables: List[Drawable] = [
+            tplot_man
+        ]
+
+        self.event_listeners: List[EventListener] = [
+            tplot_man
+        ]
 
     def start(self) -> None:
         self._initial_config()
@@ -47,29 +56,37 @@ class TilingGui(pyglet.window.Window):
     def on_draw(self):
         self.clear()
 
-        self.tplot_man.draw()
+        for drawable in self.drawables:
+            drawable.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
-        pass
+        for event_listener in self.event_listeners:
+            event_listener.on_mouse_press(x, y, button, modifiers)
 
-    def on_mouse_motion(self, x: int, y: int, _dx, _dy):
-        self.tplot_man.set_mouse_position(x, y)
+    def on_mouse_motion(self, x, y, dx, dy):
+        for event_listener in self.event_listeners:
+            event_listener.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_release(self, x, y, button, modifiers):
-        pass
+        for event_listener in self.event_listeners:
+            event_listener.on_mouse_release(x, y, button, modifiers)
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        pass
+        for event_listener in self.event_listeners:
+            event_listener.on_mouse_drag(x, y, dx, dy, button, modifiers)
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
             pyglet.app.exit()
+        for event_listener in self.event_listeners:
+            event_listener.on_key_press(symbol, modifiers)
 
     def on_resize(self, width, height):
-
         pyglet.gl.glViewport(0, 0, width, height)
         pyglet.gl.glMatrixMode(pyglet.gl.GL_PROJECTION)
         pyglet.gl.glLoadIdentity()
         pyglet.gl.glOrtho(0, width, 0, height, -1, 1)
         pyglet.gl.glMatrixMode(pyglet.gl.GL_MODELVIEW)
-        self.tplot_man.set_dimensions(width, height)
+
+        for event_listener in self.event_listeners:
+            event_listener.on_resize(width, height)
