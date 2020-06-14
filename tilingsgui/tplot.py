@@ -6,11 +6,11 @@ from typing import ClassVar, Deque, Tuple
 
 from permuta import Perm
 from permuta.misc import DIR_NORTH
-from tilings import Tiling
 
-from .geo import Point
-from .graphics import Color, GeoDrawer
-from .interface import Drawable, EventListener
+from tilings import Tiling
+from tilingsgui.geo import Point
+from tilingsgui.graphics import Color, GeoDrawer
+from tilingsgui.interface import Drawable, EventListener
 
 
 class TPlotSettings:
@@ -22,35 +22,38 @@ class TPlotSettings:
         self.highlight_touching_cell: bool = False
 
 
+# TODO: Remove magic constants...
+
+
 class TPlot:
     OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
     REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.GREEN
 
     @staticmethod
-    def gridded_perm_initial_locations(gp, gridsz, cellsz):
+    def _col_row_and_count(gp, gridsz):
         colcount = [0] * gridsz[0]
         rowcount = [0] * gridsz[1]
         col = [[] for i in range(gridsz[0])]
         row = [[] for i in range(gridsz[1])]
-        locs = []
-        for ind in range(len(gp)):
-            c_x, c_y = gp.pos[ind]
+        for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt)):
             colcount[c_x] += 1
             rowcount[c_y] += 1
             col[c_x].append(ind)
-            row[c_y].append(gp.patt[ind])
+            row[c_y].append(val)
         for r in row:
             r.sort()
-        for ind in range(len(gp)):
-            val = gp.patt[ind]
-            c_x, c_y = gp.pos[ind]
-            locx = c_x * cellsz[0] + cellsz[0] * (col[c_x].index(ind) + 1) // (
-                colcount[c_x] + 1
+        return colcount, rowcount, col, row
+
+    @staticmethod
+    def gridded_perm_initial_locations(gp, gridsz, cellsz):
+        colcount, rowcount, col, row = TPlot._col_row_and_count(gp, gridsz)
+        locs = [
+            Point(
+                cellsz[0] * (c_x + (col[c_x].index(ind) + 1) / (colcount[c_x] + 1)),
+                cellsz[1] * (c_y + (row[c_y].index(val) + 1) / (rowcount[c_y] + 1)),
             )
-            locy = c_y * cellsz[1] + cellsz[1] * (row[c_y].index(val) + 1) // (
-                rowcount[c_y] + 1
-            )
-            locs.append(Point(locx, locy))
+            for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt))
+        ]
         return locs
 
     def __init__(self, tiling, w, h):
@@ -84,40 +87,38 @@ class TPlot:
         self.w = width
         self.h = height
 
-    def cell_to_rect(self, c):
-        cx, cy = c
-        tw, th = self.tiling.dimensions
-        cw, ch = self.w / tw, self.h / th
-        return cx * cw, cy * ch, cw, ch
+    def cell_to_rect(self, c_x, c_y):
+        t_w, t_h = self.tiling.dimensions
+        c_w, c_h = self.w / t_w, self.h / t_h
+        return c_x * c_w, c_y * c_h, c_w, c_h
 
     def draw_shaded_cells(self):
-        for c in self.tiling.empty_cells:
-            GeoDrawer.draw_filled_rectangle(*self.cell_to_rect(c), Color.GRAY)
+        for c_x, c_y in self.tiling.empty_cells:
+            GeoDrawer.draw_filled_rectangle(*self.cell_to_rect(c_x, c_y), Color.GRAY)
 
     def draw_point_cells(self):
-        for c in self.tiling.point_cells:
-            x, y, w, h = self.cell_to_rect(c)
+        for c_x, c_y in self.tiling.point_cells:
+            x, y, w, h = self.cell_to_rect(c_x, c_y)
             GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)
 
     def get_cell(self, mpos: Point):
-        tw, th = self.tiling.dimensions
-        cw, ch = self.w / tw, self.h / th
-        mx, my = mpos.x, mpos.y
-        cx, cy = int(mx / cw), int(my / ch)
-        return (cx, cy)
+        t_w, t_h = self.tiling.dimensions
+        c_w, c_h = self.w / t_w, self.h / t_h
+        c_x, c_y = int(mpos.x / c_w), int(mpos.y / c_h)
+        return c_x, c_y
 
     def get_point_obs_index(self, mpos: Point):
         for j, loc in enumerate(self.obstruction_locs):
-            for k, v in enumerate(loc):
-                if mpos.dist_squared_to(v) <= 100:
-                    return (j, k)
+            for k, pnt in enumerate(loc):
+                if mpos.dist_squared_to(pnt) <= 100:
+                    return j, k
 
     def get_point_req_index(self, mpos: Point):
         for i, reqlist in enumerate(self.requirement_locs):
             for j, loc in enumerate(reqlist):
-                for k, v in enumerate(loc):
-                    if mpos.dist_squared_to(v) <= 100:
-                        return (i, j, k)
+                for k, pnt in enumerate(loc):
+                    if mpos.dist_squared_to(pnt) <= 100:
+                        return i, j, k
 
     def draw(self, settings: TPlotSettings, mpos: Point):
         highlight_col = Color.BLACK

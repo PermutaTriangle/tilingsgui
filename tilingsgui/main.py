@@ -1,7 +1,7 @@
 """Entrypoint.
 """
 
-from .gui import TilingGui
+from tilingsgui.gui import TilingGui
 
 
 def main() -> None:

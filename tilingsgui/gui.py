@@ -4,9 +4,9 @@ from typing import ClassVar, List, Tuple
 
 import pyglet
 
-from .graphics import Color
-from .interface import Drawable, EventListener
-from .tplot import TPlotManager
+from tilingsgui.graphics import Color
+from tilingsgui.interface import Drawable, EventListener
+from tilingsgui.tplot import TPlotManager
 
 
 class TilingGui(pyglet.window.Window):
