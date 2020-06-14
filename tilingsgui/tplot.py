@@ -4,13 +4,13 @@
 from collections import deque
 from typing import ClassVar, Deque, Tuple
 
-from permuta import Perm
-from permuta.misc import DIR_NORTH
-
-from tilings import Tiling
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.interface import Drawable, EventListener
+
+from permuta import Perm
+from permuta.misc import DIR_NORTH
+from tilings import Tiling
 
 
 class TPlotSettings:
@@ -28,6 +28,7 @@ class TPlotSettings:
 class TPlot:
     OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
     REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.GREEN
+    HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLACK
 
     @staticmethod
     def _col_row_and_count(gp, gridsz):
@@ -120,38 +121,29 @@ class TPlot:
                     if mpos.dist_squared_to(pnt) <= 100:
                         return i, j, k
 
-    def draw(self, settings: TPlotSettings, mpos: Point):
-        highlight_col = Color.BLACK
-        tw, th = self.tiling.dimensions
+    def draw_obstructions(self, settings: TPlotSettings, mpos: Point):
         hover_cell = self.get_cell(mpos)
-        hover_index = self.get_point_req_index(mpos)
-        if settings.shading:
-            self.draw_shaded_cells()
-        if settings.pretty_points:
-            self.draw_point_cells()
-        for i in range(tw):
-            x = self.w * i / tw
-            GeoDrawer.draw_line_segment(x, self.h, x, 0, Color.BLACK)
-        for i in range(th):
-            y = self.h * i / th
-            GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
-        for i, loc in enumerate(self.obstruction_locs):
-            if settings.shading and self.tiling.obstructions[i].is_point_perm():
-                continue
-            if settings.pretty_points and all(
-                p in self.tiling.point_cells for p in self.tiling.obstructions[i].pos
+        for obs, loc in zip(self.tiling.obstructions, self.obstruction_locs):
+            if (settings.shading and obs.is_point_perm()) or (
+                settings.pretty_points
+                and all(p in self.tiling.point_cells for p in obs.pos)
             ):
                 continue
-            col = TPlot.OBSTRUCTION_COLOR
-            if settings.highlight_touching_cell and any(
-                p == hover_cell for p in self.tiling.obstructions[i].pos
-            ):
-                col = highlight_col
-            localized = self.tiling.obstructions[i].is_localized()
+
+            col = (
+                TPlot.HIGHLIGHT_COLOR
+                if settings.highlight_touching_cell
+                and any(p == hover_cell for p in obs.pos)
+                else TPlot.OBSTRUCTION_COLOR
+            )
+            localized = obs.is_localized()
             if (localized and settings.show_localized) or (
                 not localized and settings.show_crossing
             ):
                 GeoDrawer.draw_point_path(loc, col, 5)
+
+    def draw_requirements(self, settings: TPlotSettings, mpos: Point):
+        hover_index = self.get_point_req_index(mpos)
         for i, reqlist in enumerate(self.requirement_locs):
             if settings.pretty_points and any(
                 p in self.tiling.point_cells
@@ -160,16 +152,35 @@ class TPlot:
             ):
                 continue
             col = (
-                highlight_col
+                TPlot.HIGHLIGHT_COLOR
                 if hover_index is not None and i == hover_index[0]
                 else TPlot.REQUIREMENT_COLOR
             )
+
             for j, loc in enumerate(reqlist):
                 localized = self.tiling.requirements[i][j].is_localized()
                 if (localized and settings.show_localized) or (
                     not localized and settings.show_crossing
                 ):
                     GeoDrawer.draw_point_path(loc, col, 5)
+
+    def draw_grid(self):
+        t_w, t_h = self.tiling.dimensions
+        for i in range(t_w):
+            x = self.w * i / t_w
+            GeoDrawer.draw_line_segment(x, self.h, x, 0, Color.BLACK)
+        for i in range(t_h):
+            y = self.h * i / t_h
+            GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
+
+    def draw(self, settings: TPlotSettings, mpos: Point):
+        if settings.shading:
+            self.draw_shaded_cells()
+        if settings.pretty_points:
+            self.draw_point_cells()
+        self.draw_grid()
+        self.draw_obstructions(settings, mpos)
+        self.draw_requirements(settings, mpos)
 
 
 class TPlotManager(Drawable, EventListener):

@@ -12,6 +12,7 @@
 *.toml          text    eol=lf
 *.lock          text    eol=lf
 *.ini           text    eol=lf
+*.cfg           text    eol=lf
 LICENSE         text    eol=lf
 .editorconfig   text    eol=lf
 .gitignore      text    eol=lf
