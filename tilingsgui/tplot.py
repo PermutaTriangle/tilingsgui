@@ -4,13 +4,16 @@
 from collections import deque
 from typing import ClassVar, Deque, Tuple
 
+from permuta import Perm
+from permuta.misc import DIR_NORTH
+from pyglet.window import key
+
+from tilings import Tiling
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.interface import Drawable, EventListener
 
-from permuta import Perm
-from permuta.misc import DIR_NORTH
-from tilings import Tiling
+# TODO: Remove magic constants...
 
 
 class TPlotSettings:
@@ -21,8 +24,20 @@ class TPlotSettings:
         self.show_localized: bool = True
         self.highlight_touching_cell: bool = False
 
+    def toggle_shading(self):
+        self.shading = not self.shading
 
-# TODO: Remove magic constants...
+    def toggle_pretty_points(self):
+        self.pretty_points = not self.pretty_points
+
+    def toggle_show_crossing(self):
+        self.show_crossing = not self.show_crossing
+
+    def toggle_show_localized(self):
+        self.show_localized = not self.show_localized
+
+    def toggle_highlight_touching_cell(self):
+        self.highlight_touching_cell = not self.highlight_touching_cell
 
 
 class TPlot:
@@ -75,6 +90,18 @@ class TPlot:
             for reqlist in self.tiling.requirements
         ]
 
+    def draw(self, settings: TPlotSettings, mpos: Point):
+        if any(len(obs) == 0 for obs in self.tiling.obstructions):
+            GeoDrawer.draw_filled_rectangle(0, 0, self.w, self.h, Color.GRAY)
+        else:
+            if settings.shading:
+                self._draw_shaded_cells()
+            if settings.pretty_points:
+                self._draw_point_cells()
+            self._draw_grid()
+            self._draw_obstructions(settings, mpos)
+            self._draw_requirements(settings, mpos)
+
     def resize(self, width, height):
         for obs in self.obstruction_locs:
             for pnt in obs:
@@ -88,41 +115,41 @@ class TPlot:
         self.w = width
         self.h = height
 
-    def cell_to_rect(self, c_x, c_y):
+    def _cell_to_rect(self, c_x, c_y):
         t_w, t_h = self.tiling.dimensions
         c_w, c_h = self.w / t_w, self.h / t_h
         return c_x * c_w, c_y * c_h, c_w, c_h
 
-    def draw_shaded_cells(self):
+    def _draw_shaded_cells(self):
         for c_x, c_y in self.tiling.empty_cells:
-            GeoDrawer.draw_filled_rectangle(*self.cell_to_rect(c_x, c_y), Color.GRAY)
+            GeoDrawer.draw_filled_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
 
-    def draw_point_cells(self):
+    def _draw_point_cells(self):
         for c_x, c_y in self.tiling.point_cells:
-            x, y, w, h = self.cell_to_rect(c_x, c_y)
+            x, y, w, h = self._cell_to_rect(c_x, c_y)
             GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)
 
-    def get_cell(self, mpos: Point):
+    def _get_cell(self, mpos: Point):
         t_w, t_h = self.tiling.dimensions
         c_w, c_h = self.w / t_w, self.h / t_h
         c_x, c_y = int(mpos.x / c_w), int(mpos.y / c_h)
         return c_x, c_y
 
-    def get_point_obs_index(self, mpos: Point):
+    def _get_point_obs_index(self, mpos: Point):
         for j, loc in enumerate(self.obstruction_locs):
             for k, pnt in enumerate(loc):
                 if mpos.dist_squared_to(pnt) <= 100:
                     return j, k
 
-    def get_point_req_index(self, mpos: Point):
+    def _get_point_req_index(self, mpos: Point):
         for i, reqlist in enumerate(self.requirement_locs):
             for j, loc in enumerate(reqlist):
                 for k, pnt in enumerate(loc):
                     if mpos.dist_squared_to(pnt) <= 100:
                         return i, j, k
 
-    def draw_obstructions(self, settings: TPlotSettings, mpos: Point):
-        hover_cell = self.get_cell(mpos)
+    def _draw_obstructions(self, settings: TPlotSettings, mpos: Point):
+        hover_cell = self._get_cell(mpos)
         for obs, loc in zip(self.tiling.obstructions, self.obstruction_locs):
             if (settings.shading and obs.is_point_perm()) or (
                 settings.pretty_points
@@ -142,8 +169,8 @@ class TPlot:
             ):
                 GeoDrawer.draw_point_path(loc, col, 5)
 
-    def draw_requirements(self, settings: TPlotSettings, mpos: Point):
-        hover_index = self.get_point_req_index(mpos)
+    def _draw_requirements(self, settings: TPlotSettings, mpos: Point):
+        hover_index = self._get_point_req_index(mpos)
         for i, reqlist in enumerate(self.requirement_locs):
             if settings.pretty_points and any(
                 p in self.tiling.point_cells
@@ -164,7 +191,7 @@ class TPlot:
                 ):
                     GeoDrawer.draw_point_path(loc, col, 5)
 
-    def draw_grid(self):
+    def _draw_grid(self):
         t_w, t_h = self.tiling.dimensions
         for i in range(t_w):
             x = self.w * i / t_w
@@ -172,15 +199,6 @@ class TPlot:
         for i in range(t_h):
             y = self.h * i / t_h
             GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
-
-    def draw(self, settings: TPlotSettings, mpos: Point):
-        if settings.shading:
-            self.draw_shaded_cells()
-        if settings.pretty_points:
-            self.draw_point_cells()
-        self.draw_grid()
-        self.draw_obstructions(settings, mpos)
-        self.draw_requirements(settings, mpos)
 
 
 class TPlotManager(Drawable, EventListener):
@@ -243,7 +261,16 @@ class TPlotManager(Drawable, EventListener):
         pass
 
     def on_key_press(self, symbol, modifiers):
-        pass
+        if symbol == key.L:
+            self.settings.toggle_show_localized()
+        if symbol == key.O:
+            self.settings.toggle_show_crossing()
+        if symbol == key.P:
+            self.settings.toggle_pretty_points()
+        if symbol == key.S:
+            self.settings.toggle_shading()
+        if symbol == key.C:
+            self.settings.toggle_highlight_touching_cell()
 
     def on_resize(self, width, height):
         self.set_dimensions(width, height)
