@@ -1,4 +1,5 @@
 import pyglet
+
 from tilingsgui.graphics import Color, GeoDrawer
 
 
@@ -88,47 +89,39 @@ class SelectButtonGroup:
         return -1
 
 
-class Rectangle:
-    """Draws a rectangle into a batch."""
-
-    def __init__(self, x1, y1, x2, y2, batch):
-        self.vertex_list = batch.add(
-            4,
-            pyglet.gl.GL_QUADS,
-            None,
-            ("v2f", [x1, y1, x2, y1, x2, y2, x1, y2]),
-            ("c4B", [200, 200, 220, 255] * 4),
-        )
-
-
 class TextBox:
-    def __init__(self, text, x, y, width):
-        self.document = pyglet.text.document.UnformattedDocument(text)
+    def __init__(self, init_text, x, y, width, height):
+        self.document = pyglet.text.document.UnformattedDocument(init_text)
         self.document.set_style(
-            0, len(self.document.text), dict(font_size=10, color=(0, 0, 0, 255))
+            0, len(self.document.text), dict(font_size=12, color=(0, 0, 0, 255))
         )
-        font = self.document.get_font()
-        font.size = 2
-        height = font.ascent - font.descent
-        print(height)
-
         self.batch = pyglet.graphics.Batch()
         self.layout = pyglet.text.layout.IncrementalTextLayout(
             self.document, width, height, multiline=False, batch=self.batch
         )
+        self.layout.x = x + 5
+        self.layout.y = y
         self.caret = pyglet.text.caret.Caret(self.layout)
 
-        self.layout.x = x
-        self.layout.y = y
-
-        # Rectangular outline
-        pad = 3
-
-        self.rectangle = Rectangle(
-            x - pad, y - pad, x + width + pad, y + height + pad, self.batch
+        self.vertex_list = self.batch.add(
+            4,
+            pyglet.gl.GL_QUADS,
+            None,
+            ("v2f", [x, y, x + width, y, x + width, y + height, x, y + height]),
+            ("c4B", [200, 200, 220, 255] * 4),
         )
-
         self.focused = False
+
+    def resize(self, width, height):
+        right_end = self.vertex_list.vertices[0] + width
+        self.vertex_list.vertices[2] = right_end
+        self.vertex_list.vertices[4] = right_end
+        h = self.vertex_list.vertices[7] - self.vertex_list.vertices[1]
+        self.vertex_list.vertices[1] = height
+        self.vertex_list.vertices[3] = height
+        self.vertex_list.vertices[5] = height + h
+        self.vertex_list.vertices[7] = height + h
+        self.layout.y = height
 
     def draw(self):
         self.batch.draw()
@@ -145,15 +138,10 @@ class TextBox:
     def on_text_motion(self, motion):
         self.caret.on_text_motion(motion)
 
-    def on_text_motion_select(self, motion):
-        self.caret.on_text_motion_select(motion)
-
-    def set_focus(self, with_text=""):
-        self.document.text = with_text
-        self.caret.on_mouse_press(*(0,) * 4)
+    def set_focus(self):
+        self.document.text = ""
         self.focused = True
         self.caret.visible = True
-        self.caret.position = len(with_text)
 
     def release_focus(self):
         self.focused = False
@@ -162,3 +150,7 @@ class TextBox:
 
     def get_current_text(self):
         return self.document.text
+
+    def append_text(self, text):
+        self.document.text = self.document.text + text
+        self.caret.mark = self.caret.position = len(self.document.text)

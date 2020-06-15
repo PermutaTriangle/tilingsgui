@@ -13,5 +13,5 @@ Run
 ***************
 TODO
 ***************
-- Gather drawable units into batches
+- Gather drawable units into batches [Note: no order guarantees in batches]
 - 

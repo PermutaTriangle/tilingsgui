@@ -6,12 +6,10 @@ from typing import ClassVar, Deque, Tuple
 
 from permuta import Perm
 from permuta.misc import DIR_NORTH
-from pyglet.window import key
 
 from tilings import Tiling
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
-from tilingsgui.interface import Drawable, EventListener
 
 # TODO: Remove magic constants...
 
@@ -201,7 +199,7 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
 
 
-class TPlotManager(Drawable, EventListener):
+class TPlotManager:
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
 
     def __init__(self, width: int, height: int):
@@ -213,19 +211,22 @@ class TPlotManager(Drawable, EventListener):
         self.settings = TPlotSettings()
 
         # TODO: REMOVE
-        test_tiling = Tiling.from_string("1234_1324").add_single_cell_requirement(
+        """test_tiling = Tiling.from_string("1234_1324").add_single_cell_requirement(
             Perm((0,)), (0, 0)
         )
         test_tiling = test_tiling.place_point_of_gridded_permutation(
             test_tiling.requirements[0][0], 0, DIR_NORTH
         )
-        self.undo_deq.append(TPlot(test_tiling, width, height))
+        self.undo_deq.append(TPlot(test_tiling, width, height))"""
 
     def set_dimensions(self, width: int, height: int):
         self.w = width
         self.h = height
         if self.undo_deq:
             self.undo_deq[0].resize(width, height)
+
+    def add_from_string(self, string):
+        self.add(TPlot(Tiling.from_string(string), self.w, self.h))
 
     def add(self, drawing: TPlot):
         self.undo_deq.appendleft(drawing)
@@ -247,30 +248,9 @@ class TPlotManager(Drawable, EventListener):
         if self.undo_deq:
             self.undo_deq[0].draw(self.settings, self.mouse_pos)
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        pass
-
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_pos.x = x
         self.mouse_pos.y = y
-
-    def on_mouse_release(self, x, y, button, modifiers):
-        pass
-
-    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        pass
-
-    def on_key_press(self, symbol, modifiers):
-        if symbol == key.L:
-            self.settings.toggle_show_localized()
-        if symbol == key.O:
-            self.settings.toggle_show_crossing()
-        if symbol == key.P:
-            self.settings.toggle_pretty_points()
-        if symbol == key.S:
-            self.settings.toggle_shading()
-        if symbol == key.C:
-            self.settings.toggle_highlight_touching_cell()
 
     def on_resize(self, width, height):
         self.set_dimensions(width, height)
