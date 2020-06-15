@@ -6,6 +6,7 @@ import pyglet
 
 from tilingsgui.graphics import Color
 from tilingsgui.tplot import TPlotManager
+from tilingsgui.widgets import TextBox
 
 
 class TilingGui(pyglet.window.Window):
@@ -33,6 +34,8 @@ class TilingGui(pyglet.window.Window):
         )
         self.tplot_man = TPlotManager(self.width, self.height)
 
+        self.tb = TextBox("", 5, 625, 100)
+
     def start(self) -> None:
         self._initial_config()
         pyglet.app.run()
@@ -49,9 +52,14 @@ class TilingGui(pyglet.window.Window):
         self.clear()
 
         self.tplot_man.draw()
+        self.tb.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
-        self.tplot_man.on_mouse_press(x, y, button, modifiers)
+        if self.tb.hit_test(x, y):
+            self.tb.set_focus()
+        else:
+            self.tplot_man.on_mouse_press(x, y, button, modifiers)
+
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
@@ -65,6 +73,9 @@ class TilingGui(pyglet.window.Window):
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
             pyglet.app.exit()
+        if symbol == pyglet.window.key.ENTER:
+            print(self.tb.get_current_text())
+            self.tb.release_focus()
         self.tplot_man.on_key_press(symbol, modifiers)
 
     def on_resize(self, width, height):
@@ -75,3 +86,15 @@ class TilingGui(pyglet.window.Window):
         pyglet.gl.glMatrixMode(pyglet.gl.GL_MODELVIEW)
 
         self.tplot_man.on_resize(width - 100, height - 50)
+
+    def on_text(self, text):
+        if self.tb.focused:
+            self.tb.on_text(text)
+
+    def on_text_motion(self, motion):
+        if self.tb.focused:
+            self.tb.on_text_motion(motion)
+
+    def on_text_motion_select(self, motion):
+        if self.tb.focused:
+            self.tb.on_text_motion_select(motion)
