@@ -24,15 +24,17 @@ class Button:
             color=Button.LABEL_COLOR,
         )
 
-    def hit_test(self, x, y):
+    def hit(self, x, y):
         return self.x < x < self.x + self.w and self.y < y < self.y + self.h
 
-    def mouse_click(self, x, y):
-        if self.hit_test(x, y):
+    def clicked(self, x, y):
+        if self.hit(x, y):
             self.on_click()
+            return True
+        return False
 
     def on_click(self):
-        print("click")
+        pass
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(
@@ -42,7 +44,7 @@ class Button:
 
 
 class ToggleButton(Button):
-    TOGGLE_COLOR = Color.DARK_GRAY
+    TOGGLE_COLOR = Color.DARK_GREEN
 
     def __init__(self, text, x, y, w, h):
         super().__init__(text, x, y, w, h)
@@ -50,7 +52,6 @@ class ToggleButton(Button):
 
     def on_click(self):
         self.toggle = not self.toggle
-        print("click")
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(
@@ -63,12 +64,30 @@ class ToggleButton(Button):
         self.label.draw()
 
 
-class SelectButton:
-    pass
+SelectButton = ToggleButton
 
 
 class SelectButtonGroup:
-    pass
+    def __init__(self):
+        self.buttons = []
+        self.selected = -1
+
+    def add_button(self, button):
+        self.buttons.append(button)
+
+    def clicked(self, x, y):
+
+        old_selected = self.selected
+        for i, button in enumerate(self.buttons):
+            if button.clicked(x, y):
+                self.selected = i
+                if self.selected != old_selected:
+                    if old_selected != -1:
+                        self.buttons[old_selected].toggle = False
+                    return i
+                self.buttons[old_selected].toggle = True
+                break
+        return -1
 
 
 class InputBox:

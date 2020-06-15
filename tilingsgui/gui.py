@@ -6,7 +6,6 @@ import pyglet
 
 from tilingsgui.graphics import Color
 from tilingsgui.tplot import TPlotManager
-from tilingsgui.widgets import Button, ToggleButton
 
 
 class TilingGui(pyglet.window.Window):
@@ -33,7 +32,6 @@ class TilingGui(pyglet.window.Window):
             **kargs
         )
         self.tplot_man = TPlotManager(self.width, self.height)
-        self.button = ToggleButton('ASDF', 600, 325, 100, 100)
 
     def start(self) -> None:
         self._initial_config()
@@ -51,11 +49,9 @@ class TilingGui(pyglet.window.Window):
         self.clear()
 
         self.tplot_man.draw()
-        self.button.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         self.tplot_man.on_mouse_press(x, y, button, modifiers)
-        self.button.mouse_click(x,y)
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
