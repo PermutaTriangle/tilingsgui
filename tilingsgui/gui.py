@@ -3,6 +3,7 @@
 from typing import ClassVar, Tuple
 
 import pyglet
+import pyperclip
 
 from tilingsgui.graphics import Color
 from tilingsgui.tplot import TPlotManager
@@ -34,7 +35,7 @@ class TilingGui(pyglet.window.Window):
         )
         self.tplot_man = TPlotManager(self.width, self.height)
 
-        self.tb = TextBox("", 5, 625, 100)
+        self.tb = TextBox('', 0, 625, 400)
 
     def start(self) -> None:
         self._initial_config()
@@ -51,15 +52,16 @@ class TilingGui(pyglet.window.Window):
     def on_draw(self):
         self.clear()
 
-        self.tplot_man.draw()
         self.tb.draw()
+        self.tplot_man.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
+        self.tplot_man.on_mouse_press(x, y, button, modifiers)
         if self.tb.hit_test(x, y):
-            self.tb.set_focus()
-        else:
-            self.tplot_man.on_mouse_press(x, y, button, modifiers)
-
+            if button == pyglet.window.mouse.LEFT:
+                self.tb.set_focus()
+            elif button == pyglet.window.mouse.RIGHT:
+                self.tb.set_focus(with_text=pyperclip.paste())
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
@@ -73,9 +75,6 @@ class TilingGui(pyglet.window.Window):
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
             pyglet.app.exit()
-        if symbol == pyglet.window.key.ENTER:
-            print(self.tb.get_current_text())
-            self.tb.release_focus()
         self.tplot_man.on_key_press(symbol, modifiers)
 
     def on_resize(self, width, height):
@@ -85,7 +84,7 @@ class TilingGui(pyglet.window.Window):
         pyglet.gl.glOrtho(0, width, 0, height, -1, 1)
         pyglet.gl.glMatrixMode(pyglet.gl.GL_MODELVIEW)
 
-        self.tplot_man.on_resize(width - 100, height - 50)
+        self.tplot_man.on_resize(width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT)
 
     def on_text(self, text):
         if self.tb.focused:

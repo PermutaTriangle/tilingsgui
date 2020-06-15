@@ -96,7 +96,7 @@ class Rectangle:
             4,
             pyglet.gl.GL_QUADS,
             None,
-            ("v2i", [x1, y1, x2, y1, x2, y2, x1, y2]),
+            ("v2f", [x1, y1, x2, y1, x2, y2, x1, y2]),
             ("c4B", [200, 200, 220, 255] * 4),
         )
 
@@ -104,9 +104,13 @@ class Rectangle:
 class TextBox:
     def __init__(self, text, x, y, width):
         self.document = pyglet.text.document.UnformattedDocument(text)
-        self.document.set_style(0, len(self.document.text), dict(color=(0, 0, 0, 255)))
+        self.document.set_style(
+            0, len(self.document.text), dict(font_size=10, color=(0, 0, 0, 255))
+        )
         font = self.document.get_font()
+        font.size = 2
         height = font.ascent - font.descent
+        print(height)
 
         self.batch = pyglet.graphics.Batch()
         self.layout = pyglet.text.layout.IncrementalTextLayout(
@@ -118,7 +122,7 @@ class TextBox:
         self.layout.y = y
 
         # Rectangular outline
-        pad = 2
+        pad = 3
 
         self.rectangle = Rectangle(
             x - pad, y - pad, x + width + pad, y + height + pad, self.batch
@@ -144,11 +148,12 @@ class TextBox:
     def on_text_motion_select(self, motion):
         self.caret.on_text_motion_select(motion)
 
-    def set_focus(self):
-        self.document.text = ""
+    def set_focus(self, with_text=""):
+        self.document.text = with_text
         self.caret.on_mouse_press(*(0,) * 4)
         self.focused = True
         self.caret.visible = True
+        self.caret.position = len(with_text)
 
     def release_focus(self):
         self.focused = False
