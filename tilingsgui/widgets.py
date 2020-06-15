@@ -41,8 +41,26 @@ class Button:
         self.label.draw()
 
 
-class ToggleButton:
-    pass
+class ToggleButton(Button):
+    TOGGLE_COLOR = Color.DARK_GRAY
+
+    def __init__(self, text, x, y, w, h):
+        super().__init__(text, x, y, w, h)
+        self.toggle = False
+
+    def on_click(self):
+        self.toggle = not self.toggle
+        print("click")
+
+    def draw(self):
+        GeoDrawer.draw_filled_rectangle(
+            self.x,
+            self.y,
+            self.w,
+            self.h,
+            ToggleButton.TOGGLE_COLOR if self.toggle else Button.BUTTON_COLOR,
+        )
+        self.label.draw()
 
 
 class SelectButton:

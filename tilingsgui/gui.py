@@ -6,7 +6,7 @@ import pyglet
 
 from tilingsgui.graphics import Color
 from tilingsgui.tplot import TPlotManager
-from tilingsgui.widgets import Button
+from tilingsgui.widgets import Button, ToggleButton
 
 
 class TilingGui(pyglet.window.Window):
@@ -33,7 +33,7 @@ class TilingGui(pyglet.window.Window):
             **kargs
         )
         self.tplot_man = TPlotManager(self.width, self.height)
-        self.button = Button('ASDF', 600, 325, 100, 100)
+        self.button = ToggleButton('ASDF', 600, 325, 100, 100)
 
     def start(self) -> None:
         self._initial_config()
