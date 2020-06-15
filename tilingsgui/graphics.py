@@ -64,6 +64,8 @@ class GeoDrawer:
     def draw_point_path(pnt_path: List[Point], color, point_size):
         n = len(pnt_path)
         if n > 0:
+            # TODO: Do in batch
+            # Maybe always add to bash and support flushing it...
             if n > 1:
                 vertices = [coord for pnt in pnt_path for coord in pnt]
                 pyglet.graphics.draw(
