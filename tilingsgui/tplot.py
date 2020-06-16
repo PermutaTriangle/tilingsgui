@@ -4,38 +4,10 @@
 from collections import deque
 from typing import ClassVar, Deque, Tuple
 
+from tilings import Tiling
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
-
-from permuta import Perm
-from permuta.misc import DIR_NORTH
-from tilings import Tiling
-
-# TODO: Remove magic constants...
-
-
-class TPlotSettings:
-    def __init__(self):
-        self.shading: bool = True
-        self.pretty_points: bool = True
-        self.show_crossing: bool = True
-        self.show_localized: bool = True
-        self.highlight_touching_cell: bool = False
-
-    def toggle_shading(self):
-        self.shading = not self.shading
-
-    def toggle_pretty_points(self):
-        self.pretty_points = not self.pretty_points
-
-    def toggle_show_crossing(self):
-        self.show_crossing = not self.show_crossing
-
-    def toggle_show_localized(self):
-        self.show_localized = not self.show_localized
-
-    def toggle_highlight_touching_cell(self):
-        self.highlight_touching_cell = not self.highlight_touching_cell
+from tilingsgui.state import GuiState
 
 
 class TPlot:
@@ -88,17 +60,17 @@ class TPlot:
             for reqlist in self.tiling.requirements
         ]
 
-    def draw(self, settings: TPlotSettings, mpos: Point):
+    def draw(self, state: GuiState, mpos: Point):
         if any(len(obs) == 0 for obs in self.tiling.obstructions):
             GeoDrawer.draw_filled_rectangle(0, 0, self.w, self.h, Color.GRAY)
         else:
-            if settings.shading:
+            if state.shading:
                 self._draw_shaded_cells()
-            if settings.pretty_points:
+            if state.pretty_points:
                 self._draw_point_cells()
             self._draw_grid()
-            self._draw_obstructions(settings, mpos)
-            self._draw_requirements(settings, mpos)
+            self._draw_obstructions(state, mpos)
+            self._draw_requirements(state, mpos)
 
     def resize(self, width, height):
         for obs in self.obstruction_locs:
@@ -146,31 +118,31 @@ class TPlot:
                     if mpos.dist_squared_to(pnt) <= 100:
                         return i, j, k
 
-    def _draw_obstructions(self, settings: TPlotSettings, mpos: Point):
+    def _draw_obstructions(self, state: GuiState, mpos: Point):
         hover_cell = self._get_cell(mpos)
         for obs, loc in zip(self.tiling.obstructions, self.obstruction_locs):
-            if (settings.shading and obs.is_point_perm()) or (
-                settings.pretty_points
+            if (state.shading and obs.is_point_perm()) or (
+                state.pretty_points
                 and all(p in self.tiling.point_cells for p in obs.pos)
             ):
                 continue
 
             col = (
                 TPlot.HIGHLIGHT_COLOR
-                if settings.highlight_touching_cell
+                if state.highlight_touching_cell
                 and any(p == hover_cell for p in obs.pos)
                 else TPlot.OBSTRUCTION_COLOR
             )
             localized = obs.is_localized()
-            if (localized and settings.show_localized) or (
-                not localized and settings.show_crossing
+            if (localized and state.show_localized) or (
+                not localized and state.show_crossing
             ):
                 GeoDrawer.draw_point_path(loc, col, 5)
 
-    def _draw_requirements(self, settings: TPlotSettings, mpos: Point):
+    def _draw_requirements(self, state: GuiState, mpos: Point):
         hover_index = self._get_point_req_index(mpos)
         for i, reqlist in enumerate(self.requirement_locs):
-            if settings.pretty_points and any(
+            if state.pretty_points and any(
                 p in self.tiling.point_cells
                 for req in self.tiling.requirements[i]
                 for p in req.pos
@@ -184,8 +156,8 @@ class TPlot:
 
             for j, loc in enumerate(reqlist):
                 localized = self.tiling.requirements[i][j].is_localized()
-                if (localized and settings.show_localized) or (
-                    not localized and settings.show_crossing
+                if (localized and state.show_localized) or (
+                    not localized and state.show_crossing
                 ):
                     GeoDrawer.draw_point_path(loc, col, 5)
 
@@ -202,13 +174,13 @@ class TPlot:
 class TPlotManager:
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
 
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, state: GuiState):
         self.undo_deq: Deque[TPlot] = deque()
         self.redo_deq: Deque[TPlot] = deque()
         self.set_dimensions(width, height)
         self.mouse_pos = Point(0, 0)
 
-        self.settings = TPlotSettings()
+        self.state = state
 
         # TODO: REMOVE
         """test_tiling = Tiling.from_string("1234_1324").add_single_cell_requirement(
@@ -246,7 +218,7 @@ class TPlotManager:
 
     def draw(self):
         if self.undo_deq:
-            self.undo_deq[0].draw(self.settings, self.mouse_pos)
+            self.undo_deq[0].draw(self.state, self.mouse_pos)
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_pos.x = x

@@ -6,6 +6,7 @@ import pyglet
 
 from tilingsgui.graphics import Color
 from tilingsgui.menu import RightMenu, TopMenu
+from tilingsgui.state import GuiState
 from tilingsgui.tplot import TPlotManager
 
 
@@ -32,19 +33,24 @@ class TilingGui(pyglet.window.Window):
             *args,
             **kargs
         )
-        self.tplot_man = TPlotManager(self.width, self.height)
+
+        self.state = GuiState()
+
+        self.tplot_man = TPlotManager(self.width, self.height, self.state)
         self.top_bar = TopMenu(
             0,
             self.height - TilingGui.TOP_BAR_HEIGHT,
             self.width - TilingGui.RIGHT_BAR_WIDTH,
-            TilingGui.TOP_BAR_HEIGHT
+            TilingGui.TOP_BAR_HEIGHT,
+            self.state
         )
         self.right_bar = RightMenu(
             self.width - TilingGui.RIGHT_BAR_WIDTH,
             0,
             TilingGui.RIGHT_BAR_WIDTH,
             self.height,
-            TilingGui.TOP_BAR_HEIGHT
+            TilingGui.TOP_BAR_HEIGHT,
+            self.state
         )
 
     def start(self) -> None:
@@ -67,8 +73,15 @@ class TilingGui(pyglet.window.Window):
         self.right_bar.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
-        if self.top_bar.on_mouse_press(x, y, button, modifiers):
-            self.tplot_man.add_from_string(self.top_bar.read_from_textbox())
+        self.top_bar.on_mouse_press(x, y, button, modifiers)
+        if self.state.basis_input_read:
+            self.tplot_man.add_from_string(self.state.basis_input_string)
+            self.state.basis_input_read = False
+
+        self.right_bar.on_mouse_press(x, y, button, modifiers)
+        if self.state.cell_input_read:
+            print(self.state.cell_input_string)
+            self.state.cell_input_read = False
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
@@ -80,9 +93,17 @@ class TilingGui(pyglet.window.Window):
         pass
 
     def on_key_press(self, symbol, modifiers):
-        if self.top_bar.has_focus():
-            if self.top_bar.on_key_press(symbol, modifiers):
-                self.tplot_man.add_from_string(self.top_bar.read_from_textbox())
+        if self.state.basis_input_focus:
+            self.top_bar.on_key_press(symbol, modifiers)
+            if self.state.basis_input_read:
+                self.tplot_man.add_from_string(self.state.basis_input_string)
+                self.state.basis_input_read = False
+            return
+        if self.state.cell_input_focus:
+            self.right_bar.on_key_press(symbol, modifiers)
+            if self.state.cell_input_read:
+                print(self.state.cell_input_string)
+                self.state.cell_input_read = False
             return
 
         if symbol == pyglet.window.key.ESCAPE:
@@ -103,6 +124,8 @@ class TilingGui(pyglet.window.Window):
 
     def on_text(self, text):
         self.top_bar.on_text(text)
+        self.right_bar.on_text(text)
 
     def on_text_motion(self, motion):
         self.top_bar.on_text_motion(motion)
+        self.right_bar.on_text_motion(motion)

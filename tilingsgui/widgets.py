@@ -117,7 +117,7 @@ class TextBox:
             ("c3B", Color.DARK_GRAY * 4),
         )
         self.caret.visible = False
-        # self.position(x, y, width, height)
+        self.position(x, y, width, height)
 
     def position(self, x, y, w, h):
         for i, vertex in enumerate((x, y, x + w, y, x + w, y + h, x, y + h)):
