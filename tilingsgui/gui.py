@@ -42,7 +42,8 @@ class TilingGui(pyglet.window.Window):
             self.width - TilingGui.RIGHT_BAR_WIDTH,
             0,
             TilingGui.RIGHT_BAR_WIDTH,
-            self.height
+            self.height,
+            TilingGui.TOP_BAR_HEIGHT
         )
 
     def start(self) -> None:
@@ -65,10 +66,8 @@ class TilingGui(pyglet.window.Window):
         self.right_bar.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
-        self.top_bar.on_mouse_press(x, y, button, modifiers)
-
-        if self.top_bar.string_to_process:
-            self.tplot_man.add_from_string(self.top_bar.string_to_process.pop())
+        if self.top_bar.on_mouse_press(x, y, button, modifiers):
+            self.tplot_man.add_from_string(self.top_bar.read_from_textbox())
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
@@ -81,9 +80,8 @@ class TilingGui(pyglet.window.Window):
 
     def on_key_press(self, symbol, modifiers):
         if self.top_bar.has_focus():
-            self.top_bar.on_key_press(symbol, modifiers)
-            if self.top_bar.string_to_process:
-                self.tplot_man.add_from_string(self.top_bar.string_to_process.pop())
+            if self.top_bar.on_key_press(symbol, modifiers):
+                self.tplot_man.add_from_string(self.top_bar.read_from_textbox())
             return
 
         if symbol == pyglet.window.key.ESCAPE:

@@ -2,17 +2,32 @@ import pyglet
 import pyperclip
 
 from tilingsgui.graphics import Color, GeoDrawer
-from tilingsgui.widgets import TextBox
+from tilingsgui.widgets import (
+    Button,
+    SelectButton,
+    SelectButtonGroup,
+    TextBox,
+    ToggleButton,
+)
 
 
 class TopMenu:
+    PADDING = 1
+    INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
+
     def __init__(self, x, y, w, h):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
-        self.text_box = TextBox("Write basis here...", x + 1, y + 1, w - 2, h - 2)
-        self.string_to_process = []
+        self.text_box = TextBox(
+            TopMenu.INITIAL_MESSAGE,
+            x + TopMenu.PADDING,
+            y + TopMenu.PADDING,
+            w - 2 * TopMenu.PADDING,
+            h - 2 * TopMenu.PADDING,
+        )
+        self.string_to_process = ""
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
@@ -21,10 +36,10 @@ class TopMenu:
     def on_resize(self, width, height):
         self.w = width
         self.y = height
-        self.text_box.resize(width - 2, height + 1)
+        self.text_box.resize(width - TopMenu.PADDING * 2, height + TopMenu.PADDING)
 
     def has_focus(self):
-        return self.text_box.focused
+        return self.text_box.has_focus()
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
@@ -33,49 +48,118 @@ class TopMenu:
             self.text_box.release_focus()
             s = self.text_box.get_current_text()
             if s:
-                self.string_to_process.append(s)
+                self.string_to_process = s
+                return True
+        return False
 
     def on_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
-            if self.text_box.focused:
+            if self.text_box.has_focus():
                 s = self.text_box.get_current_text()
                 if s:
-                    self.string_to_process.append(s)
+                    self.string_to_process = s
+                    return True
                 self.text_box.release_focus()
-
-            return
-        if self.has_focus():
+            return False
+        if self.text_box.has_focus():
             if button == pyglet.window.mouse.RIGHT:
                 paste = pyperclip.paste()
                 if paste:
                     self.text_box.append_text(paste)
         else:
             self.text_box.set_focus()
+        return False
 
     def on_text(self, text):
-        if self.text_box.focused:
+        if self.text_box.has_focus():
             self.text_box.on_text(text)
 
     def on_text_motion(self, motion):
-        if self.text_box.focused:
+        if self.text_box.has_focus():
             self.text_box.on_text_motion(motion)
 
-    def get_input_text(self):
-        if self.text_box.focused:
-            return self.text_box.get_current_text()
+    def read_from_textbox(self):
+        return self.string_to_process
 
 
 class RightMenu:
-    def __init__(self, x, y, w, h):
+    def __init__(self, x, y, w, h, t):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        self.text_box_height = t
+        self.text_box = TextBox(
+            "s.cell req",
+            x + TopMenu.PADDING,
+            h - t + TopMenu.PADDING,
+            w - 2 * TopMenu.PADDING,
+            t - 2 * TopMenu.PADDING,
+        )
+
+        self.sel_grp = SelectButtonGroup()
+        self.sel_grp.add_button(SelectButton("●", x + 1, h - t - 50 + 1, 48, 48))
+        self.sel_grp.add_button(SelectButton("⛬", x + 1 + 50, h - t - 50 + 1, 48, 48))
+        self.sel_grp.add_button(
+            SelectButton("⏪", x + 1, h - t - 50 + 1 - 50 * 1, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("⏩", x + 1 + 50, h - t - 50 + 1 - 50 * 1, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("⏫", x + 1, h - t - 50 + 1 - 50 * 2, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("⏬", x + 1 + 50, h - t - 50 + 1 - 50 * 2, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("⬅", x + 1, h - t - 50 + 1 - 50 * 3, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("➡", x + 1 + 50, h - t - 50 + 1 - 50 * 3, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("⬆", x + 1, h - t - 50 + 1 - 50 * 4, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("⬇", x + 1 + 50, h - t - 50 + 1 - 50 * 4, 48, 48)
+        )
+        self.sel_grp.add_button(
+            SelectButton("F", x + 1, h - t - 50 + 1 - 50 * 5, 48, 48)
+        )
+
+        self.rcs = Button("RCS", x + 1, h - t - 50 + 1 - 50 * 6 - 10, 48, 48)
+        self.ot = Button("OT", x + 1 + 50, h - t - 50 + 1 - 50 * 6 - 10, 48, 48)
+        self.undo = Button("⟲", x + 1, h - t - 50 + 1 - 50 * 7 - 10, 48, 48)
+        self.redo = Button("⟳", x + 1 + 50, h - t - 50 + 1 - 50 * 7 - 10, 48, 48)
+
+        self.shading = ToggleButton("S", x + 1, h - t - 50 + 1 - 50 * 8 - 20, 48, 48)
+        self.pretty_points = ToggleButton(
+            "PP", x + 1 + 50, h - t - 50 + 1 - 50 * 8 - 20, 48, 48
+        )
+        self.show_crossing = ToggleButton(
+            "SC", x + 1, h - t - 50 + 1 - 50 * 9 - 20, 48, 48
+        )
+        self.show_localized = ToggleButton(
+            "SL", x + 1 + 50, h - t - 50 + 1 - 50 * 9 - 20, 48, 48
+        )
+        self.highlight_touching_cell = ToggleButton(
+            "HTC", x + 1, h - t - 50 + 1 - 50 * 10 - 20, 48, 48
+        )
 
     def draw(self):
-        GeoDrawer.draw_filled_rectangle(
-            self.x, self.y, self.w, self.h, Color.GREEN_YELLOW
-        )
+        GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
+        self.text_box.draw()
+        self.sel_grp.draw()
+        self.rcs.draw()
+        self.ot.draw()
+        self.undo.draw()
+        self.redo.draw()
+        self.shading.draw()
+        self.pretty_points.draw()
+        self.show_crossing.draw()
+        self.show_localized.draw()
+        self.highlight_touching_cell.draw()
 
     def on_resize(self, width, height):
         self.x = width

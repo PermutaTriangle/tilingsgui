@@ -4,12 +4,12 @@
 from collections import deque
 from typing import ClassVar, Deque, Tuple
 
-from permuta import Perm
-from permuta.misc import DIR_NORTH
-
-from tilings import Tiling
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
+
+from permuta import Perm
+from permuta.misc import DIR_NORTH
+from tilings import Tiling
 
 # TODO: Remove magic constants...
 

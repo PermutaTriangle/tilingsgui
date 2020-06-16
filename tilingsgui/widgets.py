@@ -1,10 +1,9 @@
 import pyglet
-
 from tilingsgui.graphics import Color, GeoDrawer
 
 
 class Button:
-    FONT_SIZE = 10
+    FONT_SIZE = 15
     LABEL_COLOR = Color.alpha_extend(Color.BLACK)
     BUTTON_COLOR = Color.GRAY
 
@@ -88,6 +87,10 @@ class SelectButtonGroup:
                 break
         return -1
 
+    def draw(self):
+        for btn in self.buttons:
+            btn.draw()
+
 
 class TextBox:
     def __init__(self, init_text, x, y, width, height):
@@ -108,9 +111,9 @@ class TextBox:
             pyglet.gl.GL_QUADS,
             None,
             ("v2f", [x, y, x + width, y, x + width, y + height, x, y + height]),
-            ("c4B", [200, 200, 220, 255] * 4),
+            ("c3B", Color.DARK_GRAY * 4),
         )
-        self.focused = False
+        self.caret.visible = False
 
     def resize(self, width, height):
         right_end = self.vertex_list.vertices[0] + width
@@ -138,13 +141,14 @@ class TextBox:
     def on_text_motion(self, motion):
         self.caret.on_text_motion(motion)
 
+    def has_focus(self):
+        return self.caret.visible
+
     def set_focus(self):
         self.document.text = ""
-        self.focused = True
         self.caret.visible = True
 
     def release_focus(self):
-        self.focused = False
         self.caret.visible = False
         self.caret.mark = self.caret.position = 0
 
