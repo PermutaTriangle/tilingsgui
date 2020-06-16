@@ -3,6 +3,7 @@
 from typing import ClassVar, Tuple
 
 import pyglet
+
 from tilingsgui.graphics import Color
 from tilingsgui.menu import RightMenu, TopMenu
 from tilingsgui.tplot import TPlotManager
@@ -12,11 +13,11 @@ class TilingGui(pyglet.window.Window):
 
     TITLE: ClassVar[str] = 'Tilings GUI'
 
-    MIN_WIDTH: ClassVar[int] = 400
+    MIN_WIDTH: ClassVar[int] = 500
     MIN_HEIGHT: ClassVar[int] = 400
-    INITIAL_WIDTH: ClassVar[int] = 700
+    INITIAL_WIDTH: ClassVar[int] = 800
     INITIAL_HEIGHT: ClassVar[int] = 650
-    RIGHT_BAR_WIDTH: ClassVar[int] = 100
+    RIGHT_BAR_WIDTH: ClassVar[int] = 200
     TOP_BAR_HEIGHT: ClassVar[int] = 24
 
     CLEAR_COLOR: ClassVar[Tuple[float, ...]] = Color.alpha_extend_and_scale_to_01(

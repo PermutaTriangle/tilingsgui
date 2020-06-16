@@ -1,6 +1,5 @@
 import pyglet
 import pyperclip
-
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.widgets import (
     Button,
@@ -20,14 +19,9 @@ class TopMenu:
         self.y = y
         self.w = w
         self.h = h
-        self.text_box = TextBox(
-            TopMenu.INITIAL_MESSAGE,
-            x + TopMenu.PADDING,
-            y + TopMenu.PADDING,
-            w - 2 * TopMenu.PADDING,
-            h - 2 * TopMenu.PADDING,
-        )
+        self.text_box = TextBox(TopMenu.INITIAL_MESSAGE)
         self.string_to_process = ""
+        self.on_resize(w, h)
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
@@ -36,7 +30,12 @@ class TopMenu:
     def on_resize(self, width, height):
         self.w = width
         self.y = height
-        self.text_box.resize(width - TopMenu.PADDING * 2, height + TopMenu.PADDING)
+        self.text_box.position(
+            self.x + TopMenu.PADDING,
+            self.y + TopMenu.PADDING,
+            self.w - 2 * TopMenu.PADDING,
+            self.h - 2 * TopMenu.PADDING,
+        )
 
     def has_focus(self):
         return self.text_box.has_focus()
@@ -63,9 +62,16 @@ class TopMenu:
             return False
         if self.text_box.has_focus():
             if button == pyglet.window.mouse.RIGHT:
-                paste = pyperclip.paste()
-                if paste:
-                    self.text_box.append_text(paste)
+                try:
+                    paste = pyperclip.paste()
+                    if paste:
+                        self.text_box.append_text(paste)
+                except pyperclip.PyperclipException:
+                    # Console log something?
+                    # Most likely on linux:
+                    # sudo apt-get install xclip
+                    # sudo apt-get install xsel
+                    pass
         else:
             self.text_box.set_focus()
         return False
@@ -88,46 +94,27 @@ class RightMenu:
         self.y = y
         self.w = w
         self.h = h
+        self.t = t
         self.text_box_height = t
-        self.text_box = TextBox(
-            "s.cell req",
-            x + TopMenu.PADDING,
-            h - t + TopMenu.PADDING,
-            w - 2 * TopMenu.PADDING,
-            t - 2 * TopMenu.PADDING,
-        )
+
+        self.text_box = TextBox("single cell requirement")
 
         self.sel_grp = SelectButtonGroup()
-        self.sel_grp.add_button(SelectButton("●", x + 1, h - t - 50 + 1, 48, 48))
-        self.sel_grp.add_button(SelectButton("⛬", x + 1 + 50, h - t - 50 + 1, 48, 48))
-        self.sel_grp.add_button(
-            SelectButton("⏪", x + 1, h - t - 50 + 1 - 50 * 1, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("⏩", x + 1 + 50, h - t - 50 + 1 - 50 * 1, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("⏫", x + 1, h - t - 50 + 1 - 50 * 2, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("⏬", x + 1 + 50, h - t - 50 + 1 - 50 * 2, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("⬅", x + 1, h - t - 50 + 1 - 50 * 3, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("➡", x + 1 + 50, h - t - 50 + 1 - 50 * 3, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("⬆", x + 1, h - t - 50 + 1 - 50 * 4, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("⬇", x + 1 + 50, h - t - 50 + 1 - 50 * 4, 48, 48)
-        )
-        self.sel_grp.add_button(
-            SelectButton("F", x + 1, h - t - 50 + 1 - 50 * 5, 48, 48)
-        )
+        self.sel_grp.add_button(SelectButton("●"))
+        self.sel_grp.add_button(SelectButton("⛬"))
+        self.sel_grp.add_button(SelectButton("F"))
+        self.sel_grp.add_button(SelectButton("⏪"))
+        self.sel_grp.add_button(SelectButton("⏩"))
+        self.sel_grp.add_button(SelectButton("⏫"))
+        self.sel_grp.add_button(SelectButton("⏬"))
+        self.sel_grp.add_button(SelectButton("⬅"))
+        self.sel_grp.add_button(SelectButton("➡"))
+        self.sel_grp.add_button(SelectButton("⬆"))
+        self.sel_grp.add_button(SelectButton("⬇"))
 
+        self.on_resize(w, h)
+
+        """
         self.rcs = Button("RCS", x + 1, h - t - 50 + 1 - 50 * 6 - 10, 48, 48)
         self.ot = Button("OT", x + 1 + 50, h - t - 50 + 1 - 50 * 6 - 10, 48, 48)
         self.undo = Button("⟲", x + 1, h - t - 50 + 1 - 50 * 7 - 10, 48, 48)
@@ -145,13 +132,13 @@ class RightMenu:
         )
         self.highlight_touching_cell = ToggleButton(
             "HTC", x + 1, h - t - 50 + 1 - 50 * 10 - 20, 48, 48
-        )
+        )"""
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
         self.text_box.draw()
         self.sel_grp.draw()
-        self.rcs.draw()
+        """self.rcs.draw()
         self.ot.draw()
         self.undo.draw()
         self.redo.draw()
@@ -159,11 +146,51 @@ class RightMenu:
         self.pretty_points.draw()
         self.show_crossing.draw()
         self.show_localized.draw()
-        self.highlight_touching_cell.draw()
+        self.highlight_touching_cell.draw()"""
 
     def on_resize(self, width, height):
         self.x = width
         self.h = height
+        self.text_box.position(
+            self.x + TopMenu.PADDING,
+            self.h - self.t + TopMenu.PADDING,
+            self.w - 2 * TopMenu.PADDING,
+            self.t - 2 * TopMenu.PADDING,
+        )
+        self.position_buttons()
+
+    def position_buttons(self):
+        self.sel_grp.buttons[0].position(self.x + 1, self.h - self.t - 50 + 1, 48, 48)
+        self.sel_grp.buttons[1].position(
+            self.x + 1 + 50, self.h - self.t - 50 + 1, 48, 48
+        )
+        self.sel_grp.buttons[2].position(
+            self.x + 1 + 100, self.h - self.t - 50 + 1, 48, 48
+        )
+        self.sel_grp.buttons[3].position(
+            self.x + 1, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
+        )
+        self.sel_grp.buttons[4].position(
+            self.x + 1 + 50, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
+        )
+        self.sel_grp.buttons[5].position(
+            self.x + 1 + 100, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
+        )
+        self.sel_grp.buttons[6].position(
+            self.x + 1 + 150, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
+        )
+        self.sel_grp.buttons[7].position(
+            self.x + 1, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
+        )
+        self.sel_grp.buttons[8].position(
+            self.x + 1 + 50, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
+        )
+        self.sel_grp.buttons[9].position(
+            self.x + 1 + 100, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
+        )
+        self.sel_grp.buttons[10].position(
+            self.x + 1 + 150, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
+        )
 
     def has_focus(self):
         return False

@@ -1,27 +1,25 @@
 import pyglet
+
 from tilingsgui.graphics import Color, GeoDrawer
 
 
 class Button:
     FONT_SIZE = 15
+    FONT = "Times New Roman"
     LABEL_COLOR = Color.alpha_extend(Color.BLACK)
     BUTTON_COLOR = Color.GRAY
 
-    def __init__(self, text, x, y, w, h):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
+    def __init__(self, text, x=0, y=0, w=0, h=0):
         self.label = pyglet.text.Label(
             text,
             font_size=Button.FONT_SIZE,
-            x=x + w / 2,
-            y=y + h / 2,
-            font_name="Impact",
+            font_name=Button.FONT,
             anchor_x="center",
             anchor_y="center",
             color=Button.LABEL_COLOR,
         )
+        self.x, self.y, self.w, self.h = x, y, w, h
+        self.position(x, y, w, h)
 
     def hit(self, x, y):
         return self.x < x < self.x + self.w and self.y < y < self.y + self.h
@@ -41,12 +39,20 @@ class Button:
         )
         self.label.draw()
 
+    def position(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.label.x = x + w / 2
+        self.label.y = y + h / 2
+
 
 class ToggleButton(Button):
     TOGGLE_COLOR = Color.DARK_GREEN
 
-    def __init__(self, text, x, y, w, h):
-        super().__init__(text, x, y, w, h)
+    def __init__(self, text):
+        super().__init__(text)
         self.toggle = False
 
     def on_click(self):
@@ -93,7 +99,7 @@ class SelectButtonGroup:
 
 
 class TextBox:
-    def __init__(self, init_text, x, y, width, height):
+    def __init__(self, init_text, x=0, y=0, width=0, height=0):
         self.document = pyglet.text.document.UnformattedDocument(init_text)
         self.document.set_style(
             0, len(self.document.text), dict(font_size=12, color=(0, 0, 0, 255))
@@ -102,10 +108,7 @@ class TextBox:
         self.layout = pyglet.text.layout.IncrementalTextLayout(
             self.document, width, height, multiline=False, batch=self.batch
         )
-        self.layout.x = x + 5
-        self.layout.y = y
         self.caret = pyglet.text.caret.Caret(self.layout)
-
         self.vertex_list = self.batch.add(
             4,
             pyglet.gl.GL_QUADS,
@@ -114,17 +117,15 @@ class TextBox:
             ("c3B", Color.DARK_GRAY * 4),
         )
         self.caret.visible = False
+        # self.position(x, y, width, height)
 
-    def resize(self, width, height):
-        right_end = self.vertex_list.vertices[0] + width
-        self.vertex_list.vertices[2] = right_end
-        self.vertex_list.vertices[4] = right_end
-        h = self.vertex_list.vertices[7] - self.vertex_list.vertices[1]
-        self.vertex_list.vertices[1] = height
-        self.vertex_list.vertices[3] = height
-        self.vertex_list.vertices[5] = height + h
-        self.vertex_list.vertices[7] = height + h
-        self.layout.y = height
+    def position(self, x, y, w, h):
+        for i, vertex in enumerate((x, y, x + w, y, x + w, y + h, x, y + h)):
+            self.vertex_list.vertices[i] = vertex
+        self.layout.x = x + 5
+        self.layout.y = y
+        self.layout.width = w
+        self.layout.height = h
 
     def draw(self):
         self.batch.draw()
