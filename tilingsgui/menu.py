@@ -1,9 +1,14 @@
 import pyglet
-import pyperclip
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.state import GuiState
 from tilingsgui.utils import paste
-from tilingsgui.widgets import Button, ButtonGrid, TextBox
+from tilingsgui.widgets import (
+    Button,
+    ButtonGrid,
+    SelectionButton,
+    TextBox,
+    ToggleButton,
+)
 
 
 class TopMenu:
@@ -84,30 +89,91 @@ class RightMenu:
         self.text_box = TextBox("single cell requirement")
 
         self.keyboard = ButtonGrid(x, y, w, h - t, 10, 4)
+
         # Select grp
-        self.keyboard.add_btn(9, 0, Button("●"))
-        self.keyboard.add_btn(9, 1, Button("⛬"))
-        self.keyboard.add_btn(9, 2, Button("F"))
-        self.keyboard.add_btn(8, 0, Button("⏪"))
-        self.keyboard.add_btn(8, 1, Button("⏩"))
-        self.keyboard.add_btn(8, 2, Button("⏫"))
-        self.keyboard.add_btn(8, 3, Button("⏬"))
-        self.keyboard.add_btn(7, 0, Button("⬅"))
-        self.keyboard.add_btn(7, 1, Button("➡"))
-        self.keyboard.add_btn(7, 2, Button("⬆"))
-        self.keyboard.add_btn(7, 3, Button("⬇"))
+        self.keyboard.add_btn(9, 0, SelectionButton("●", toggled=True))
+        self.keyboard.add_btn(9, 1, SelectionButton("⛬"))
+        self.keyboard.add_btn(9, 2, SelectionButton("F"))
+        self.keyboard.add_btn(8, 0, SelectionButton("⏪"))
+        self.keyboard.add_btn(8, 1, SelectionButton("⏩"))
+        self.keyboard.add_btn(8, 2, SelectionButton("⏫"))
+        self.keyboard.add_btn(8, 3, SelectionButton("⏬"))
+        self.keyboard.add_btn(7, 0, SelectionButton("⬅"))
+        self.keyboard.add_btn(7, 1, SelectionButton("➡"))
+        self.keyboard.add_btn(7, 2, SelectionButton("⬆"))
+        self.keyboard.add_btn(7, 3, SelectionButton("⬇"))
+        self.keyboard.add_selection_group(
+            [
+                (9, 0),
+                (9, 1),
+                (9, 2),
+                (8, 0),
+                (8, 1),
+                (8, 2),
+                (8, 3),
+                (7, 0),
+                (7, 1),
+                (7, 2),
+                (7, 3),
+            ],
+            on_click=self.state.set_strategy,
+        )
+
         # normal btns
-        self.keyboard.add_btn(5, 0, Button("⟲"))
-        self.keyboard.add_btn(5, 1, Button("⟳"))
-        self.keyboard.add_btn(4, 0, Button("RCS"))
-        self.keyboard.add_btn(4, 1, Button("OT"))
-        self.keyboard.add_btn(4, 2, Button("E"))
+        self.keyboard.add_btn(5, 0, Button("⟲", on_click=self.state.set_undo))
+        self.keyboard.add_btn(5, 1, Button("⟳", on_click=self.state.set_redo))
+        self.keyboard.add_btn(
+            4, 0, Button("RCS", on_click=self.state.set_row_col_seperation)
+        )
+        self.keyboard.add_btn(
+            4, 1, Button("OT", on_click=self.state.set_obstruction_transivity)
+        )
+        self.keyboard.add_btn(4, 2, Button("E", on_click=self.state.set_export))
+
         # toggle btns
-        self.keyboard.add_btn(2, 0, Button("S"))
-        self.keyboard.add_btn(2, 1, Button("PP"))
-        self.keyboard.add_btn(2, 2, Button("SC"))
-        self.keyboard.add_btn(2, 3, Button("SL"))
-        self.keyboard.add_btn(1, 0, Button("HTC"))
+        self.keyboard.add_btn(
+            2,
+            0,
+            ToggleButton(
+                "S", on_click=self.state.toggle_shading, toggled=self.state.shading
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            1,
+            ToggleButton(
+                "PP",
+                on_click=self.state.toggle_pretty_points,
+                toggled=self.state.pretty_points,
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            2,
+            ToggleButton(
+                "SC",
+                on_click=self.state.toggle_show_crossing,
+                toggled=self.state.show_crossing,
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            3,
+            ToggleButton(
+                "SL",
+                on_click=self.state.toggle_show_localized,
+                toggled=self.state.show_localized,
+            ),
+        )
+        self.keyboard.add_btn(
+            1,
+            0,
+            ToggleButton(
+                "HTC",
+                on_click=self.state.toggle_highlight_touching_cell,
+                toggled=self.state.highlight_touching_cell,
+            ),
+        )
 
         self.on_resize(w, h)
 
@@ -126,9 +192,6 @@ class RightMenu:
             self.t - 2 * TopMenu.PADDING,
         )
         self.keyboard.resize(self.x, self.y, self.w, self.h - self.t)
-
-    def position_buttons(self):
-        pass
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
@@ -159,6 +222,9 @@ class RightMenu:
             else:
                 self.state.cell_input_focus = True
                 self.text_box.set_focus()
+            return
+
+        self.keyboard.click_check(x, y)
 
     def on_text(self, text):
         if self.state.cell_input_focus:
