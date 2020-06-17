@@ -10,7 +10,7 @@ from tilingsgui.state import GuiState
 
 from permuta import Perm
 from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
-from tilings import GriddedPerm, Tiling
+from tilings import Tiling
 from tilings.algorithms import Factor
 
 
@@ -253,88 +253,78 @@ class TPlotManager:
         # Wrap in a class?
 
         strats = [
-            cell_insertion,
-            cell_insertion_custom,
-            factor,
-            place_point_west,
-            place_point_east,
-            place_point_north,
-            place_point_south,
-            partial_place_point_west,
-            partial_place_point_east,
-            partial_place_point_north,
-            partial_place_point_south,
+            self.cell_insertion,
+            self.cell_insertion_custom,
+            self.factor,
+            self.place_point_west,
+            self.place_point_east,
+            self.place_point_north,
+            self.place_point_south,
+            self.partial_place_point_west,
+            self.partial_place_point_east,
+            self.partial_place_point_north,
+            self.partial_place_point_south,
         ]
-        n_plot = strats[self.state.strategy_selected](
-            self.undo_deq[0], x, y, button, modifiers
-        )
+        n_plot = strats[self.state.strategy_selected](x, y, button, modifiers)
         if n_plot is not None:
             self.add(TPlot(n_plot, self.w, self.h))
 
+    def cell_insertion(self, x, y, button, modifiers):
+        t = self.undo_deq[0]
+        cx, cy = t.get_cell(Point(x, y))
+        return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
 
-def cell_insertion(t, x, y, button, modifiers):
-    cx, cy = t.get_cell(Point(x, y))
-    return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
+    def cell_insertion_custom(self, x, y, button, modifiers):
+        t = self.undo_deq[0]
+        cx, cy = t.get_cell(Point(x, y))
+        return t.tiling.add_single_cell_requirement(self.custom_placement, (cx, cy))
 
+    def place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
+        t = self.undo_deq[0]
+        ind = t.get_point_req_index(Point(x, y))
+        if ind is not None:
+            return t.tiling.place_point_of_gridded_permutation(
+                t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
+            )
 
-def cell_insertion_custom(t, x, y, button, modifiers):
-    cx, cy = t.get_cell(Point(x, y))
-    return t.tiling.add_single_cell_requirement(Perm((0, 1)), (cx, cy))
+    def partial_place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
+        t = self.undo_deq[0]
+        ind = t.get_point_req_index(Point(x, y))
+        if ind is not None:
+            return t.tiling.partial_place_point_of_gridded_permutation(
+                t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
+            )
 
+    def factor(self, x, y, button, modifiers):
+        t = self.undo_deq[0]
+        fac_algo = Factor(t.tiling)
+        components = fac_algo.get_components()
+        facs = fac_algo.factors()
+        cell = t.get_cell(Point(x, y))
+        for fac, component in zip(facs, components):
+            if cell in component:
+                return fac
 
-def place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
-    ind = t.get_point_req_index(Point(x, y))
-    if ind is not None:
-        return t.tiling.place_point_of_gridded_permutation(
-            t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
-        )
+    def place_point_south(self, x, y, button, modifiers):
+        return self.place_point(x, y, button, modifiers, DIR_SOUTH)
 
+    def place_point_north(self, x, y, button, modifiers):
+        return self.place_point(x, y, button, modifiers, DIR_NORTH)
 
-def partial_place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
-    ind = t.get_point_req_index(Point(x, y))
-    if ind is not None:
-        return t.tiling.partial_place_point_of_gridded_permutation(
-            t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
-        )
+    def place_point_west(self, x, y, button, modifiers):
+        return self.place_point(x, y, button, modifiers, DIR_WEST)
 
+    def place_point_east(self, x, y, button, modifiers):
+        return self.place_point(x, y, button, modifiers, DIR_EAST)
 
-def factor(t, x, y, button, modifiers):
-    fac_algo = Factor(t.tiling)
-    components = fac_algo.get_components()
-    facs = fac_algo.factors()
-    cell = t.get_cell(Point(x, y))
-    for fac, component in zip(facs, components):
-        if cell in component:
-            return fac
+    def partial_place_point_south(self, x, y, button, modifiers):
+        return self.partial_place_point(x, y, button, modifiers, DIR_SOUTH)
 
+    def partial_place_point_north(self, x, y, button, modifiers):
+        return self.partial_place_point(x, y, button, modifiers, DIR_NORTH)
 
-def place_point_south(t, x, y, button, modifiers):
-    return place_point(t, x, y, button, modifiers, DIR_SOUTH)
+    def partial_place_point_west(self, x, y, button, modifiers):
+        return self.partial_place_point(x, y, button, modifiers, DIR_WEST)
 
-
-def place_point_north(t, x, y, button, modifiers):
-    return place_point(t, x, y, button, modifiers, DIR_NORTH)
-
-
-def place_point_west(t, x, y, button, modifiers):
-    return place_point(t, x, y, button, modifiers, DIR_WEST)
-
-
-def place_point_east(t, x, y, button, modifiers):
-    return place_point(t, x, y, button, modifiers, DIR_EAST)
-
-
-def partial_place_point_south(t, x, y, button, modifiers):
-    return partial_place_point(t, x, y, button, modifiers, DIR_SOUTH)
-
-
-def partial_place_point_north(t, x, y, button, modifiers):
-    return partial_place_point(t, x, y, button, modifiers, DIR_NORTH)
-
-
-def partial_place_point_west(t, x, y, button, modifiers):
-    return partial_place_point(t, x, y, button, modifiers, DIR_WEST)
-
-
-def partial_place_point_east(t, x, y, button, modifiers):
-    return partial_place_point(t, x, y, button, modifiers, DIR_EAST)
+    def partial_place_point_east(self, x, y, button, modifiers):
+        return self.partial_place_point(x, y, button, modifiers, DIR_EAST)
