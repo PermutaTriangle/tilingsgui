@@ -9,7 +9,9 @@ from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.state import GuiState
 
 from permuta import Perm
-from tilings import Tiling
+from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
+from tilings import GriddedPerm, Tiling
+from tilings.algorithms import Factor
 
 
 class TPlot:
@@ -101,19 +103,19 @@ class TPlot:
             x, y, w, h = self._cell_to_rect(c_x, c_y)
             GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)
 
-    def _get_cell(self, mpos: Point):
+    def get_cell(self, mpos: Point):
         t_w, t_h = self.tiling.dimensions
         c_w, c_h = self.w / t_w, self.h / t_h
         c_x, c_y = int(mpos.x / c_w), int(mpos.y / c_h)
         return c_x, c_y
 
-    def _get_point_obs_index(self, mpos: Point):
+    def get_point_obs_index(self, mpos: Point):
         for j, loc in enumerate(self.obstruction_locs):
             for k, pnt in enumerate(loc):
                 if mpos.dist_squared_to(pnt) <= 100:
                     return j, k
 
-    def _get_point_req_index(self, mpos: Point):
+    def get_point_req_index(self, mpos: Point):
         for i, reqlist in enumerate(self.requirement_locs):
             for j, loc in enumerate(reqlist):
                 for k, pnt in enumerate(loc):
@@ -121,7 +123,7 @@ class TPlot:
                         return i, j, k
 
     def _draw_obstructions(self, state: GuiState, mpos: Point):
-        hover_cell = self._get_cell(mpos)
+        hover_cell = self.get_cell(mpos)
         for obs, loc in zip(self.tiling.obstructions, self.obstruction_locs):
             if (state.shading and obs.is_point_perm()) or (
                 state.pretty_points
@@ -142,7 +144,7 @@ class TPlot:
                 GeoDrawer.draw_point_path(loc, col, 5)
 
     def _draw_requirements(self, state: GuiState, mpos: Point):
-        hover_index = self._get_point_req_index(mpos)
+        hover_index = self.get_point_req_index(mpos)
         for i, reqlist in enumerate(self.requirement_locs):
             if state.pretty_points and any(
                 p in self.tiling.point_cells
@@ -184,15 +186,6 @@ class TPlotManager:
         self.custom_placement: Perm = Perm((0, 1))
         self.state = state
 
-        # TODO: REMOVE
-        """test_tiling = Tiling.from_string("1234_1324").add_single_cell_requirement(
-            Perm((0,)), (0, 0)
-        )
-        test_tiling = test_tiling.place_point_of_gridded_permutation(
-            test_tiling.requirements[0][0], 0, DIR_NORTH
-        )
-        self.undo_deq.append(TPlot(test_tiling, width, height))"""
-
     def set_dimensions(self, width: int, height: int):
         self.w = width
         self.h = height
@@ -204,7 +197,6 @@ class TPlotManager:
 
     def set_custom_placement(self, string):
         self.custom_placement = Perm.to_standard(string)
-        print(self.custom_placement)
 
     def add(self, drawing: TPlot):
         self.undo_deq.appendleft(drawing)
@@ -232,3 +224,117 @@ class TPlotManager:
 
     def on_resize(self, width, height):
         self.set_dimensions(width, height)
+
+    def row_col_seperation(self):
+        if self.undo_deq:
+            n_plot = TPlot(
+                self.undo_deq[0].tiling.row_and_column_separation(), self.w, self.h
+            )
+            if n_plot is not None:
+                self.add(n_plot)
+
+    def obstruction_transitivity(self):
+        if self.undo_deq:
+            n_plot = TPlot(
+                self.undo_deq[0].tiling.obstruction_transitivity(), self.w, self.h
+            )
+            if n_plot is not None:
+                self.add(n_plot)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        if x > self.w or y > self.h:
+            return
+
+        print("hi", "strat is", self.state.strategy_selected)
+
+        if not self.undo_deq:
+            return
+        # Find a better way for this...
+        # Wrap in a class?
+
+        strats = [
+            cell_insertion,
+            cell_insertion_custom,
+            factor,
+            place_point_west,
+            place_point_east,
+            place_point_north,
+            place_point_south,
+            partial_place_point_west,
+            partial_place_point_east,
+            partial_place_point_north,
+            partial_place_point_south,
+        ]
+        n_plot = strats[self.state.strategy_selected](
+            self.undo_deq[0], x, y, button, modifiers
+        )
+        if n_plot is not None:
+            self.add(TPlot(n_plot, self.w, self.h))
+
+
+def cell_insertion(t, x, y, button, modifiers):
+    cx, cy = t.get_cell(Point(x, y))
+    return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
+
+
+def cell_insertion_custom(t, x, y, button, modifiers):
+    cx, cy = t.get_cell(Point(x, y))
+    return t.tiling.add_single_cell_requirement(Perm((0, 1)), (cx, cy))
+
+
+def place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
+    ind = t.get_point_req_index(Point(x, y))
+    if ind is not None:
+        return t.tiling.place_point_of_gridded_permutation(
+            t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
+        )
+
+
+def partial_place_point(t, x, y, button, modifiers, force_dir=DIR_NONE):
+    ind = t.get_point_req_index(Point(x, y))
+    if ind is not None:
+        return t.tiling.partial_place_point_of_gridded_permutation(
+            t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
+        )
+
+
+def factor(t, x, y, button, modifiers):
+    fac_algo = Factor(t.tiling)
+    components = fac_algo.get_components()
+    facs = fac_algo.factors()
+    cell = t.get_cell(Point(x, y))
+    for fac, component in zip(facs, components):
+        if cell in component:
+            return fac
+
+
+def place_point_south(t, x, y, button, modifiers):
+    return place_point(t, x, y, button, modifiers, DIR_SOUTH)
+
+
+def place_point_north(t, x, y, button, modifiers):
+    return place_point(t, x, y, button, modifiers, DIR_NORTH)
+
+
+def place_point_west(t, x, y, button, modifiers):
+    return place_point(t, x, y, button, modifiers, DIR_WEST)
+
+
+def place_point_east(t, x, y, button, modifiers):
+    return place_point(t, x, y, button, modifiers, DIR_EAST)
+
+
+def partial_place_point_south(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_SOUTH)
+
+
+def partial_place_point_north(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_NORTH)
+
+
+def partial_place_point_west(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_WEST)
+
+
+def partial_place_point_east(t, x, y, button, modifiers):
+    return partial_place_point(t, x, y, button, modifiers, DIR_EAST)

@@ -1,9 +1,6 @@
-
-
 from typing import ClassVar, Tuple
 
 import pyglet
-
 from tilingsgui.graphics import Color
 from tilingsgui.menu import RightMenu, TopMenu
 from tilingsgui.state import GuiState
@@ -12,7 +9,7 @@ from tilingsgui.tplot import TPlotManager
 
 class TilingGui(pyglet.window.Window):
 
-    TITLE: ClassVar[str] = 'Tilings GUI'
+    TITLE: ClassVar[str] = "Tilings GUI"
 
     MIN_WIDTH: ClassVar[int] = 500
     MIN_HEIGHT: ClassVar[int] = 400
@@ -42,7 +39,7 @@ class TilingGui(pyglet.window.Window):
             self.height - TilingGui.TOP_BAR_HEIGHT,
             self.width - TilingGui.RIGHT_BAR_WIDTH,
             TilingGui.TOP_BAR_HEIGHT,
-            self.state
+            self.state,
         )
         self.right_bar = RightMenu(
             self.width - TilingGui.RIGHT_BAR_WIDTH,
@@ -50,7 +47,7 @@ class TilingGui(pyglet.window.Window):
             TilingGui.RIGHT_BAR_WIDTH,
             self.height,
             TilingGui.TOP_BAR_HEIGHT,
-            self.state
+            self.state,
         )
 
     def start(self) -> None:
@@ -83,11 +80,27 @@ class TilingGui(pyglet.window.Window):
             self.tplot_man.set_custom_placement(self.state.cell_input_string)
             self.state.cell_input_read = False
 
-        # TODO: IF UNDO REDO... DO Tthat...
-        # TODO: IF Export, do that...
-        # TODO: IF RCS or OT, do that...
+        if self.state.export:
+            print("Exporting... [to file maybe?, otherwise stdout]")
+            self.state.export = False
 
-        # TODO: tplot handle mouse click
+        if self.state.undo:
+            self.tplot_man.undo()
+            self.state.undo = False
+
+        if self.state.redo:
+            self.tplot_man.redo()
+            self.state.redo = False
+
+        if self.state.row_col_seperation:
+            self.tplot_man.row_col_seperation()
+            self.state.row_col_seperation = False
+
+        if self.state.obstruction_transivity:
+            self.tplot_man.obstruction_transitivity()
+            self.state.obstruction_transivity = False
+
+        self.tplot_man.on_mouse_press(x, y, button, modifiers)
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
@@ -121,12 +134,10 @@ class TilingGui(pyglet.window.Window):
         super().on_resize(width, height)
 
         self.tplot_man.on_resize(
-            width - TilingGui.RIGHT_BAR_WIDTH,
-            height - TilingGui.TOP_BAR_HEIGHT
+            width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
         )
         self.top_bar.on_resize(
-            width - TilingGui.RIGHT_BAR_WIDTH,
-            height - TilingGui.TOP_BAR_HEIGHT
+            width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
         )
         self.right_bar.on_resize(width - TilingGui.RIGHT_BAR_WIDTH, height)
 
