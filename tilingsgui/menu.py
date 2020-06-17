@@ -2,6 +2,7 @@ import pyglet
 import pyperclip
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.state import GuiState
+from tilingsgui.utils import paste
 from tilingsgui.widgets import (
     Button,
     SelectButton,
@@ -62,12 +63,7 @@ class TopMenu:
             return
         if self.state.basis_input_focus:
             if button == pyglet.window.mouse.RIGHT:
-                try:
-                    paste = pyperclip.paste()
-                    if paste:
-                        self.text_box.append_text(paste)
-                except pyperclip.PyperclipException:
-                    pass
+                self.text_box.append_text(paste())
         else:
             self.state.basis_input_focus = True
             self.text_box.set_focus()
@@ -88,6 +84,7 @@ class RightMenu:
         self.w = w
         self.h = h
         self.t = t
+
         self.state = state
 
         self.text_box = TextBox("single cell requirement")
@@ -181,12 +178,7 @@ class RightMenu:
         else:
             if self.state.cell_input_focus:
                 if button == pyglet.window.mouse.RIGHT:
-                    try:
-                        paste = pyperclip.paste()
-                        if paste:
-                            self.text_box.append_text(paste)
-                    except pyperclip.PyperclipException:
-                        pass
+                    self.text_box.append_text(paste())
             else:
                 self.state.cell_input_focus = True
                 self.text_box.set_focus()

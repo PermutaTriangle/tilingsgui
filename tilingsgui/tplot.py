@@ -4,10 +4,12 @@
 from collections import deque
 from typing import ClassVar, Deque, Tuple
 
-from tilings import Tiling
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.state import GuiState
+
+from permuta import Perm
+from tilings import Tiling
 
 
 class TPlot:
@@ -179,7 +181,7 @@ class TPlotManager:
         self.redo_deq: Deque[TPlot] = deque()
         self.set_dimensions(width, height)
         self.mouse_pos = Point(0, 0)
-
+        self.custom_placement: Perm = Perm((0, 1))
         self.state = state
 
         # TODO: REMOVE
@@ -199,6 +201,10 @@ class TPlotManager:
 
     def add_from_string(self, string):
         self.add(TPlot(Tiling.from_string(string), self.w, self.h))
+
+    def set_custom_placement(self, string):
+        self.custom_placement = Perm.to_standard(string)
+        print(self.custom_placement)
 
     def add(self, drawing: TPlot):
         self.undo_deq.appendleft(drawing)

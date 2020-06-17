@@ -80,16 +80,24 @@ class TilingGui(pyglet.window.Window):
 
         self.right_bar.on_mouse_press(x, y, button, modifiers)
         if self.state.cell_input_read:
-            print(self.state.cell_input_string)
+            self.tplot_man.set_custom_placement(self.state.cell_input_string)
             self.state.cell_input_read = False
+
+        # TODO: IF UNDO REDO... DO Tthat...
+        # TODO: IF Export, do that...
+        # TODO: IF RCS or OT, do that...
+
+        # TODO: tplot handle mouse click
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_release(self, x, y, button, modifiers):
+        # TODO: tplot handle mouse release
         pass
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
+        # TODO: tplot handle mouse drag
         pass
 
     def on_key_press(self, symbol, modifiers):
@@ -102,7 +110,7 @@ class TilingGui(pyglet.window.Window):
         if self.state.cell_input_focus:
             self.right_bar.on_key_press(symbol, modifiers)
             if self.state.cell_input_read:
-                print(self.state.cell_input_string)
+                self.tplot_man.set_custom_placement(self.state.cell_input_string)
                 self.state.cell_input_read = False
             return
 

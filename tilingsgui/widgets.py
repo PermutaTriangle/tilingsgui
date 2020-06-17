@@ -3,6 +3,7 @@ import pyglet
 from tilingsgui.graphics import Color, GeoDrawer
 
 
+# TODO: Make sprite and font subclasses...
 class Button:
     FONT_SIZE = 15
     FONT = "Times New Roman"
@@ -46,6 +47,14 @@ class Button:
         self.h = h
         self.label.x = x + w / 2
         self.label.y = y + h / 2
+
+
+class ButtonGrid:
+    def __init__(self, x, y, w, h, r, c):
+        self.buttons = [[None for _ in range(c)] for _ in range(r)]
+
+    def add_btn(self, r, c, btn):
+        self.buttons[r][c] = btn
 
 
 class ToggleButton(Button):
