@@ -1,110 +1,7 @@
+from typing import List
+
 import pyglet
-
 from tilingsgui.graphics import Color, GeoDrawer
-
-
-# TODO: Make sprite and font subclasses...
-class Button:
-    FONT_SIZE = 15
-    FONT = "Times New Roman"
-    LABEL_COLOR = Color.alpha_extend(Color.BLACK)
-    BUTTON_COLOR = Color.GRAY
-
-    def __init__(self, text, x=0, y=0, w=0, h=0):
-        self.label = pyglet.text.Label(
-            text,
-            font_size=Button.FONT_SIZE,
-            font_name=Button.FONT,
-            anchor_x="center",
-            anchor_y="center",
-            color=Button.LABEL_COLOR,
-        )
-        self.x, self.y, self.w, self.h = x, y, w, h
-        self.position(x, y, w, h)
-
-    def hit(self, x, y):
-        return self.x < x < self.x + self.w and self.y < y < self.y + self.h
-
-    def clicked(self, x, y):
-        if self.hit(x, y):
-            self.on_click()
-            return True
-        return False
-
-    def on_click(self):
-        pass
-
-    def draw(self):
-        GeoDrawer.draw_filled_rectangle(
-            self.x, self.y, self.w, self.h, Button.BUTTON_COLOR
-        )
-        self.label.draw()
-
-    def position(self, x, y, w, h):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.label.x = x + w / 2
-        self.label.y = y + h / 2
-
-
-class ButtonGrid:
-    def __init__(self, x, y, w, h, r, c):
-        self.buttons = [[None for _ in range(c)] for _ in range(r)]
-
-    def add_btn(self, r, c, btn):
-        self.buttons[r][c] = btn
-
-
-class ToggleButton(Button):
-    TOGGLE_COLOR = Color.DARK_GREEN
-
-    def __init__(self, text):
-        super().__init__(text)
-        self.toggle = False
-
-    def on_click(self):
-        self.toggle = not self.toggle
-
-    def draw(self):
-        GeoDrawer.draw_filled_rectangle(
-            self.x,
-            self.y,
-            self.w,
-            self.h,
-            ToggleButton.TOGGLE_COLOR if self.toggle else Button.BUTTON_COLOR,
-        )
-        self.label.draw()
-
-
-SelectButton = ToggleButton
-
-
-class SelectButtonGroup:
-    def __init__(self):
-        self.buttons = []
-        self.selected = -1
-
-    def add_button(self, button):
-        self.buttons.append(button)
-
-    def clicked(self, x, y):
-        old_selected = self.selected
-        for i, button in enumerate(self.buttons):
-            if button.clicked(x, y):
-                self.selected = i
-                if self.selected != old_selected:
-                    if old_selected != -1:
-                        self.buttons[old_selected].toggle = False
-                    return i
-                self.buttons[old_selected].toggle = True
-                break
-        return -1
-
-    def draw(self):
-        for btn in self.buttons:
-            btn.draw()
 
 
 class TextBox:
@@ -168,3 +65,88 @@ class TextBox:
     def append_text(self, text):
         self.document.text = self.document.text + text
         self.caret.mark = self.caret.position = len(self.document.text)
+
+
+# TODO: Make sprite and font subclasses...
+class Button:
+    FONT_SIZE = 15
+    FONT = "Times New Roman"
+    LABEL_COLOR = Color.alpha_extend(Color.BLACK)
+    BUTTON_COLOR = Color.GRAY
+
+    def __init__(self, text, x=0, y=0, w=0, h=0):
+        self.label = pyglet.text.Label(
+            text,
+            font_size=Button.FONT_SIZE,
+            font_name=Button.FONT,
+            anchor_x="center",
+            anchor_y="center",
+            color=Button.LABEL_COLOR,
+        )
+        self.x, self.y, self.w, self.h = x, y, w, h
+        self.position(x, y, w, h)
+
+    def hit(self, x, y):
+        return self.x < x < self.x + self.w and self.y < y < self.y + self.h
+
+    def on_click(self):
+        pass
+
+    def draw(self):
+        GeoDrawer.draw_filled_rectangle(
+            self.x, self.y, self.w, self.h, Button.BUTTON_COLOR
+        )
+        self.label.draw()
+
+    def position(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.label.x = x + w / 2
+        self.label.y = y + h / 2
+
+
+class ButtonGrid:
+    PADDING = 1
+
+    def __init__(self, x, y, w, h, r, c):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.buttons: List[List[Button]] = [[None for _ in range(c)] for _ in range(r)]
+        self.button_w = w / c
+        self.button_h = h / r
+
+    def resize(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.button_w = w / len(self.buttons[0])
+        self.button_h = h / len(self.buttons)
+        self.position_btns()
+
+    def add_btn(self, r, c, btn):
+        self.buttons[r][c] = btn
+
+    def draw(self):
+        for row in self.buttons:
+            for button in row:
+                if button is not None:
+                    button.draw()
+
+    def position_btns(self):
+        for _r, row in enumerate(self.buttons):
+            for _c, btn in enumerate(row):
+                if btn is not None:
+                    self.place_btn_within_grid(btn, _r, _c)
+
+    def place_btn_within_grid(self, btn, r, c):
+        btn.position(
+            self.x + self.button_w * c + ButtonGrid.PADDING,
+            self.y + self.button_h * r + ButtonGrid.PADDING,
+            self.button_w - 2 * ButtonGrid.PADDING,
+            self.button_h - 2 * ButtonGrid.PADDING,
+        )

@@ -3,13 +3,7 @@ import pyperclip
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.state import GuiState
 from tilingsgui.utils import paste
-from tilingsgui.widgets import (
-    Button,
-    SelectButton,
-    SelectButtonGroup,
-    TextBox,
-    ToggleButton,
-)
+from tilingsgui.widgets import Button, ButtonGrid, TextBox
 
 
 class TopMenu:
@@ -89,25 +83,38 @@ class RightMenu:
 
         self.text_box = TextBox("single cell requirement")
 
-        self.sel_grp = SelectButtonGroup()
-        self.sel_grp.add_button(SelectButton("●"))
-        self.sel_grp.add_button(SelectButton("⛬"))
-        self.sel_grp.add_button(SelectButton("F"))
-        self.sel_grp.add_button(SelectButton("⏪"))
-        self.sel_grp.add_button(SelectButton("⏩"))
-        self.sel_grp.add_button(SelectButton("⏫"))
-        self.sel_grp.add_button(SelectButton("⏬"))
-        self.sel_grp.add_button(SelectButton("⬅"))
-        self.sel_grp.add_button(SelectButton("➡"))
-        self.sel_grp.add_button(SelectButton("⬆"))
-        self.sel_grp.add_button(SelectButton("⬇"))
+        self.keyboard = ButtonGrid(x, y, w, h - t, 10, 4)
+        # Select grp
+        self.keyboard.add_btn(9, 0, Button("●"))
+        self.keyboard.add_btn(9, 1, Button("⛬"))
+        self.keyboard.add_btn(9, 2, Button("F"))
+        self.keyboard.add_btn(8, 0, Button("⏪"))
+        self.keyboard.add_btn(8, 1, Button("⏩"))
+        self.keyboard.add_btn(8, 2, Button("⏫"))
+        self.keyboard.add_btn(8, 3, Button("⏬"))
+        self.keyboard.add_btn(7, 0, Button("⬅"))
+        self.keyboard.add_btn(7, 1, Button("➡"))
+        self.keyboard.add_btn(7, 2, Button("⬆"))
+        self.keyboard.add_btn(7, 3, Button("⬇"))
+        # normal btns
+        self.keyboard.add_btn(5, 0, Button("⟲"))
+        self.keyboard.add_btn(5, 1, Button("⟳"))
+        self.keyboard.add_btn(4, 0, Button("RCS"))
+        self.keyboard.add_btn(4, 1, Button("OT"))
+        self.keyboard.add_btn(4, 2, Button("E"))
+        # toggle btns
+        self.keyboard.add_btn(2, 0, Button("S"))
+        self.keyboard.add_btn(2, 1, Button("PP"))
+        self.keyboard.add_btn(2, 2, Button("SC"))
+        self.keyboard.add_btn(2, 3, Button("SL"))
+        self.keyboard.add_btn(1, 0, Button("HTC"))
 
         self.on_resize(w, h)
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
         self.text_box.draw()
-        self.sel_grp.draw()
+        self.keyboard.draw()
 
     def on_resize(self, width, height):
         self.x = width
@@ -118,40 +125,10 @@ class RightMenu:
             self.w - 2 * TopMenu.PADDING,
             self.t - 2 * TopMenu.PADDING,
         )
-        self.position_buttons()
+        self.keyboard.resize(self.x, self.y, self.w, self.h - self.t)
 
     def position_buttons(self):
-        self.sel_grp.buttons[0].position(self.x + 1, self.h - self.t - 50 + 1, 48, 48)
-        self.sel_grp.buttons[1].position(
-            self.x + 1 + 50, self.h - self.t - 50 + 1, 48, 48
-        )
-        self.sel_grp.buttons[2].position(
-            self.x + 1 + 100, self.h - self.t - 50 + 1, 48, 48
-        )
-        self.sel_grp.buttons[3].position(
-            self.x + 1, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
-        )
-        self.sel_grp.buttons[4].position(
-            self.x + 1 + 50, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
-        )
-        self.sel_grp.buttons[5].position(
-            self.x + 1 + 100, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
-        )
-        self.sel_grp.buttons[6].position(
-            self.x + 1 + 150, self.h - self.t - 50 + 1 - 50 * 1, 48, 48
-        )
-        self.sel_grp.buttons[7].position(
-            self.x + 1, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
-        )
-        self.sel_grp.buttons[8].position(
-            self.x + 1 + 50, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
-        )
-        self.sel_grp.buttons[9].position(
-            self.x + 1 + 100, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
-        )
-        self.sel_grp.buttons[10].position(
-            self.x + 1 + 150, self.h - self.t - 50 + 1 - 50 * 2, 48, 48
-        )
+        pass
 
     def on_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
