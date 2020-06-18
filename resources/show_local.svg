@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24">
+ <g>
+  <title>Layer 1</title>
+  <line fill="none" stroke="#000" x1="54.580142" y1="10.669788" x2="54.446452" y2="10.536099"/>
+  <line fill="none" stroke="#000" x1="-20.954493" y1="-20.880962" x2="-20.820804" y2="-21.014652"/>
+  <line fill="none" stroke="#000" x1="-50.900968" y1="0.643067" x2="-50.767279" y2="0.509377"/>
+  <line fill="none" stroke="#000" x1="-47.023969" y1="-11.255309" x2="-59.457104" y2="10.669788"/>
+  <line fill="none" stroke="#000" x1="23.541447" y1="0" x2="23.541447" y2="24"/>
+  <line fill="none" stroke="#000" y2="24" x1="0.488229" x2="0.488229" y1="-0.204708"/>
+  <line fill="none" stroke="#000" x1="23.821899" y1="0.466397" x2="0.280452" y2="0.466397"/>
+  <line fill="none" stroke="#000" x1="23.821899" y1="23.511771" x2="0.280452" y2="23.511771"/>
+  <ellipse fill="#000000" cx="3.857531" cy="15.728268" rx="0.75" ry="0.75" stroke="#000"/>
+  <line stroke="#000" y2="19.837121" x2="8.022962" y1="15.921709" x1="4.086505" stroke-width="0.6" fill="none"/>
+  <line fill="none" stroke="#000" x1="23.821899" y1="11.5775" x2="0.280452" y2="11.5775"/>
+  <line fill="none" stroke="#000" x1="12.261994" y1="0" x2="12.261994" y2="24"/>
+  <ellipse fill="#000000" cx="8.060244" cy="19.93098" rx="0.75" ry="0.75" stroke="#000"/>
+  <ellipse fill="#000000" cx="15.105968" cy="6.333969" rx="0.75" ry="0.75" stroke="#000"/>
+  <line stroke="#000" y2="3.397098" x2="20.260271" y1="8.875985" x1="18.054344" stroke-width="0.6" fill="none"/>
+  <ellipse fill="#000000" cx="17.948979" cy="9.053371" rx="0.75" ry="0.75" stroke="#000"/>
+  <ellipse fill="#000000" cx="20.421163" cy="3.367348" rx="0.75" ry="0.75" stroke="#000"/>
+  <line stroke="#000" y2="6.610937" x2="15.192294" y1="8.875985" x1="18.054344" stroke-width="0.6" fill="none"/>
+ </g>
+</svg>
