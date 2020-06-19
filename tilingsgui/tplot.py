@@ -337,6 +337,8 @@ class TPlotManager:
                     oy += dy
                     t.obstruction_locs[i][k] = Point(ox, oy)
         else:
+            # TODO: does not support types of movement, add that
+            # (was not in the original eihter...)
             i, j, k = self.state.selected_point
             mnx, mxx, mny, mxy = self.state.point_move_bounds
             t.requirement_locs[i][j][k] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy),)
