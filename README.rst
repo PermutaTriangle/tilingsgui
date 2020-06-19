@@ -18,7 +18,8 @@ Install and run
        # Run
        poetry run tilingsgui
 
-or if you have all dependencies installed, 
+or if you have all dependencies installed,
+
 .. code:: bash
 
        python tilingsgui/main.py
