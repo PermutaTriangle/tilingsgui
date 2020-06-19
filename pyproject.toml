@@ -11,8 +11,8 @@ readme = "README.rst"
 [tool.poetry.dependencies]
 python = "^3.7"
 pyglet = "^1.5.5"
-tilings = {git = "https://github.com/JonSteinn/Tilings.git", rev = "tmp-update-dep-until-release"}
 pyperclip = "^1.8.0"
+tilings = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
