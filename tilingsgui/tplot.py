@@ -220,6 +220,18 @@ class TPlotManager:
         if self.undo_deq:
             self.undo_deq[0].draw(self.state, self.mouse_pos)
 
+    def get_current_tplot(self):
+        if self.undo_deq:
+            return self.undo_deq[0]
+
+    def get_current_tiling(self):
+        if self.undo_deq:
+            return self.undo_deq[0].tiling
+
+    def get_current_tiling_json(self):
+        if self.undo_deq:
+            return self.undo_deq[0].tiling.to_jsonable()
+
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_pos.x = x
         self.mouse_pos.y = y
