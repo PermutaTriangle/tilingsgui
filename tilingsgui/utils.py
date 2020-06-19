@@ -1,5 +1,4 @@
 import pathlib
-from io import BytesIO
 
 import pyperclip
 

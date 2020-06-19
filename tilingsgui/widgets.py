@@ -1,7 +1,8 @@
 from typing import List
 
 import pyglet
-from tilingsgui.graphics import Color, GeoDrawer
+
+from .graphics import Color, GeoDrawer
 
 
 class TextBox:
@@ -65,6 +66,7 @@ class TextBox:
     def append_text(self, text):
         self.document.text = self.document.text + text
         self.caret.mark = self.caret.position = len(self.document.text)
+
 
 class Button:
     # FONT_SIZE = 15

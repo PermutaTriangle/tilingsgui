@@ -5,14 +5,15 @@ from collections import deque
 from typing import ClassVar, Deque, Tuple
 
 import pyglet
-from tilingsgui.geo import Point
-from tilingsgui.graphics import Color, GeoDrawer
-from tilingsgui.state import GuiState
 
 from permuta import Perm
 from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
 from tilings.algorithms import Factor
+
+from .geo import Point
+from .graphics import Color, GeoDrawer
+from .state import GuiState
 
 
 class TPlot:

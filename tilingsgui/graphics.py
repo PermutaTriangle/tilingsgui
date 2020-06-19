@@ -7,7 +7,7 @@ from typing import ClassVar, List, Tuple
 
 import pyglet
 
-from tilingsgui.geo import Point
+from .geo import Point
 
 
 class GeoDrawer:

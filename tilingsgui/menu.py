@@ -1,14 +1,9 @@
 import pyglet
-from tilingsgui.graphics import Color, GeoDrawer
-from tilingsgui.state import GuiState
-from tilingsgui.utils import paste
-from tilingsgui.widgets import (
-    Button,
-    ButtonGrid,
-    SelectionButton,
-    TextBox,
-    ToggleButton,
-)
+
+from .graphics import Color, GeoDrawer
+from .state import GuiState
+from .utils import paste
+from .widgets import Button, ButtonGrid, SelectionButton, TextBox, ToggleButton
 
 
 class TopMenu:

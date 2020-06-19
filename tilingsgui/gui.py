@@ -1,11 +1,12 @@
 from typing import ClassVar, Tuple
 
 import pyglet
-from tilingsgui.graphics import Color
-from tilingsgui.menu import RightMenu, TopMenu
-from tilingsgui.state import GuiState
-from tilingsgui.tplot import TPlotManager
-from tilingsgui.utils import get_png_resource_folder_abs_path
+
+from .graphics import Color
+from .menu import RightMenu, TopMenu
+from .state import GuiState
+from .tplot import TPlotManager
+from .utils import get_png_resource_folder_abs_path
 
 
 class TilingGui(pyglet.window.Window):

@@ -22,7 +22,7 @@ or if you have all dependencies installed,
 
 .. code:: bash
 
-       python tilingsgui/main.py
+       python -m tilingsgui.main.py
 
 ***************
 Dependencies
