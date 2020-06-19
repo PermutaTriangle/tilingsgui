@@ -92,17 +92,17 @@ class RightMenu:
 
         # Select grp
 
-        self.keyboard.add_btn(9, 0, SelectionButton("●", toggled=True))
-        self.keyboard.add_btn(9, 1, SelectionButton("⛬"))
-        self.keyboard.add_btn(9, 2, SelectionButton("F"))
-        self.keyboard.add_btn(8, 0, SelectionButton("⏪"))
-        self.keyboard.add_btn(8, 1, SelectionButton("⏩"))
-        self.keyboard.add_btn(8, 2, SelectionButton("⏫"))
-        self.keyboard.add_btn(8, 3, SelectionButton("⏬"))
-        self.keyboard.add_btn(7, 0, SelectionButton("⬅"))
-        self.keyboard.add_btn(7, 1, SelectionButton("➡"))
-        self.keyboard.add_btn(7, 2, SelectionButton("⬆"))
-        self.keyboard.add_btn(7, 3, SelectionButton("⬇"))
+        self.keyboard.add_btn(9, 0, SelectionButton("add_point.png", toggled=True))
+        self.keyboard.add_btn(9, 1, SelectionButton("add_custom.png"))
+        self.keyboard.add_btn(9, 2, SelectionButton("factor.png"))
+        self.keyboard.add_btn(8, 0, SelectionButton("place_west.png"))
+        self.keyboard.add_btn(8, 1, SelectionButton("place_east.png"))
+        self.keyboard.add_btn(8, 2, SelectionButton("place_north.png"))
+        self.keyboard.add_btn(8, 3, SelectionButton("place_south.png"))
+        self.keyboard.add_btn(7, 0, SelectionButton("pplace_west.png"))
+        self.keyboard.add_btn(7, 1, SelectionButton("pplace_east.png"))
+        self.keyboard.add_btn(7, 2, SelectionButton("pplace_north.png"))
+        self.keyboard.add_btn(7, 3, SelectionButton("pplace_south.png"))
         self.keyboard.add_selection_group(
             [
                 (9, 0),
@@ -121,29 +121,35 @@ class RightMenu:
         )
 
         # normal btns
-        self.keyboard.add_btn(5, 0, Button("⟲", on_click=self.state.set_undo))
-        self.keyboard.add_btn(5, 1, Button("⟳", on_click=self.state.set_redo))
+        self.keyboard.add_btn(5, 0, Button("undo.png", on_click=self.state.set_undo))
+        self.keyboard.add_btn(5, 1, Button("redo.png", on_click=self.state.set_redo))
         self.keyboard.add_btn(
-            4, 0, Button("RCS", on_click=self.state.set_row_col_seperation)
+            4, 0, Button("rowcolsep.png", on_click=self.state.set_row_col_seperation)
         )
         self.keyboard.add_btn(
-            4, 1, Button("OT", on_click=self.state.set_obstruction_transivity)
+            4,
+            1,
+            Button("obstr-trans.png", on_click=self.state.set_obstruction_transivity),
         )
-        self.keyboard.add_btn(4, 2, Button("E", on_click=self.state.set_export))
+        self.keyboard.add_btn(
+            4, 2, Button("export.png", on_click=self.state.set_export)
+        )
 
         # toggle btns
         self.keyboard.add_btn(
             2,
             0,
             ToggleButton(
-                "S", on_click=self.state.toggle_shading, toggled=self.state.shading
+                "shading.png",
+                on_click=self.state.toggle_shading,
+                toggled=self.state.shading,
             ),
         )
         self.keyboard.add_btn(
             2,
             1,
             ToggleButton(
-                "PP",
+                "pretty.png",
                 on_click=self.state.toggle_pretty_points,
                 toggled=self.state.pretty_points,
             ),
@@ -152,7 +158,7 @@ class RightMenu:
             2,
             2,
             ToggleButton(
-                "SC",
+                "show_cross.png",
                 on_click=self.state.toggle_show_crossing,
                 toggled=self.state.show_crossing,
             ),
@@ -161,7 +167,7 @@ class RightMenu:
             2,
             3,
             ToggleButton(
-                "SL",
+                "show_local.png",
                 on_click=self.state.toggle_show_localized,
                 toggled=self.state.show_localized,
             ),
@@ -170,7 +176,7 @@ class RightMenu:
             1,
             0,
             ToggleButton(
-                "HTC",
+                "htc.png",
                 on_click=self.state.toggle_highlight_touching_cell,
                 toggled=self.state.highlight_touching_cell,
             ),

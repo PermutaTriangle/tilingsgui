@@ -66,34 +66,14 @@ class TextBox:
         self.document.text = self.document.text + text
         self.caret.mark = self.caret.position = len(self.document.text)
 
-
-"""
-        testimg = pyglet.resource.image("shading.png")
-        # testimg.width = 50
-        # testimg.height = 50
-        self.sprite = pyglet.sprite.Sprite(testimg, x=200, y=200)
-
-        self.sprite.draw()
-
-        self.sprite.scale = 0.9 * self.sprite.scale
-        # self.sprite.image.height = 0.9 * self.sprite.image.height"""
-
-# TODO: Make sprite and font subclasses...
 class Button:
-    FONT_SIZE = 15
-    FONT = "Times New Roman"
-    LABEL_COLOR = Color.alpha_extend(Color.BLACK)
+    # FONT_SIZE = 15
+    # FONT = "Times New Roman"
+    # LABEL_COLOR = Color.alpha_extend(Color.BLACK)
     BUTTON_COLOR = Color.GRAY
 
-    def __init__(self, text, x=0, y=0, w=0, h=0, on_click=None):
-        self.label = pyglet.text.Label(
-            text,
-            font_size=Button.FONT_SIZE,
-            font_name=Button.FONT,
-            anchor_x="center",
-            anchor_y="center",
-            color=Button.LABEL_COLOR,
-        )
+    def __init__(self, image, x=0, y=0, w=0, h=0, on_click=None):
+        self.sprite = pyglet.sprite.Sprite(pyglet.resource.image(image), x=x, y=y)
         self.x, self.y, self.w, self.h = x, y, w, h
         self.position(x, y, w, h)
         self.on_click = on_click
@@ -112,15 +92,19 @@ class Button:
         GeoDrawer.draw_filled_rectangle(
             self.x, self.y, self.w, self.h, Button.BUTTON_COLOR
         )
-        self.label.draw()
+        self.sprite.draw()
+        # self.label.draw()
 
     def position(self, x, y, w, h):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
-        self.label.x = x + w / 2
-        self.label.y = y + h / 2
+        dim = min(w, h)
+        if dim > 0:
+            self.sprite.scale *= dim / self.sprite.width
+            self.sprite.x = x + self.w / 2 - self.sprite.width / 2
+            self.sprite.y = y + self.h / 2 - self.sprite.height / 2
 
 
 class ToggleButton(Button):
@@ -139,7 +123,7 @@ class ToggleButton(Button):
     def draw(self):
         color = Color.DARK_OLIVE_GREEN if self.toggled else Button.BUTTON_COLOR
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, color)
-        self.label.draw()
+        self.sprite.draw()
 
 
 class SelectionButton(ToggleButton):
