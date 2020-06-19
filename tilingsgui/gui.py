@@ -5,6 +5,7 @@ from tilingsgui.graphics import Color
 from tilingsgui.menu import RightMenu, TopMenu
 from tilingsgui.state import GuiState
 from tilingsgui.tplot import TPlotManager
+from tilingsgui.utils import get_png_resource_folder_abs_path
 
 
 class TilingGui(pyglet.window.Window):
@@ -28,8 +29,10 @@ class TilingGui(pyglet.window.Window):
             TilingGui.INITIAL_HEIGHT,
             TilingGui.TITLE,
             *args,
-            **kargs
+            **kargs,
         )
+
+        pyglet.resource.path = [get_png_resource_folder_abs_path()]
 
         self.state = GuiState()
 
@@ -70,6 +73,7 @@ class TilingGui(pyglet.window.Window):
         self.right_bar.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
+
         self.top_bar.on_mouse_press(x, y, button, modifiers)
         if self.state.basis_input_read:
             self.tplot_man.add_from_string(self.state.basis_input_string)

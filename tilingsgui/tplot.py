@@ -16,7 +16,7 @@ from tilings.algorithms import Factor
 
 class TPlot:
     OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
-    REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.GREEN
+    REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
     HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLACK
 
     @staticmethod
@@ -244,8 +244,6 @@ class TPlotManager:
     def on_mouse_press(self, x, y, button, modifiers):
         if x > self.w or y > self.h:
             return
-
-        print("hi", "strat is", self.state.strategy_selected)
 
         if not self.undo_deq:
             return

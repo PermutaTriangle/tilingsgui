@@ -67,6 +67,17 @@ class TextBox:
         self.caret.mark = self.caret.position = len(self.document.text)
 
 
+"""
+        testimg = pyglet.resource.image("shading.png")
+        # testimg.width = 50
+        # testimg.height = 50
+        self.sprite = pyglet.sprite.Sprite(testimg, x=200, y=200)
+
+        self.sprite.draw()
+
+        self.sprite.scale = 0.9 * self.sprite.scale
+        # self.sprite.image.height = 0.9 * self.sprite.image.height"""
+
 # TODO: Make sprite and font subclasses...
 class Button:
     FONT_SIZE = 15
@@ -173,7 +184,6 @@ class ButtonGrid:
         _r, _c = s_grp.i_to_rc[s_grp.selected]
         if _r == r and _c == c:
             return
-        print(r, c, _r, _c)
         self.buttons[_r][_c].toggled = not self.buttons[_r][_c].toggled
         s_grp.selected = s_grp.rc_to_i[(r, c)]
         s_grp.on_click(s_grp.selected)

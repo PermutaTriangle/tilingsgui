@@ -91,6 +91,7 @@ class RightMenu:
         self.keyboard = ButtonGrid(x, y, w, h - t, 10, 4)
 
         # Select grp
+
         self.keyboard.add_btn(9, 0, SelectionButton("●", toggled=True))
         self.keyboard.add_btn(9, 1, SelectionButton("⛬"))
         self.keyboard.add_btn(9, 2, SelectionButton("F"))
