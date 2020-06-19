@@ -60,7 +60,6 @@ class TilingGui(pyglet.window.Window):
         )
 
         self.history = get_history_data()
-        print(self.history)
 
     def start(self) -> None:
         self._initial_config()
@@ -101,7 +100,6 @@ class TilingGui(pyglet.window.Window):
                 self.history[-1]["tilings"].append(
                     {"tiling_time": get_current_time_string(), "tiling": tiling_json}
                 )
-                print("Exporting...")
             self.state.export = False
 
         if self.state.undo:
@@ -175,4 +173,3 @@ class TilingGui(pyglet.window.Window):
     def clean_up(self):
         if self.history[-1]["tilings"]:
             save_history_data(self.history)
-        print("Bye")
