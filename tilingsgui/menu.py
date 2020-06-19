@@ -95,6 +95,7 @@ class RightMenu:
         self.keyboard.add_btn(9, 0, SelectionButton("add_point.png", toggled=True))
         self.keyboard.add_btn(9, 1, SelectionButton("add_custom.png"))
         self.keyboard.add_btn(9, 2, SelectionButton("factor.png"))
+        self.keyboard.add_btn(9, 3, SelectionButton("move.png"))
         self.keyboard.add_btn(8, 0, SelectionButton("place_west.png"))
         self.keyboard.add_btn(8, 1, SelectionButton("place_east.png"))
         self.keyboard.add_btn(8, 2, SelectionButton("place_north.png"))
@@ -108,6 +109,7 @@ class RightMenu:
                 (9, 0),
                 (9, 1),
                 (9, 2),
+                (9, 3),
                 (8, 0),
                 (8, 1),
                 (8, 2),

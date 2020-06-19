@@ -4,6 +4,7 @@
 from collections import deque
 from typing import ClassVar, Deque, Tuple
 
+import pyglet
 from tilingsgui.geo import Point
 from tilingsgui.graphics import Color, GeoDrawer
 from tilingsgui.state import GuiState
@@ -254,6 +255,7 @@ class TPlotManager:
             self.cell_insertion,
             self.cell_insertion_custom,
             self.factor,
+            self.move,
             self.place_point_west,
             self.place_point_east,
             self.place_point_north,
@@ -267,15 +269,96 @@ class TPlotManager:
         if n_plot is not None:
             self.add(TPlot(n_plot, self.w, self.h))
 
+    def move(self, x, y, button, modifiers):
+
+        if button == pyglet.window.mouse.LEFT:
+            self.state.move_type = 0
+        elif button == pyglet.window.mouse.RIGHT:
+            self.state.move_type = 1
+        else:
+            return
+
+        t = self.undo_deq[0]
+        self.state.selected_point = t.get_point_obs_index(Point(x, y))
+        if self.state.selected_point is not None:
+            i, j = self.state.selected_point
+            gploc = t.obstruction_locs[i]
+            gp = t.tiling.obstructions[i]
+        else:
+            self.state.selected_point = t.get_point_req_index(Point(x, y))
+            if self.state.selected_point is not None:
+                a, i, j = self.state.selected_point
+                gploc = t.requirement_locs[a][i]
+                gp = t.tiling.requirements[a][i]
+            else:
+                self.state.init_move_state()
+                return
+
+        self.state.has_selected_pnt = True
+        v = gp.patt[j]
+        cell = gp.pos[j]
+        a, b, c, d = t._cell_to_rect(*cell)
+        loc, sz = (a, b), (c, d)
+        min_space = 10
+        mnx, mny = loc[0] + min_space, loc[1] + min_space
+        mxx, mxy = loc[0] + sz[0] - min_space, loc[1] + sz[1] - min_space
+        for k in range(len(gp)):
+            if k == j - 1:
+                mnx = max(mnx, gploc[k].x + min_space)
+            if k == j + 1:
+                mxx = min(mxx, gploc[k].x - min_space)
+            if gp.patt[k] == v - 1:
+                mny = max(mny, gploc[k].y + min_space)
+            if gp.patt[k] == v + 1:
+                mxy = min(mxy, gploc[k].y - min_space)
+        self.state.point_move_bounds = (mnx, mxx, mny, mxy)
+
+        # check click pnt, check btn, set selected in sta
+        # print("move")
+
+    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
+
+        if not self.state.has_selected_pnt or not self.undo_deq:
+            return
+
+        def clamp(x, mnx, mxx):
+            return min(mxx, max(x, mnx))
+
+        t = self.undo_deq[0]
+        if len(self.state.selected_point) == 2:
+            i, j = self.state.selected_point
+            mnx, mxx, mny, mxy = self.state.point_move_bounds
+            if self.state.move_type == 0:
+                t.obstruction_locs[i][j] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy))
+            else:
+                for k in range(len(t.obstruction_locs[i])):
+                    ox, oy = t.obstruction_locs[i][k]
+                    ox += dx
+                    oy += dy
+                    t.obstruction_locs[i][k] = Point(ox, oy)
+        else:
+            i, j, k = self.state.selected_point
+            mnx, mxx, mny, mxy = self.state.point_move_bounds
+            t.requirement_locs[i][j][k] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy),)
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        self.state.init_move_state()
+
     def cell_insertion(self, x, y, button, modifiers):
         t = self.undo_deq[0]
         cx, cy = t.get_cell(Point(x, y))
-        return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
+        if button == pyglet.window.mouse.LEFT:
+            return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
+        elif button == pyglet.window.mouse.RIGHT:
+            return t.tiling.add_single_cell_obstruction(Perm((0,)), (cx, cy))
 
     def cell_insertion_custom(self, x, y, button, modifiers):
         t = self.undo_deq[0]
         cx, cy = t.get_cell(Point(x, y))
-        return t.tiling.add_single_cell_requirement(self.custom_placement, (cx, cy))
+        if button == pyglet.window.mouse.LEFT:
+            return t.tiling.add_single_cell_requirement(self.custom_placement, (cx, cy))
+        elif button == pyglet.window.mouse.RIGHT:
+            return t.tiling.add_single_cell_obstruction(self.custom_placement, (cx, cy))
 
     def place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
         t = self.undo_deq[0]

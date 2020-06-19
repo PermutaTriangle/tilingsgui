@@ -112,12 +112,10 @@ class TilingGui(pyglet.window.Window):
         self.tplot_man.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_release(self, x, y, button, modifiers):
-        # TODO: tplot handle mouse release
-        pass
+        self.tplot_man.on_mouse_release(x, y, button, modifiers)
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        # TODO: tplot handle mouse drag
-        pass
+        self.tplot_man.on_mouse_drag(x, y, dx, dy, button, modifiers)
 
     def on_key_press(self, symbol, modifiers):
         if self.state.basis_input_focus:

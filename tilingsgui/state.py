@@ -24,6 +24,17 @@ class GuiState:
         self.obstruction_transivity = False
         self.row_col_seperation = False
 
+        self.has_selected_pnt = False
+        self.selected_points = tuple()
+        self.point_move_bounds = tuple()
+        self.move_type = 0
+
+    def init_move_state(self):
+        self.has_selected_pnt = False
+        self.selected_points = tuple()
+        self.point_move_bounds = tuple()
+        self.move_type = 0
+
     def toggle_shading(self):
         self.shading = not self.shading
         # print(f"toggle shading: {self.shading}")
