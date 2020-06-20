@@ -4,14 +4,9 @@ import pyglet
 
 from .graphics import Color
 from .menu import RightMenu, TopMenu
+from .resource import History, PathManager
 from .state import GuiState
 from .tplot import TPlotManager
-from .utils import (
-    get_current_time_string,
-    get_history_data,
-    get_png_resource_folder_abs_path,
-    save_history_data,
-)
 
 
 class TilingGui(pyglet.window.Window):
@@ -38,7 +33,7 @@ class TilingGui(pyglet.window.Window):
             **kargs,
         )
 
-        pyglet.resource.path = [get_png_resource_folder_abs_path()]
+        pyglet.resource.path = [PathManager.get_png_abs_path()]
 
         self.state = GuiState()
 
@@ -59,7 +54,7 @@ class TilingGui(pyglet.window.Window):
             self.state,
         )
 
-        self.history = get_history_data()
+        self.history = History()
 
     def start(self) -> None:
         self._initial_config()
@@ -96,10 +91,7 @@ class TilingGui(pyglet.window.Window):
 
         if self.state.export:
             tiling_json = self.tplot_man.get_current_tiling_json()
-            if tiling_json is not None:
-                self.history[-1]["tilings"].append(
-                    {"tiling_time": get_current_time_string(), "tiling": tiling_json}
-                )
+            self.history.add_tiling(tiling_json)
             self.state.export = False
 
         if self.state.undo:
@@ -171,5 +163,4 @@ class TilingGui(pyglet.window.Window):
         self.clean_up()
 
     def clean_up(self):
-        if self.history[-1]["tilings"]:
-            save_history_data(self.history)
+        self.history.save()
