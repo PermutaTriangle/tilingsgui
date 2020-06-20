@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 
@@ -13,3 +12,11 @@ class Point:
     def __iter__(self):
         yield self.x
         yield self.y
+
+
+class Rectangle:
+    def __init__(self, x, y, w, h) -> None:
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h

@@ -11,7 +11,7 @@ def paste(warning=False):
     except pyperclip.PyperclipException:
         if warning:
             print("Os does not support required c/p operations")
-            print("Try: sudo apt-get install xclip")
+            print("Linux requires xclip")
         return ""
 
 
