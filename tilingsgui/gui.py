@@ -2,9 +2,9 @@ from typing import ClassVar, Tuple
 
 import pyglet
 
+from .files import History, PathManager
 from .graphics import Color
 from .menu import RightMenu, TopMenu
-from .resource import History, PathManager
 from .state import GuiState
 from .tplot import TPlotManager
 
@@ -33,7 +33,7 @@ class TilingGui(pyglet.window.Window):
             **kargs,
         )
 
-        pyglet.resource.path = [PathManager.get_png_abs_path_str()]
+        pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
         self.state = GuiState()
 

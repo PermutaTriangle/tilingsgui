@@ -1,3 +1,6 @@
+"""A collection of file and path related functionality.
+"""
+
 import json
 import pathlib
 from typing import Any, ClassVar, Dict, List
@@ -6,45 +9,60 @@ from .utils import get_current_time_string
 
 
 class PathManager:
-    _ROOT = pathlib.Path(__file__).parent.parent.absolute()
-    _RESOURCES = "resources"
-    _EXPORTS = "exports"
+    """A collection of functions to fetch various paths.
+    """
+
+    _ROOT: ClassVar[pathlib.Path] = pathlib.Path(__file__).parent.parent.absolute()
+    _RESOURCES: ClassVar[str] = "resources"
+    _EXPORTS: ClassVar[str] = "exports"
+
+    @staticmethod
+    def as_string(path: pathlib.Path) -> str:
+        """Convert a Path object to a string.
+
+        Args:
+            path (pathlib.Path): The path to convert.
+
+        Returns:
+            str: The path as a string using forward slashes.
+        """
+        return path.as_posix()
 
     @staticmethod
     def get_root_abs_path() -> pathlib.Path:
+        """Get the absolute path of the project's root directory.
+
+        Returns:
+            pathlib.Path: Absolute path of '.'.
+        """
         return PathManager._ROOT
 
     @staticmethod
-    def get_root_abs_path_str() -> str:
-        return PathManager.get_root_abs_path().as_posix()
-
-    @staticmethod
     def get_resources_abs_path() -> pathlib.Path:
+        """Get the absolute path of the project's resource directory.
+
+        Returns:
+            pathlib.Path: Absolute path of './resources'.
+        """
         return PathManager._ROOT.joinpath(PathManager._RESOURCES)
 
     @staticmethod
-    def get_resources_abs_path_str() -> str:
-        return PathManager.get_resources_abs_path().as_posix()
-
-    @staticmethod
     def get_png_abs_path() -> pathlib.Path:
+        """Get the absolute path of the project's png resource directory.
+
+        Returns:
+            pathlib.Path: Absolute path of './resources/img/png'.
+        """
         return PathManager._ROOT.joinpath(PathManager._RESOURCES, "img", "png")
 
     @staticmethod
-    def get_png_abs_path_str() -> str:
-        return PathManager.get_png_abs_path().as_posix()
-
-    @staticmethod
     def get_exports_abs_path() -> pathlib.Path:
+        """Get the absolute path of the project's export directory.
+
+        Returns:
+            pathlib.Path: Absolute path of './exports'.
+        """
         return PathManager._ROOT.joinpath(PathManager._EXPORTS)
-
-    @staticmethod
-    def get_exports_abs_path_str() -> str:
-        return PathManager.get_exports_abs_path().as_posix()
-
-
-class ResourceManager:
-    pass
 
 
 class History:
