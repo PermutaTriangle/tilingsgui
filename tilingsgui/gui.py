@@ -6,7 +6,12 @@ from .graphics import Color
 from .menu import RightMenu, TopMenu
 from .state import GuiState
 from .tplot import TPlotManager
-from .utils import get_png_resource_folder_abs_path
+from .utils import (
+    get_current_time_string,
+    get_history_data,
+    get_png_resource_folder_abs_path,
+    save_history_data,
+)
 
 
 class TilingGui(pyglet.window.Window):
@@ -54,6 +59,8 @@ class TilingGui(pyglet.window.Window):
             self.state,
         )
 
+        self.history = get_history_data()
+
     def start(self) -> None:
         self._initial_config()
         pyglet.app.run()
@@ -88,7 +95,11 @@ class TilingGui(pyglet.window.Window):
             self.state.cell_input_read = False
 
         if self.state.export:
-            print("Exporting... [to file maybe?, otherwise stdout]")
+            tiling_json = self.tplot_man.get_current_tiling_json()
+            if tiling_json is not None:
+                self.history[-1]["tilings"].append(
+                    {"tiling_time": get_current_time_string(), "tiling": tiling_json}
+                )
             self.state.export = False
 
         if self.state.undo:
@@ -133,6 +144,7 @@ class TilingGui(pyglet.window.Window):
             return
 
         if symbol == pyglet.window.key.ESCAPE:
+            self.clean_up()
             pyglet.app.exit()
 
     def on_resize(self, width, height):
@@ -153,3 +165,11 @@ class TilingGui(pyglet.window.Window):
     def on_text_motion(self, motion):
         self.top_bar.on_text_motion(motion)
         self.right_bar.on_text_motion(motion)
+
+    def on_close(self):
+        super().on_close()
+        self.clean_up()
+
+    def clean_up(self):
+        if self.history[-1]["tilings"]:
+            save_history_data(self.history)
