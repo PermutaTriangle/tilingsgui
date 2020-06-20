@@ -12,14 +12,12 @@ from .tplot import TPlotManager
 class TilingGui(pyglet.window.Window):
 
     TITLE: ClassVar[str] = "Tilings GUI"
-
     MIN_WIDTH: ClassVar[int] = 500
     MIN_HEIGHT: ClassVar[int] = 400
     INITIAL_WIDTH: ClassVar[int] = 800
     INITIAL_HEIGHT: ClassVar[int] = 650
     RIGHT_BAR_WIDTH: ClassVar[int] = 200
     TOP_BAR_HEIGHT: ClassVar[int] = 24
-
     CLEAR_COLOR: ClassVar[Tuple[float, ...]] = Color.alpha_extend_and_scale_to_01(
         Color.WHITE
     )
@@ -36,7 +34,6 @@ class TilingGui(pyglet.window.Window):
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
         self.state = GuiState()
-
         self.tplot_man = TPlotManager(self.width, self.height, self.state)
         self.top_bar = TopMenu(
             0,

@@ -16,7 +16,12 @@ class TopMenu:
         self.w = w
         self.h = h
         self.state = state
-        self.text_box = TextBox(TopMenu.INITIAL_MESSAGE)
+        self.text_box = TextBox(
+            TopMenu.INITIAL_MESSAGE,
+            12,
+            Color.alpha_extend(Color.BLACK),
+            Color.DARK_GRAY,
+        )
         self.on_resize(w, h)
 
     def draw(self):
@@ -81,9 +86,14 @@ class RightMenu:
 
         self.state = state
 
-        self.text_box = TextBox("single cell requirement")
+        self.text_box = TextBox(
+            "single cell requirement",
+            12,
+            Color.alpha_extend(Color.BLACK),
+            Color.DARK_GRAY,
+        )
 
-        self.keyboard = ButtonGrid(x, y, w, h - t, 10, 4)
+        self.keyboard = ButtonGrid(10, 4)
 
         # Select grp
 

@@ -20,3 +20,6 @@ class Rectangle:
         self.y = y
         self.w = w
         self.h = h
+
+    def center(self):
+        return Point(self.x + self.w / 2, self.y + self.h / 2)
