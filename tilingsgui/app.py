@@ -31,6 +31,9 @@ class TilingGui(pyglet.window.Window):
             **kargs,
         )
 
+        self.test = Test()
+        self.push_handlers(self.test)
+
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
         self.state = GuiState()
