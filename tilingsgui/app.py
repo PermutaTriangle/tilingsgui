@@ -9,6 +9,25 @@ from .state import GuiState
 from .tplot import TPlotManager
 
 
+class Dispatcher(pyglet.event.EventDispatcher):
+    def __init__(self):
+        pass
+
+    def fake_evt(self):
+        self.dispatch_event("on_foo")
+
+
+Dispatcher.register_event_type("on_foo")
+
+
+class Observer:
+    def __init__(self):
+        pass
+
+    def on_foo(self):
+        print("IT IS HAPPENING!")
+
+
 class TilingGui(pyglet.window.Window):
 
     TITLE: ClassVar[str] = "Tilings GUI"
@@ -30,6 +49,10 @@ class TilingGui(pyglet.window.Window):
             *args,
             **kargs,
         )
+
+        self.dis = Dispatcher()
+        self.obs = Observer()
+        self.dis.push_handlers(self.obs)
 
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
@@ -137,6 +160,7 @@ class TilingGui(pyglet.window.Window):
         self.tplot_man.XXXon_mouse_press(x, y, button, modifiers)
 
     def on_key_press(self, symbol, modifiers):
+        self.dis.fake_evt()
         if self.state.basis_input_focus:
             self.top_bar.XXXon_key_press(symbol, modifiers)
             if self.state.basis_input_read:
