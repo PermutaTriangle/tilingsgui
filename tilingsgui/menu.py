@@ -22,13 +22,13 @@ class TopMenu:
             Color.alpha_extend(Color.BLACK),
             Color.DARK_GRAY,
         )
-        self.on_resize(w, h)
+        self.position(w, h)
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
         self.text_box.draw()
 
-    def on_resize(self, width, height):
+    def position(self, width, height):
         self.w = width
         self.y = height
         self.text_box.position(
@@ -38,7 +38,7 @@ class TopMenu:
             self.h - 2 * TopMenu.PADDING,
         )
 
-    def on_key_press(self, symbol, modifiers):
+    def XXXon_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
             self.text_box.release_focus()
             self.state.basis_input_focus = False
@@ -50,7 +50,7 @@ class TopMenu:
                 self.state.basis_input_read = True
                 self.state.basis_input_string = s
 
-    def on_mouse_press(self, x, y, button, modifiers):
+    def XXXon_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
             if self.state.basis_input_focus:
                 s = self.text_box.get_current_text()
@@ -189,14 +189,14 @@ class RightMenu:
             ),
         )
 
-        self.on_resize(w, h)
+        self.position(w, h)
 
     def draw(self):
         GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
         self.text_box.draw()
         self.keyboard.draw()
 
-    def on_resize(self, width, height):
+    def position(self, width, height):
         self.x = width
         self.h = height
         self.text_box.position(
@@ -207,7 +207,7 @@ class RightMenu:
         )
         self.keyboard.resize(self.x, self.y, self.w, self.h - self.t)
 
-    def on_key_press(self, symbol, modifiers):
+    def XXXon_key_press(self, symbol, modifiers):
         if symbol == pyglet.window.key.ESCAPE:
             self.text_box.release_focus()
             self.state.cell_input_focus = False
@@ -219,7 +219,7 @@ class RightMenu:
                 self.state.cell_input_read = True
                 self.state.cell_input_string = s
 
-    def on_mouse_press(self, x, y, button, modifiers):
+    def XXXon_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
             if self.state.cell_input_focus:
                 s = self.text_box.get_current_text()

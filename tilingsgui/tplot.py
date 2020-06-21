@@ -236,7 +236,7 @@ class TPlotManager:
         self.mouse_pos.x = x
         self.mouse_pos.y = y
 
-    def on_resize(self, width, height):
+    def position(self, width, height):
         self.set_dimensions(width, height)
 
     def row_col_seperation(self):
@@ -255,7 +255,7 @@ class TPlotManager:
             if n_plot is not None:
                 self.add(n_plot)
 
-    def on_mouse_press(self, x, y, button, modifiers):
+    def XXXon_mouse_press(self, x, y, button, modifiers):
         if x > self.w or y > self.h:
             return
 
