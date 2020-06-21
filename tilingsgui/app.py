@@ -108,8 +108,9 @@ class TilingGui(pyglet.window.Window):
 
         self.right_bar.XXXon_mouse_press(x, y, button, modifiers)
         if self.state.cell_input_read:
-            self.tplot_man.set_custom_placement(self.state.cell_input_string)
+            self.tplot_man.on_placement_input(self.state.cell_input_string)
             self.state.cell_input_read = False
+            return
 
         if self.state.export:
             tiling_json = self.tplot_man.get_current_tiling_json()
@@ -133,15 +134,3 @@ class TilingGui(pyglet.window.Window):
             self.state.obstruction_transivity = False
 
         self.tplot_man.XXXon_mouse_press(x, y, button, modifiers)
-
-    def on_key_press(self, symbol, modifiers):
-        if self.state.cell_input_focus:
-            self.right_bar.XXXon_key_press(symbol, modifiers)
-            if self.state.cell_input_read:
-                self.tplot_man.set_custom_placement(self.state.cell_input_string)
-                self.state.cell_input_read = False
-            return
-
-        if symbol == pyglet.window.key.ESCAPE:
-            self.clean_up()
-            pyglet.app.exit()

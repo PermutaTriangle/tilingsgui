@@ -219,17 +219,24 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         )
         self.keyboard.resize(self.x, self.y, self.w, self.h - self.t)
 
-    def XXXon_key_press(self, symbol, modifiers):
-        if symbol == pyglet.window.key.ESCAPE:
-            self.text_box.release_focus()
-            self.state.cell_input_focus = False
-        if symbol == pyglet.window.key.ENTER:
-            self.text_box.release_focus()
-            self.state.cell_input_focus = False
-            s = self.text_box.get_current_text()
-            if s:
-                self.state.cell_input_read = True
-                self.state.cell_input_string = s
+    def on_key_press(self, symbol, modifiers):
+
+        if self.state.cell_input_focus:
+            if symbol == pyglet.window.key.ESCAPE:
+                self.text_box.release_focus()
+                self.state.cell_input_focus = False
+            if symbol == pyglet.window.key.ENTER:
+                self.text_box.release_focus()
+                self.state.cell_input_focus = False
+                s = self.text_box.get_current_text()
+                if s:
+                    self.state.cell_input_read = True
+                    self.state.cell_input_string = s
+            if self.state.cell_input_read:
+                self.dispatch_event("on_placement_input", self.state.cell_input_string)
+                self.state.cell_input_read = False
+            return True
+        return False
 
     def XXXon_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
@@ -259,3 +266,6 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
     def on_text_motion(self, motion):
         if self.state.cell_input_focus:
             self.text_box.on_text_motion(motion)
+
+
+RightMenu.register_event_type("on_placement_input")

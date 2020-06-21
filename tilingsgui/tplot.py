@@ -198,8 +198,8 @@ class TPlotManager(Observer):
     def on_basis_input(self, basis):
         self.add(TPlot(Tiling.from_string(basis), self.w, self.h))
 
-    def set_custom_placement(self, string):
-        self.custom_placement = Perm.to_standard(string)
+    def on_placement_input(self, perm):
+        self.custom_placement = Perm.to_standard(perm)
 
     def add(self, drawing: TPlot):
         self.undo_deq.appendleft(drawing)
