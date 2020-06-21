@@ -9,25 +9,6 @@ from .state import GuiState
 from .tplot import TPlotManager
 
 
-class Dispatcher(pyglet.event.EventDispatcher):
-    def __init__(self):
-        pass
-
-    def fake_evt(self):
-        self.dispatch_event("on_foo")
-
-
-Dispatcher.register_event_type("on_foo")
-
-
-class Observer:
-    def __init__(self):
-        pass
-
-    def on_foo(self):
-        print("IT IS HAPPENING!")
-
-
 class TilingGui(pyglet.window.Window):
 
     TITLE: ClassVar[str] = "Tilings GUI"
@@ -50,13 +31,9 @@ class TilingGui(pyglet.window.Window):
             **kargs,
         )
 
-        self.dis = Dispatcher()
-        self.obs = Observer()
-        self.dis.push_handlers(self.obs)
-
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
-        self.state = GuiState()
+        self.state = GuiState()  # TODO: REMOVE ME, IM AN ANTI-PATTERN
 
         self.top_bar = TopMenu(
             0,
@@ -64,6 +41,7 @@ class TilingGui(pyglet.window.Window):
             self.width - TilingGui.RIGHT_BAR_WIDTH,
             TilingGui.TOP_BAR_HEIGHT,
             self.state,
+            [self],
         )
         self.right_bar = RightMenu(
             self.width - TilingGui.RIGHT_BAR_WIDTH,
@@ -72,17 +50,13 @@ class TilingGui(pyglet.window.Window):
             self.height,
             TilingGui.TOP_BAR_HEIGHT,
             self.state,
+            [self],
         )
-        self.tplot_man = TPlotManager(self.width, self.height, self.state)
-
-        self.delegate_handlers()
+        self.tplot_man = TPlotManager(
+            self.width, self.height, self.state, [self, self.top_bar, self.right_bar]
+        )
 
         self.history = History()
-
-    def delegate_handlers(self):
-        self.push_handlers(self.top_bar)
-        self.push_handlers(self.right_bar)
-        self.push_handlers(self.tplot_man)
 
     def start(self) -> None:
         self._initial_config()
@@ -128,8 +102,9 @@ class TilingGui(pyglet.window.Window):
 
         self.top_bar.XXXon_mouse_press(x, y, button, modifiers)
         if self.state.basis_input_read:
-            self.tplot_man.add_from_string(self.state.basis_input_string)
+            self.tplot_man.on_basis_input(self.state.basis_input_string)
             self.state.basis_input_read = False
+            return
 
         self.right_bar.XXXon_mouse_press(x, y, button, modifiers)
         if self.state.cell_input_read:
@@ -160,13 +135,6 @@ class TilingGui(pyglet.window.Window):
         self.tplot_man.XXXon_mouse_press(x, y, button, modifiers)
 
     def on_key_press(self, symbol, modifiers):
-        self.dis.fake_evt()
-        if self.state.basis_input_focus:
-            self.top_bar.XXXon_key_press(symbol, modifiers)
-            if self.state.basis_input_read:
-                self.tplot_man.add_from_string(self.state.basis_input_string)
-                self.state.basis_input_read = False
-            return
         if self.state.cell_input_focus:
             self.right_bar.XXXon_key_press(symbol, modifiers)
             if self.state.cell_input_read:

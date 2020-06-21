@@ -78,3 +78,9 @@ class GuiState:
     def set_row_col_seperation(self):
         self.row_col_seperation = True
         # print(f"row_col_seperation: {self.row_col_seperation}")
+
+
+class Observer:
+    def __init__(self, dispatchers):
+        for dispatcher in dispatchers:
+            dispatcher.push_handlers(self)

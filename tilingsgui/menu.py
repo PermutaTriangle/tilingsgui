@@ -1,16 +1,17 @@
 import pyglet
 
 from .graphics import Color, GeoDrawer
-from .state import GuiState
+from .state import GuiState, Observer
 from .utils import paste
 from .widgets import Button, ButtonGrid, SelectionButton, TextBox, ToggleButton
 
 
-class TopMenu:
+class TopMenu(pyglet.event.EventDispatcher, Observer):
     PADDING = 1
     INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
 
-    def __init__(self, x, y, w, h, state: GuiState):
+    def __init__(self, x, y, w, h, state: GuiState, dispatchers):
+        Observer.__init__(self, dispatchers)
         self.x = x
         self.y = y
         self.w = w
@@ -38,17 +39,24 @@ class TopMenu:
             self.h - 2 * TopMenu.PADDING,
         )
 
-    def XXXon_key_press(self, symbol, modifiers):
-        if symbol == pyglet.window.key.ESCAPE:
-            self.text_box.release_focus()
-            self.state.basis_input_focus = False
-        if symbol == pyglet.window.key.ENTER:
-            self.text_box.release_focus()
-            self.state.basis_input_focus = False
-            s = self.text_box.get_current_text()
-            if s:
-                self.state.basis_input_read = True
-                self.state.basis_input_string = s
+    def on_key_press(self, symbol, modifiers):
+
+        if self.state.basis_input_focus:
+            if symbol == pyglet.window.key.ESCAPE:
+                self.text_box.release_focus()
+                self.state.basis_input_focus = False
+            if symbol == pyglet.window.key.ENTER:
+                self.text_box.release_focus()
+                self.state.basis_input_focus = False
+                s = self.text_box.get_current_text()
+                if s:
+                    self.state.basis_input_read = True
+                    self.state.basis_input_string = s
+            if self.state.basis_input_read:
+                self.dispatch_event("on_basis_input", self.state.basis_input_string)
+                self.state.basis_input_read = False
+            return True
+        return False
 
     def XXXon_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
@@ -76,8 +84,12 @@ class TopMenu:
             self.text_box.on_text_motion(motion)
 
 
-class RightMenu:
-    def __init__(self, x, y, w, h, t, state: GuiState):
+TopMenu.register_event_type("on_basis_input")
+
+
+class RightMenu(pyglet.event.EventDispatcher, Observer):
+    def __init__(self, x, y, w, h, t, state: GuiState, dispatchers):
+        Observer.__init__(self, dispatchers)
         self.x = x
         self.y = y
         self.w = w

@@ -13,7 +13,7 @@ from tilings.algorithms import Factor
 
 from .geometry import Point
 from .graphics import Color, GeoDrawer
-from .state import GuiState
+from .state import GuiState, Observer
 
 
 class TPlot:
@@ -177,10 +177,11 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
 
 
-class TPlotManager:
+class TPlotManager(Observer):
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
 
-    def __init__(self, width: int, height: int, state: GuiState):
+    def __init__(self, width: int, height: int, state: GuiState, dispatchers):
+        super().__init__(dispatchers)
         self.undo_deq: Deque[TPlot] = deque()
         self.redo_deq: Deque[TPlot] = deque()
         self.set_dimensions(width, height)
@@ -194,8 +195,8 @@ class TPlotManager:
         if self.undo_deq:
             self.undo_deq[0].resize(width, height)
 
-    def add_from_string(self, string):
-        self.add(TPlot(Tiling.from_string(string), self.w, self.h))
+    def on_basis_input(self, basis):
+        self.add(TPlot(Tiling.from_string(basis), self.w, self.h))
 
     def set_custom_placement(self, string):
         self.custom_placement = Perm.to_standard(string)
