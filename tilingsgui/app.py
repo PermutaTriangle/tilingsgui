@@ -100,12 +100,6 @@ class TilingGui(pyglet.window.Window):
 
         # TODO: consume some of these with custom evt handling and dispatchers...
 
-        self.top_bar.XXXon_mouse_press(x, y, button, modifiers)
-        if self.state.basis_input_read:
-            self.tplot_man.on_basis_input(self.state.basis_input_string)
-            self.state.basis_input_read = False
-            return
-
         self.right_bar.XXXon_mouse_press(x, y, button, modifiers)
         if self.state.cell_input_read:
             self.tplot_man.on_placement_input(self.state.cell_input_string)

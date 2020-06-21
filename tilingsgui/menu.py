@@ -58,22 +58,26 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
             return True
         return False
 
-    def XXXon_mouse_press(self, x, y, button, modifiers):
+    def on_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
             if self.state.basis_input_focus:
                 s = self.text_box.get_current_text()
                 if s:
                     self.state.basis_input_read = True
                     self.state.basis_input_string = s
+                    self.dispatch_event("on_basis_input", self.state.basis_input_string)
+                    self.state.basis_input_read = False
                 self.text_box.release_focus()
                 self.state.basis_input_focus = False
-            return
+                return True
+            return False
         if self.state.basis_input_focus:
             if button == pyglet.window.mouse.RIGHT:
                 self.text_box.append_text(paste())
         else:
             self.state.basis_input_focus = True
             self.text_box.set_focus()
+        return False
 
     def on_text(self, text):
         if self.state.basis_input_focus:
