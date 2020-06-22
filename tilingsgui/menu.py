@@ -133,15 +133,27 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         )
 
         # normal btns
-        self.keyboard.add_btn(5, 0, Button("undo.png", on_click=self.state.set_undo))
-        self.keyboard.add_btn(5, 1, Button("redo.png", on_click=self.state.set_redo))
         self.keyboard.add_btn(
-            4, 0, Button("rowcolsep.png", on_click=self.state.set_row_col_seperation)
+            5, 0, Button("undo.png", on_click=lambda: self.dispatch_event("on_undo"))
+        )
+        self.keyboard.add_btn(
+            5, 1, Button("redo.png", on_click=lambda: self.dispatch_event("on_redo"))
+        )
+        self.keyboard.add_btn(
+            4,
+            0,
+            Button(
+                "rowcolsep.png",
+                on_click=lambda: self.dispatch_event("on_row_col_seperation"),
+            ),
         )
         self.keyboard.add_btn(
             4,
             1,
-            Button("obstr-trans.png", on_click=self.state.set_obstruction_transivity),
+            Button(
+                "obstr-trans.png",
+                on_click=lambda: self.dispatch_event("on_obstruction_transivity"),
+            ),
         )
         self.keyboard.add_btn(
             4,
@@ -219,52 +231,47 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
 
     def on_key_press(self, symbol, modifiers):
 
-        if self.state.cell_input_focus:
+        if self.text_box.has_focus():
             if symbol == pyglet.window.key.ESCAPE:
                 self.text_box.release_focus()
-                self.state.cell_input_focus = False
             if symbol == pyglet.window.key.ENTER:
                 self.text_box.release_focus()
-                self.state.cell_input_focus = False
-                s = self.text_box.get_current_text()
-                if s:
-                    self.state.cell_input_read = True
-                    self.state.cell_input_string = s
-            if self.state.cell_input_read:
-                self.dispatch_event("on_placement_input", self.state.cell_input_string)
-                self.state.cell_input_read = False
+                input_text = self.text_box.get_current_text()
+                if input_text:
+                    self.dispatch_event("on_placement_input", input_text)
             return True
         return False
 
-    def XXXon_mouse_press(self, x, y, button, modifiers):
+    def on_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
-            if self.state.cell_input_focus:
-                s = self.text_box.get_current_text()
-                if s:
-                    self.state.cell_input_read = True
-                    self.state.cell_input_string = s
+            if self.text_box.has_focus():
+                input_string = self.text_box.get_current_text()
+                if input_string:
+                    self.dispatch_event("on_placement_input", input_string)
                 self.text_box.release_focus()
-                self.state.cell_input_focus = False
-                return
+                return True
         else:
-            if self.state.cell_input_focus:
+            if self.text_box.has_focus():
                 if button == pyglet.window.mouse.RIGHT:
                     self.text_box.append_text(paste())
             else:
-                self.state.cell_input_focus = True
                 self.text_box.set_focus()
-            return
+            return False
 
         self.keyboard.click_check(x, y)
 
     def on_text(self, text):
-        if self.state.cell_input_focus:
+        if self.text_box.has_focus():
             self.text_box.on_text(text)
 
     def on_text_motion(self, motion):
-        if self.state.cell_input_focus:
+        if self.text_box.has_focus():
             self.text_box.on_text_motion(motion)
 
 
 RightMenu.register_event_type("on_placement_input")
 RightMenu.register_event_type("on_fetch_tiling_for_export")
+RightMenu.register_event_type("on_undo")
+RightMenu.register_event_type("on_redo")
+RightMenu.register_event_type("on_row_col_seperation")
+RightMenu.register_event_type("on_obstruction_transivity")

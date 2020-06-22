@@ -229,12 +229,12 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         if len(self.undo_deq) > TPlotManager.MAX_DEQUEUE_SIZE:
             self.undo_deq.pop()
 
-    def undo(self):
+    def on_undo(self):
         if len(self.undo_deq) > 1:
             self.redo_deq.append(self.undo_deq.popleft())
             self.undo_deq[0].resize(self.w, self.h)
 
-    def redo(self):
+    def on_redo(self):
         if self.redo_deq:
             self.undo_deq.appendleft(self.redo_deq.pop())
             self.undo_deq[0].resize(self.w, self.h)
@@ -262,7 +262,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     def position(self, width, height):
         self.set_dimensions(width, height)
 
-    def row_col_seperation(self):
+    def on_row_col_seperation(self):
         if self.undo_deq:
             n_plot = TPlot(
                 self.undo_deq[0].tiling.row_and_column_separation(), self.w, self.h
@@ -270,7 +270,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             if n_plot is not None:
                 self.add(n_plot)
 
-    def obstruction_transitivity(self):
+    def on_obstruction_transivity(self):
         if self.undo_deq:
             n_plot = TPlot(
                 self.undo_deq[0].tiling.obstruction_transitivity(), self.w, self.h
@@ -278,7 +278,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             if n_plot is not None:
                 self.add(n_plot)
 
-    def XXXon_mouse_press(self, x, y, button, modifiers):
+    def on_mouse_press(self, x, y, button, modifiers):
         if x > self.w or y > self.h:
             return
 

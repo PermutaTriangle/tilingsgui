@@ -85,34 +85,3 @@ class TilingGui(pyglet.window.Window):
             width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
         )
         self.right_bar.position(width - TilingGui.RIGHT_BAR_WIDTH, height)
-
-    # The following should be delegated to subcomponents...
-    #
-
-    def on_mouse_press(self, x, y, button, modifiers):
-
-        # TODO: consume some of these with custom evt handling and dispatchers...
-
-        self.right_bar.XXXon_mouse_press(x, y, button, modifiers)
-        if self.state.cell_input_read:
-            self.tplot_man.on_placement_input(self.state.cell_input_string)
-            self.state.cell_input_read = False
-            return
-
-        if self.state.undo:
-            self.tplot_man.undo()
-            self.state.undo = False
-
-        if self.state.redo:
-            self.tplot_man.redo()
-            self.state.redo = False
-
-        if self.state.row_col_seperation:
-            self.tplot_man.row_col_seperation()
-            self.state.row_col_seperation = False
-
-        if self.state.obstruction_transivity:
-            self.tplot_man.obstruction_transitivity()
-            self.state.obstruction_transivity = False
-
-        self.tplot_man.XXXon_mouse_press(x, y, button, modifiers)
