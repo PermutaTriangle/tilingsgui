@@ -1,7 +1,8 @@
 import pyglet
 
+from .events import Observer
 from .graphics import Color, GeoDrawer
-from .state import GuiState, Observer
+from .state import GuiState
 from .utils import paste
 from .widgets import Button, ButtonGrid, SelectionButton, TextBox, ToggleButton
 
@@ -143,7 +144,12 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             Button("obstr-trans.png", on_click=self.state.set_obstruction_transivity),
         )
         self.keyboard.add_btn(
-            4, 2, Button("export.png", on_click=self.state.set_export)
+            4,
+            2,
+            Button(
+                "export.png",
+                on_click=lambda: self.dispatch_event("on_fetch_tiling_for_export"),
+            ),
         )
 
         # toggle btns
@@ -261,3 +267,4 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
 
 
 RightMenu.register_event_type("on_placement_input")
+RightMenu.register_event_type("on_fetch_tiling_for_export")

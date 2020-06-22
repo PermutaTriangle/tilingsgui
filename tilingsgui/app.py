@@ -56,7 +56,7 @@ class TilingGui(pyglet.window.Window):
             self.width, self.height, self.state, [self, self.top_bar, self.right_bar]
         )
 
-        self.history = History()
+        self.history = History([self, self.right_bar, self.tplot_man])
 
     def start(self) -> None:
         self._initial_config()
@@ -86,13 +86,6 @@ class TilingGui(pyglet.window.Window):
         )
         self.right_bar.position(width - TilingGui.RIGHT_BAR_WIDTH, height)
 
-    def on_close(self):
-        super().on_close()
-        self.clean_up()
-
-    def clean_up(self):
-        self.history.save()
-
     # The following should be delegated to subcomponents...
     #
 
@@ -105,11 +98,6 @@ class TilingGui(pyglet.window.Window):
             self.tplot_man.on_placement_input(self.state.cell_input_string)
             self.state.cell_input_read = False
             return
-
-        if self.state.export:
-            tiling_json = self.tplot_man.get_current_tiling_json()
-            self.history.add_tiling(tiling_json)
-            self.state.export = False
 
         if self.state.undo:
             self.tplot_man.undo()

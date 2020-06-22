@@ -11,9 +11,10 @@ from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
 from tilings.algorithms import Factor
 
+from .events import Observer
 from .geometry import Point
 from .graphics import Color, GeoDrawer
-from .state import GuiState, Observer
+from .state import GuiState
 
 
 class TPlot:
@@ -177,17 +178,38 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
 
 
-class TPlotManager(Observer):
+"""
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+"""
+
+
+class TPlotManager(pyglet.event.EventDispatcher, Observer):
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
 
     def __init__(self, width: int, height: int, state: GuiState, dispatchers):
-        super().__init__(dispatchers)
+        Observer.__init__(self, dispatchers)
         self.undo_deq: Deque[TPlot] = deque()
         self.redo_deq: Deque[TPlot] = deque()
         self.set_dimensions(width, height)
         self.mouse_pos = Point(0, 0)
         self.custom_placement: Perm = Perm((0, 1))
         self.state = state
+
+    def on_fetch_tiling_for_export(self):
+        if self.undo_deq:
+            self.dispatch_event("on_export", self.undo_deq[0].tiling.to_jsonable())
 
     def set_dimensions(self, width: int, height: int):
         self.w = width
@@ -425,3 +447,6 @@ class TPlotManager(Observer):
 
     def partial_place_point_east(self, x, y, button, modifiers):
         return self.partial_place_point(x, y, button, modifiers, DIR_EAST)
+
+
+TPlotManager.register_event_type("on_export")

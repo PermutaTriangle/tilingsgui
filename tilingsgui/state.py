@@ -12,8 +12,6 @@ class GuiState:
 
         self.strategy_selected = 0
 
-        self.export = False
-
         self.redo = False
         self.undo = False
 
@@ -55,10 +53,6 @@ class GuiState:
         self.strategy_selected = i
         # print(f"strategy_selected: {self.strategy_selected}")
 
-    def set_export(self):
-        self.export = True
-        # print(f"export: {self.export}")
-
     def set_redo(self):
         self.redo = True
         # print(f"redo: {self.redo}")
@@ -74,9 +68,3 @@ class GuiState:
     def set_row_col_seperation(self):
         self.row_col_seperation = True
         # print(f"row_col_seperation: {self.row_col_seperation}")
-
-
-class Observer:
-    def __init__(self, dispatchers):
-        for dispatcher in dispatchers:
-            dispatcher.push_handlers(self)
