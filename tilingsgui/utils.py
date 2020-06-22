@@ -1,51 +1,31 @@
+"""A collection of various utility functionality.
+"""
+
 import datetime
-import json
-import pathlib
 
 import pyperclip
 
 
-def paste(warning=False):
+def paste() -> str:
+    """Paste what is currently in clipboard. This can fail if os does not
+    included required dependencies.
+    * Win: None
+    * Mac: pbcopy and pbpaste (should be built in)
+    * Linux: xclip
+
+    Returns:
+        str: The pasted value as a string or an empty string if fails.
+    """
     try:
         return pyperclip.paste()
     except pyperclip.PyperclipException:
-        if warning:
-            print("Os does not support required c/p operations")
-            print("Linux requires xclip")
         return ""
 
 
-def get_root_folder():
-    return pathlib.Path(__file__).parent.parent.absolute().as_posix()
+def get_current_time_string() -> str:
+    """Get the current date and time as a string.
 
-
-def get_resource_folder_abs_path():
-    return f"{get_root_folder()}/resources"
-
-
-def get_png_resource_folder_abs_path():
-    return f"{get_resource_folder_abs_path()}/img/png"
-
-
-def get_history_data():
-    path = f"{get_root_folder()}/history.json"
-    try:
-        with open(path, "r") as json_file:
-            data = json.load(json_file)
-        data.append({"session_time": get_current_time_string(), "tilings": []})
-        return data
-    except FileNotFoundError:
-        pathlib.Path(path).touch()
-        return [{"session_time": get_current_time_string(), "tilings": []}]
-    except json.decoder.JSONDecodeError:
-        return [{"session_time": get_current_time_string(), "tilings": []}]
-
-
-def save_history_data(data):
-    path = f"{get_root_folder()}/history.json"
-    with open(path, "w") as f:
-        json.dump(data, f)
-
-
-def get_current_time_string():
+    Returns:
+        str: The current datetime.
+    """
     return datetime.datetime.now().isoformat()

@@ -1,92 +1,125 @@
 import pyglet
 
+from .events import CustomEvents, Observer
+from .geometry import Rectangle
 from .graphics import Color, GeoDrawer
 from .state import GuiState
 from .utils import paste
 from .widgets import Button, ButtonGrid, SelectionButton, TextBox, ToggleButton
 
 
-class TopMenu:
+class TopMenu(pyglet.event.EventDispatcher, Observer):
     PADDING = 1
     INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
+    FONT_SIZE = 12
+    TEXT_COLOR = Color.alpha_extend(Color.BLACK)
+    TEXT_BOX_COLOR = Color.DARK_GRAY
+    BACKGROUND_COLOR = Color.BLACK
 
-    def __init__(self, x, y, w, h, state: GuiState):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.state = state
-        self.text_box = TextBox(TopMenu.INITIAL_MESSAGE)
-        self.on_resize(w, h)
+    def __init__(self, x, y, w, h, dispatchers):
+        Observer.__init__(self, dispatchers)
+        self.rect = Rectangle(x, y, w, h)
+        self.text_box = TextBox(
+            TopMenu.INITIAL_MESSAGE,
+            TopMenu.FONT_SIZE,
+            TopMenu.TEXT_COLOR,
+            TopMenu.TEXT_BOX_COLOR,
+        )
+        self.position(w, h)
 
-    def draw(self):
-        GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
+    def on_draw(self):
+        GeoDrawer.draw_filled_rectangle(
+            self.rect.x, self.rect.y, self.rect.w, self.rect.h, TopMenu.BACKGROUND_COLOR
+        )
         self.text_box.draw()
 
-    def on_resize(self, width, height):
-        self.w = width
-        self.y = height
+    def position(self, width, height):
+        self.rect.w = width
+        self.rect.y = height
         self.text_box.position(
-            self.x + TopMenu.PADDING,
-            self.y + TopMenu.PADDING,
-            self.w - 2 * TopMenu.PADDING,
-            self.h - 2 * TopMenu.PADDING,
+            self.rect.x + TopMenu.PADDING,
+            self.rect.y + TopMenu.PADDING,
+            self.rect.w - 2 * TopMenu.PADDING,
+            self.rect.h - 2 * TopMenu.PADDING,
         )
 
     def on_key_press(self, symbol, modifiers):
-        if symbol == pyglet.window.key.ESCAPE:
-            self.text_box.release_focus()
-            self.state.basis_input_focus = False
-        if symbol == pyglet.window.key.ENTER:
-            self.text_box.release_focus()
-            self.state.basis_input_focus = False
-            s = self.text_box.get_current_text()
-            if s:
-                self.state.basis_input_read = True
-                self.state.basis_input_string = s
+        if self.text_box.has_focus():
+            if symbol == pyglet.window.key.ESCAPE:
+                self.text_box.release_focus()
+            elif symbol == pyglet.window.key.ENTER:
+                self.text_box.release_focus()
+                input_string = self.text_box.get_current_text()
+                if input_string:
+                    self.dispatch_event(CustomEvents.ON_BASIS_INPUT, input_string)
+            return True
+        return False
 
     def on_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
-            if self.state.basis_input_focus:
-                s = self.text_box.get_current_text()
-                if s:
-                    self.state.basis_input_read = True
-                    self.state.basis_input_string = s
+            if self.text_box.has_focus():
                 self.text_box.release_focus()
-                self.state.basis_input_focus = False
-            return
-        if self.state.basis_input_focus:
+                input_string = self.text_box.get_current_text()
+                if input_string:
+                    self.dispatch_event(CustomEvents.ON_BASIS_INPUT, input_string)
+                return True
+            return False
+        if self.text_box.has_focus():
             if button == pyglet.window.mouse.RIGHT:
                 self.text_box.append_text(paste())
         else:
-            self.state.basis_input_focus = True
             self.text_box.set_focus()
+        return False
 
     def on_text(self, text):
-        if self.state.basis_input_focus:
+        if self.text_box.has_focus():
             self.text_box.on_text(text)
+            return True
+        return False
 
     def on_text_motion(self, motion):
-        if self.state.basis_input_focus:
+        if self.text_box.has_focus():
             self.text_box.on_text_motion(motion)
+            return True
+        return False
 
 
-class RightMenu:
-    def __init__(self, x, y, w, h, t, state: GuiState):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
+TopMenu.register_event_type(CustomEvents.ON_BASIS_INPUT)
+
+
+#####################################
+#####################################
+#####################################
+#####################################
+#####################################
+######################################
+
+
+class RightMenu(pyglet.event.EventDispatcher, Observer):
+    INITIAL_MESSAGE = "12"
+    FONT_SIZE = 12
+    TEXT_COLOR = Color.alpha_extend(Color.BLACK)
+    TEXT_BOX_COLOR = Color.DARK_GRAY
+    BACKGROUND_COLOR = Color.BLACK
+
+    def __init__(self, x, y, w, h, t, state: GuiState, dispatchers):
+        Observer.__init__(self, dispatchers)
+        self.rect = Rectangle(x, y, w, h)
         self.t = t
 
         self.state = state
 
-        self.text_box = TextBox("single cell requirement")
+        self.text_box = TextBox(
+            RightMenu.INITIAL_MESSAGE,
+            RightMenu.FONT_SIZE,
+            RightMenu.TEXT_COLOR,
+            RightMenu.TEXT_BOX_COLOR,
+        )
 
-        self.keyboard = ButtonGrid(x, y, w, h - t, 10, 4)
+        self.keyboard = ButtonGrid(10, 4)
 
         # Select grp
-
+        # TODO: Collect these into variables
         self.keyboard.add_btn(9, 0, SelectionButton("add_point.png", toggled=True))
         self.keyboard.add_btn(9, 1, SelectionButton("add_custom.png"))
         self.keyboard.add_btn(9, 2, SelectionButton("factor.png"))
@@ -118,18 +151,49 @@ class RightMenu:
         )
 
         # normal btns
-        self.keyboard.add_btn(5, 0, Button("undo.png", on_click=self.state.set_undo))
-        self.keyboard.add_btn(5, 1, Button("redo.png", on_click=self.state.set_redo))
         self.keyboard.add_btn(
-            4, 0, Button("rowcolsep.png", on_click=self.state.set_row_col_seperation)
+            5,
+            0,
+            Button(
+                "undo.png", on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
+            ),
+        )
+        self.keyboard.add_btn(
+            5,
+            1,
+            Button(
+                "redo.png", on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
+            ),
+        )
+        self.keyboard.add_btn(
+            4,
+            0,
+            Button(
+                "rowcolsep.png",
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_ROW_COL_SEPERATION
+                ),
+            ),
         )
         self.keyboard.add_btn(
             4,
             1,
-            Button("obstr-trans.png", on_click=self.state.set_obstruction_transivity),
+            Button(
+                "obstr-trans.png",
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_OBSTRUCTION_TRANSIVITY
+                ),
+            ),
         )
         self.keyboard.add_btn(
-            4, 2, Button("export.png", on_click=self.state.set_export)
+            4,
+            2,
+            Button(
+                "export.png",
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_FETCH_TILING_FOR_EXPORT
+                ),
+            ),
         )
 
         # toggle btns
@@ -179,61 +243,79 @@ class RightMenu:
             ),
         )
 
-        self.on_resize(w, h)
+        self.position(w, h)
 
-    def draw(self):
-        GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, Color.BLACK)
+    def on_draw(self):
+        GeoDrawer.draw_filled_rectangle(
+            self.rect.x,
+            self.rect.y,
+            self.rect.w,
+            self.rect.h,
+            RightMenu.BACKGROUND_COLOR,
+        )
         self.text_box.draw()
         self.keyboard.draw()
 
-    def on_resize(self, width, height):
-        self.x = width
-        self.h = height
+    def position(self, width, height):
+        self.rect.x = width
+        self.rect.h = height
         self.text_box.position(
-            self.x + TopMenu.PADDING,
-            self.h - self.t + TopMenu.PADDING,
-            self.w - 2 * TopMenu.PADDING,
+            self.rect.x + TopMenu.PADDING,
+            self.rect.h - self.t + TopMenu.PADDING,
+            self.rect.w - 2 * TopMenu.PADDING,
             self.t - 2 * TopMenu.PADDING,
         )
-        self.keyboard.resize(self.x, self.y, self.w, self.h - self.t)
+        self.keyboard.resize(
+            self.rect.x, self.rect.y, self.rect.w, self.rect.h - self.t
+        )
 
     def on_key_press(self, symbol, modifiers):
-        if symbol == pyglet.window.key.ESCAPE:
-            self.text_box.release_focus()
-            self.state.cell_input_focus = False
-        if symbol == pyglet.window.key.ENTER:
-            self.text_box.release_focus()
-            self.state.cell_input_focus = False
-            s = self.text_box.get_current_text()
-            if s:
-                self.state.cell_input_read = True
-                self.state.cell_input_string = s
+
+        if self.text_box.has_focus():
+            if symbol == pyglet.window.key.ESCAPE:
+                self.text_box.release_focus()
+            if symbol == pyglet.window.key.ENTER:
+                self.text_box.release_focus()
+                input_text = self.text_box.get_current_text()
+                if input_text:
+                    self.dispatch_event(CustomEvents.ON_PLACEMENT_INPUT, input_text)
+            return True
+        return False
 
     def on_mouse_press(self, x, y, button, modifiers):
         if not self.text_box.hit_test(x, y):
-            if self.state.cell_input_focus:
-                s = self.text_box.get_current_text()
-                if s:
-                    self.state.cell_input_read = True
-                    self.state.cell_input_string = s
+            if self.text_box.has_focus():
+                input_string = self.text_box.get_current_text()
+                if input_string:
+                    self.dispatch_event(CustomEvents.ON_PLACEMENT_INPUT, input_string)
                 self.text_box.release_focus()
-                self.state.cell_input_focus = False
-                return
+                return True
         else:
-            if self.state.cell_input_focus:
+            if self.text_box.has_focus():
                 if button == pyglet.window.mouse.RIGHT:
                     self.text_box.append_text(paste())
             else:
-                self.state.cell_input_focus = True
                 self.text_box.set_focus()
-            return
+            return False
 
         self.keyboard.click_check(x, y)
 
     def on_text(self, text):
-        if self.state.cell_input_focus:
+        if self.text_box.has_focus():
             self.text_box.on_text(text)
+            return True
+        return False
 
     def on_text_motion(self, motion):
-        if self.state.cell_input_focus:
+        if self.text_box.has_focus():
             self.text_box.on_text_motion(motion)
+            return True
+        return False
+
+
+RightMenu.register_event_type(CustomEvents.ON_PLACEMENT_INPUT)
+RightMenu.register_event_type(CustomEvents.ON_FETCH_TILING_FOR_EXPORT)
+RightMenu.register_event_type(CustomEvents.ON_UNDO)
+RightMenu.register_event_type(CustomEvents.ON_REDO)
+RightMenu.register_event_type(CustomEvents.ON_ROW_COL_SEPERATION)
+RightMenu.register_event_type(CustomEvents.ON_OBSTRUCTION_TRANSIVITY)

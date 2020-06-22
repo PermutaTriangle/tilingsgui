@@ -11,7 +11,8 @@ from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
 from tilings.algorithms import Factor
 
-from .geo import Point
+from .events import CustomEvents, Observer
+from .geometry import Point
 from .graphics import Color, GeoDrawer
 from .state import GuiState
 
@@ -177,10 +178,28 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
 
 
-class TPlotManager:
+"""
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+"""
+
+
+class TPlotManager(pyglet.event.EventDispatcher, Observer):
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
 
-    def __init__(self, width: int, height: int, state: GuiState):
+    def __init__(self, width: int, height: int, state: GuiState, dispatchers):
+        Observer.__init__(self, dispatchers)
         self.undo_deq: Deque[TPlot] = deque()
         self.redo_deq: Deque[TPlot] = deque()
         self.set_dimensions(width, height)
@@ -188,17 +207,23 @@ class TPlotManager:
         self.custom_placement: Perm = Perm((0, 1))
         self.state = state
 
+    def on_fetch_tiling_for_export(self):
+        if self.undo_deq:
+            self.dispatch_event(
+                CustomEvents.ON_EXPORT, self.undo_deq[0].tiling.to_jsonable()
+            )
+
     def set_dimensions(self, width: int, height: int):
         self.w = width
         self.h = height
         if self.undo_deq:
             self.undo_deq[0].resize(width, height)
 
-    def add_from_string(self, string):
-        self.add(TPlot(Tiling.from_string(string), self.w, self.h))
+    def on_basis_input(self, basis):
+        self.add(TPlot(Tiling.from_string(basis), self.w, self.h))
 
-    def set_custom_placement(self, string):
-        self.custom_placement = Perm.to_standard(string)
+    def on_placement_input(self, perm):
+        self.custom_placement = Perm.to_standard(perm)
 
     def add(self, drawing: TPlot):
         self.undo_deq.appendleft(drawing)
@@ -206,17 +231,17 @@ class TPlotManager:
         if len(self.undo_deq) > TPlotManager.MAX_DEQUEUE_SIZE:
             self.undo_deq.pop()
 
-    def undo(self):
+    def on_undo(self):
         if len(self.undo_deq) > 1:
             self.redo_deq.append(self.undo_deq.popleft())
             self.undo_deq[0].resize(self.w, self.h)
 
-    def redo(self):
+    def on_redo(self):
         if self.redo_deq:
             self.undo_deq.appendleft(self.redo_deq.pop())
             self.undo_deq[0].resize(self.w, self.h)
 
-    def draw(self):
+    def on_draw(self):
         if self.undo_deq:
             self.undo_deq[0].draw(self.state, self.mouse_pos)
 
@@ -236,10 +261,10 @@ class TPlotManager:
         self.mouse_pos.x = x
         self.mouse_pos.y = y
 
-    def on_resize(self, width, height):
+    def position(self, width, height):
         self.set_dimensions(width, height)
 
-    def row_col_seperation(self):
+    def on_row_col_seperation(self):
         if self.undo_deq:
             n_plot = TPlot(
                 self.undo_deq[0].tiling.row_and_column_separation(), self.w, self.h
@@ -247,7 +272,7 @@ class TPlotManager:
             if n_plot is not None:
                 self.add(n_plot)
 
-    def obstruction_transitivity(self):
+    def on_obstruction_transivity(self):
         if self.undo_deq:
             n_plot = TPlot(
                 self.undo_deq[0].tiling.obstruction_transitivity(), self.w, self.h
@@ -424,3 +449,6 @@ class TPlotManager:
 
     def partial_place_point_east(self, x, y, button, modifiers):
         return self.partial_place_point(x, y, button, modifiers, DIR_EAST)
+
+
+TPlotManager.register_event_type(CustomEvents.ON_EXPORT)
