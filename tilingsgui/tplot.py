@@ -239,7 +239,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             self.undo_deq.appendleft(self.redo_deq.pop())
             self.undo_deq[0].resize(self.w, self.h)
 
-    def draw(self):
+    def on_draw(self):
         if self.undo_deq:
             self.undo_deq[0].draw(self.state, self.mouse_pos)
 

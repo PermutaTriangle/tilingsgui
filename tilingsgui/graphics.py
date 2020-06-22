@@ -225,7 +225,7 @@ class Color:
     WHITE: ClassVar[Tuple[int, int, int]] = (255, 255, 255)
 
     @staticmethod
-    def scale_to_01(color: Tuple[float, ...]) -> Tuple[float, ...]:
+    def scale_to_01(color: Tuple[int, int, int]) -> Tuple[float, float, float]:
         """Scale color values from 0-255 to 0-1. Color can include alpha value.
 
         Args:
@@ -234,7 +234,8 @@ class Color:
         Returns:
             Tuple[float, ...]: A scaped tuple.
         """
-        return tuple(c / 255 for c in color)
+        r, g, b = color
+        return r / 255, g / 255, b / 255
 
     @staticmethod
     def alpha_extend(
@@ -254,7 +255,7 @@ class Color:
     @staticmethod
     def alpha_extend_and_scale_to_01(
         color: Tuple[int, int, int], alpha: int = 255
-    ) -> Tuple[float, ...]:
+    ) -> Tuple[float, float, float, float]:
         """Performs both alpha extension and 0-1 scaling of a color.
         Use this method if you intent to do both to guarantee they
         are done in correct order.
@@ -266,4 +267,5 @@ class Color:
         Returns:
             Tuple[float, float, float, float]: A rgba color value, 0-1.
         """
-        return Color.scale_to_01(Color.alpha_extend(color, alpha))
+        r, g, b = color
+        return r / 255, g / 255, b / 255, alpha / 255
