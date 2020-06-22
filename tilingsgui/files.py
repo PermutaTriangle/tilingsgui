@@ -3,8 +3,11 @@
 
 import json
 import pathlib
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, Iterable, List
 
+import pyglet
+
+from .events import Observer
 from .utils import get_current_time_string
 
 
@@ -65,7 +68,7 @@ class PathManager:
         return PathManager._ROOT.joinpath(PathManager._EXPORTS)
 
 
-class History:
+class History(Observer):
     """A class that handles loading and saving exported tilings.
     """
 
@@ -109,18 +112,22 @@ class History:
             History._TILING: tiling_json,
         }
 
-    def __init__(self) -> None:
+    def __init__(self, dispatchers: Iterable[pyglet.event.EventDispatcher]) -> None:
         """Creates exports folder and file if they don't exists. If they
         do exists, the files content is loaded and used if valid JSON. If
         not, we start with a fresh one.
+
+        Args:
+            dispatchers (Iterable[pyglet.event.EventDispatcher]): TODO
         """
+        super().__init__(dispatchers)
         export_path = PathManager.get_exports_abs_path()
         export_path.mkdir(parents=True, exist_ok=True)
 
         self.path: pathlib.Path = export_path.joinpath(History._FILE_NAME)
         self.data: List[Dict[str, Any]] = self._get_history_data()
 
-    def save(self) -> None:
+    def on_close(self) -> None:
         """If any exports have occurred this session, add them to
         the history file. There is a session limit so in case the
         limit is reacehed, the oldest one is removed.
@@ -132,7 +139,7 @@ class History:
                 else:
                     json.dump(self.data, history_file)
 
-    def add_tiling(self, tiling_json: dict) -> None:
+    def on_export(self, tiling_json: dict) -> None:
         """Add a tiling json to the current session.
 
         Args:

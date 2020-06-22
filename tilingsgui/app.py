@@ -31,19 +31,17 @@ class TilingGui(pyglet.window.Window):
             **kargs,
         )
 
-        self.test = Test()
-        self.push_handlers(self.test)
-
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
         self.state = GuiState()
-        self.tplot_man = TPlotManager(self.width, self.height, self.state)
+
         self.top_bar = TopMenu(
             0,
             self.height - TilingGui.TOP_BAR_HEIGHT,
             self.width - TilingGui.RIGHT_BAR_WIDTH,
             TilingGui.TOP_BAR_HEIGHT,
             self.state,
+            [self],
         )
         self.right_bar = RightMenu(
             self.width - TilingGui.RIGHT_BAR_WIDTH,
@@ -52,9 +50,13 @@ class TilingGui(pyglet.window.Window):
             self.height,
             TilingGui.TOP_BAR_HEIGHT,
             self.state,
+            [self],
+        )
+        self.tplot_man = TPlotManager(
+            self.width, self.height, self.state, [self, self.top_bar, self.right_bar]
         )
 
-        self.history = History()
+        self.history = History([self, self.right_bar, self.tplot_man])
 
     def start(self) -> None:
         self._initial_config()
@@ -70,97 +72,16 @@ class TilingGui(pyglet.window.Window):
 
     def on_draw(self):
         self.clear()
-
         self.tplot_man.draw()
         self.top_bar.draw()
         self.right_bar.draw()
 
-    def on_mouse_press(self, x, y, button, modifiers):
-
-        # TODO: consume some of these with custom evt handling and dispatchers...
-
-        self.top_bar.on_mouse_press(x, y, button, modifiers)
-        if self.state.basis_input_read:
-            self.tplot_man.add_from_string(self.state.basis_input_string)
-            self.state.basis_input_read = False
-
-        self.right_bar.on_mouse_press(x, y, button, modifiers)
-        if self.state.cell_input_read:
-            self.tplot_man.set_custom_placement(self.state.cell_input_string)
-            self.state.cell_input_read = False
-
-        if self.state.export:
-            tiling_json = self.tplot_man.get_current_tiling_json()
-            self.history.add_tiling(tiling_json)
-            self.state.export = False
-
-        if self.state.undo:
-            self.tplot_man.undo()
-            self.state.undo = False
-
-        if self.state.redo:
-            self.tplot_man.redo()
-            self.state.redo = False
-
-        if self.state.row_col_seperation:
-            self.tplot_man.row_col_seperation()
-            self.state.row_col_seperation = False
-
-        if self.state.obstruction_transivity:
-            self.tplot_man.obstruction_transitivity()
-            self.state.obstruction_transivity = False
-
-        self.tplot_man.on_mouse_press(x, y, button, modifiers)
-
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.tplot_man.on_mouse_motion(x, y, dx, dy)
-
-    def on_mouse_release(self, x, y, button, modifiers):
-        self.tplot_man.on_mouse_release(x, y, button, modifiers)
-
-    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        self.tplot_man.on_mouse_drag(x, y, dx, dy, button, modifiers)
-
-    def on_key_press(self, symbol, modifiers):
-        if self.state.basis_input_focus:
-            self.top_bar.on_key_press(symbol, modifiers)
-            if self.state.basis_input_read:
-                self.tplot_man.add_from_string(self.state.basis_input_string)
-                self.state.basis_input_read = False
-            return
-        if self.state.cell_input_focus:
-            self.right_bar.on_key_press(symbol, modifiers)
-            if self.state.cell_input_read:
-                self.tplot_man.set_custom_placement(self.state.cell_input_string)
-                self.state.cell_input_read = False
-            return
-
-        if symbol == pyglet.window.key.ESCAPE:
-            self.clean_up()
-            pyglet.app.exit()
-
     def on_resize(self, width, height):
         super().on_resize(width, height)
-
-        self.tplot_man.on_resize(
+        self.tplot_man.position(
             width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
         )
-        self.top_bar.on_resize(
+        self.top_bar.position(
             width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
         )
-        self.right_bar.on_resize(width - TilingGui.RIGHT_BAR_WIDTH, height)
-
-    def on_text(self, text):
-        self.top_bar.on_text(text)
-        self.right_bar.on_text(text)
-
-    def on_text_motion(self, motion):
-        self.top_bar.on_text_motion(motion)
-        self.right_bar.on_text_motion(motion)
-
-    def on_close(self):
-        super().on_close()
-        self.clean_up()
-
-    def clean_up(self):
-        self.history.save()
+        self.right_bar.position(width - TilingGui.RIGHT_BAR_WIDTH, height)
