@@ -118,7 +118,8 @@ class History(Observer):
         not, we start with a fresh one.
 
         Args:
-            dispatchers (Iterable[pyglet.event.EventDispatcher]): TODO
+            dispatchers (Iterable[pyglet.event.EventDispatcher]): All dispatchers that
+            dispatch events to this obserer.
         """
         super().__init__(dispatchers)
         export_path = PathManager.get_exports_abs_path()
@@ -127,10 +128,13 @@ class History(Observer):
         self.path: pathlib.Path = export_path.joinpath(History._FILE_NAME)
         self.data: List[Dict[str, Any]] = self._get_history_data()
 
-    def on_close(self) -> None:
-        """If any exports have occurred this session, add them to
-        the history file. There is a session limit so in case the
-        limit is reacehed, the oldest one is removed.
+    def on_close(self) -> bool:
+        """A handler for the closing of the window event. If any exports have occurred
+        this session, add them to the history file. There is a session limit so in case
+        the limit is reacehed, the oldest one is removed.
+
+        Returns:
+            bool: False as we do not want to consume this event.
         """
         if self._session_has_export():
             with open(self.path.as_posix(), "w") as history_file:
@@ -138,17 +142,22 @@ class History(Observer):
                     json.dump(self.data[1:], history_file)
                 else:
                     json.dump(self.data, history_file)
+        return False
 
-    def on_export(self, tiling_json: dict) -> None:
+    def on_export(self, tiling_json: dict) -> bool:
         """Add a tiling json to the current session.
 
         Args:
             tiling_json (dict): A json representation of a tiling.
+
+        Returns:
+            bool: True as this event is unique to this handler.
         """
         if tiling_json is not None:
             self._get_current_session_tiling_list().append(
                 History._create_tiling_entry(tiling_json)
             )
+        return True
 
     def _get_history_data(self) -> List[Dict[str, Any]]:
         """Tries to open the export file and retrieve any json object
