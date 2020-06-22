@@ -33,7 +33,7 @@ class TilingGui(pyglet.window.Window):
 
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
-        self.state = GuiState()  # TODO: REMOVE ME, IM AN ANTI-PATTERN
+        self.state = GuiState()
 
         self.top_bar = TopMenu(
             0,
