@@ -53,7 +53,6 @@ class TilingGui(pyglet.window.Window):
             self.height - TilingGui.TOP_BAR_HEIGHT,
             self.width - TilingGui.RIGHT_BAR_WIDTH,
             TilingGui.TOP_BAR_HEIGHT,
-            self.state,
             [self],
         )
 

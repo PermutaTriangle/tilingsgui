@@ -11,7 +11,7 @@ from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
 from tilings.algorithms import Factor
 
-from .events import Observer
+from .events import CustomEvents, Observer
 from .geometry import Point
 from .graphics import Color, GeoDrawer
 from .state import GuiState
@@ -209,7 +209,9 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
 
     def on_fetch_tiling_for_export(self):
         if self.undo_deq:
-            self.dispatch_event("on_export", self.undo_deq[0].tiling.to_jsonable())
+            self.dispatch_event(
+                CustomEvents.ON_EXPORT, self.undo_deq[0].tiling.to_jsonable()
+            )
 
     def set_dimensions(self, width: int, height: int):
         self.w = width
@@ -449,4 +451,4 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         return self.partial_place_point(x, y, button, modifiers, DIR_EAST)
 
 
-TPlotManager.register_event_type("on_export")
+TPlotManager.register_event_type(CustomEvents.ON_EXPORT)
