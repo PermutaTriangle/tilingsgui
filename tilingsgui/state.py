@@ -6,10 +6,6 @@ class GuiState:
         self.show_localized: bool = True
         self.highlight_touching_cell: bool = False
 
-        self.basis_input_focus = False
-        self.basis_input_read = False
-        self.basis_input_string = ""
-
         self.cell_input_focus = False
         self.cell_input_read = False
         self.cell_input_string = ""
