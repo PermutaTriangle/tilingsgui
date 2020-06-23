@@ -2,8 +2,7 @@
 """
 
 from collections import deque
-
-# from random import uniform
+from random import uniform
 from typing import ClassVar, Deque, Tuple
 
 import pyglet
@@ -23,7 +22,8 @@ from .utils import clamp
 class TPlot:
     OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
     REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
-    HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLACK
+    HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.ORANGE
+    FUZZYNESS = 0.25  # Should be in (0,0.5)
 
     @staticmethod
     def _col_row_and_count(gp, gridsz):
@@ -45,8 +45,26 @@ class TPlot:
         colcount, rowcount, col, row = TPlot._col_row_and_count(gp, gridsz)
         locs = [
             Point(
-                cellsz[0] * (c_x + (col[c_x].index(ind) + 1) / (colcount[c_x] + 1)),
-                cellsz[1] * (c_y + (row[c_y].index(val) + 1) / (rowcount[c_y] + 1)),
+                cellsz[0]
+                * (
+                    c_x
+                    + (
+                        col[c_x].index(ind)
+                        + 1
+                        + uniform(-TPlot.FUZZYNESS, TPlot.FUZZYNESS)
+                    )
+                    / (colcount[c_x] + 1)
+                ),
+                cellsz[1]
+                * (
+                    c_y
+                    + (
+                        row[c_y].index(val)
+                        + 1
+                        + uniform(-TPlot.FUZZYNESS, TPlot.FUZZYNESS)
+                    )
+                    / (rowcount[c_y] + 1)
+                ),
             )
             for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt))
         ]
