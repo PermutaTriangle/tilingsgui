@@ -29,3 +29,7 @@ def get_current_time_string() -> str:
         str: The current datetime.
     """
     return datetime.datetime.now().isoformat()
+
+
+def clamp(x, mnx, mxx):
+    return min(mxx, max(x, mnx))

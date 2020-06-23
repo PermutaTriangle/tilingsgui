@@ -2,6 +2,8 @@
 """
 
 from collections import deque
+
+# from random import uniform
 from typing import ClassVar, Deque, Tuple
 
 import pyglet
@@ -15,6 +17,7 @@ from .events import CustomEvents, Observer
 from .geometry import Point
 from .graphics import Color, GeoDrawer
 from .state import GuiState
+from .utils import clamp
 
 
 class TPlot:
@@ -202,22 +205,18 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         Observer.__init__(self, dispatchers)
         self.undo_deq: Deque[TPlot] = deque()
         self.redo_deq: Deque[TPlot] = deque()
-        self.set_dimensions(width, height)
+        self.position(width, height)
         self.mouse_pos = Point(0, 0)
         self.custom_placement: Perm = Perm((0, 1))
         self.state = state
 
-    def on_fetch_tiling_for_export(self):
-        if self.undo_deq:
-            self.dispatch_event(
-                CustomEvents.ON_EXPORT, self.undo_deq[0].tiling.to_jsonable()
-            )
+    # Handlers
 
-    def set_dimensions(self, width: int, height: int):
-        self.w = width
-        self.h = height
-        if self.undo_deq:
-            self.undo_deq[0].resize(width, height)
+    def on_fetch_tiling_for_export(self):
+        if not self.empty():
+            self.dispatch_event(
+                CustomEvents.ON_EXPORT, self.current().tiling.to_jsonable()
+            )
 
     def on_basis_input(self, basis):
         self.add(TPlot(Tiling.from_string(basis), self.w, self.h))
@@ -225,16 +224,10 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     def on_placement_input(self, perm):
         self.custom_placement = Perm.to_standard(perm)
 
-    def add(self, drawing: TPlot):
-        self.undo_deq.appendleft(drawing)
-        self.redo_deq.clear()
-        if len(self.undo_deq) > TPlotManager.MAX_DEQUEUE_SIZE:
-            self.undo_deq.pop()
-
     def on_undo(self):
-        if len(self.undo_deq) > 1:
+        if self.has_older():
             self.redo_deq.append(self.undo_deq.popleft())
-            self.undo_deq[0].resize(self.w, self.h)
+            self.current().resize(self.w, self.h)
 
     def on_redo(self):
         if self.redo_deq:
@@ -245,24 +238,33 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         if self.undo_deq:
             self.undo_deq[0].draw(self.state, self.mouse_pos)
 
-    def get_current_tplot(self):
-        if self.undo_deq:
-            return self.undo_deq[0]
+    def add(self, drawing: TPlot):
+        self.undo_deq.appendleft(drawing)
+        self.redo_deq.clear()
+        if len(self.undo_deq) > TPlotManager.MAX_DEQUEUE_SIZE:
+            self.undo_deq.pop()
 
-    def get_current_tiling(self):
-        if self.undo_deq:
-            return self.undo_deq[0].tiling
+    def empty(self):
+        return not self
 
-    def get_current_tiling_json(self):
-        if self.undo_deq:
-            return self.undo_deq[0].tiling.to_jsonable()
+    def has_older(self):
+        return len(self.undo_deq) > 1
+
+    def __bool__(self):
+        return bool(self.undo_deq)
+
+    def current(self):
+        return self.undo_deq[0]
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_pos.x = x
         self.mouse_pos.y = y
 
     def position(self, width, height):
-        self.set_dimensions(width, height)
+        self.w = width
+        self.h = height
+        if self.undo_deq:
+            self.undo_deq[0].resize(width, height)
 
     def on_row_col_seperation(self):
         if self.undo_deq:
@@ -294,14 +296,30 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             self.cell_insertion_custom,
             self.factor,
             self.move,
-            self.place_point_west,
-            self.place_point_east,
-            self.place_point_north,
-            self.place_point_south,
-            self.partial_place_point_west,
-            self.partial_place_point_east,
-            self.partial_place_point_north,
-            self.partial_place_point_south,
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_WEST
+            ),
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_EAST
+            ),
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_NORTH
+            ),
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_SOUTH
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_WEST
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_EAST
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_NORTH
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_SOUTH
+            ),
         ]
         n_plot = strats[self.state.strategy_selected](x, y, button, modifiers)
         if n_plot is not None:
@@ -358,9 +376,6 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
 
         if not self.state.has_selected_pnt or not self.undo_deq:
             return
-
-        def clamp(x, mnx, mxx):
-            return min(mxx, max(x, mnx))
 
         t = self.undo_deq[0]
         if len(self.state.selected_point) == 2:
@@ -425,30 +440,6 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         for fac, component in zip(facs, components):
             if cell in component:
                 return fac
-
-    def place_point_south(self, x, y, button, modifiers):
-        return self.place_point(x, y, button, modifiers, DIR_SOUTH)
-
-    def place_point_north(self, x, y, button, modifiers):
-        return self.place_point(x, y, button, modifiers, DIR_NORTH)
-
-    def place_point_west(self, x, y, button, modifiers):
-        return self.place_point(x, y, button, modifiers, DIR_WEST)
-
-    def place_point_east(self, x, y, button, modifiers):
-        return self.place_point(x, y, button, modifiers, DIR_EAST)
-
-    def partial_place_point_south(self, x, y, button, modifiers):
-        return self.partial_place_point(x, y, button, modifiers, DIR_SOUTH)
-
-    def partial_place_point_north(self, x, y, button, modifiers):
-        return self.partial_place_point(x, y, button, modifiers, DIR_NORTH)
-
-    def partial_place_point_west(self, x, y, button, modifiers):
-        return self.partial_place_point(x, y, button, modifiers, DIR_WEST)
-
-    def partial_place_point_east(self, x, y, button, modifiers):
-        return self.partial_place_point(x, y, button, modifiers, DIR_EAST)
 
 
 TPlotManager.register_event_type(CustomEvents.ON_EXPORT)
