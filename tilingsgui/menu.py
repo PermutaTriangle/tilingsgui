@@ -1,5 +1,7 @@
 import pyglet
 
+from tilings import Tiling
+
 from .events import CustomEvents, Observer
 from .geometry import Rectangle
 from .graphics import Color, GeoDrawer
@@ -51,6 +53,15 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
                 self.text_box.release_focus()
                 input_string = self.text_box.get_current_text()
                 if input_string:
+                    if input_string[0] == "{" and input_string[-1] == "}":
+                        try:
+                            tiling = Tiling.from_json(input_string)
+                            self.dispatch_event(
+                                CustomEvents.ON_BASIS_JSON_INPUT, tiling
+                            )
+                            return True
+                        except ValueError:
+                            pass
                     self.dispatch_event(CustomEvents.ON_BASIS_INPUT, input_string)
             return True
         return False
@@ -61,6 +72,15 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
                 self.text_box.release_focus()
                 input_string = self.text_box.get_current_text()
                 if input_string:
+                    if input_string[0] == "{" and input_string[-1] == "}":
+                        try:
+                            tiling = Tiling.from_json(input_string)
+                            self.dispatch_event(
+                                CustomEvents.ON_BASIS_JSON_INPUT, tiling
+                            )
+                            return True
+                        except ValueError:
+                            pass
                     self.dispatch_event(CustomEvents.ON_BASIS_INPUT, input_string)
                 return True
             return False
@@ -85,6 +105,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
 
 
 TopMenu.register_event_type(CustomEvents.ON_BASIS_INPUT)
+TopMenu.register_event_type(CustomEvents.ON_BASIS_JSON_INPUT)
 
 
 #####################################
