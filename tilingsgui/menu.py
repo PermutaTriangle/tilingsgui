@@ -79,7 +79,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
                                 CustomEvents.ON_BASIS_JSON_INPUT, tiling
                             )
                             return True
-                        except ValueError:
+                        except (ValueError, KeyError):
                             pass
                     self.dispatch_event(CustomEvents.ON_BASIS_INPUT, input_string)
                 return True

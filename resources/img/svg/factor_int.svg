@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="100" viewBox="0 0 24 24" width="100">
+ <g>
+  <text x="11" y="14" style="font: 6px serif; fill: black;">I</text>
+  <rect x="5.25" y="0.25" width="3.5" height="3.5"/>
+  <rect x="15.25" y="0.25" width="3.5" height="3.5"/>
+  <rect x="0.25" y="5.25" width="3.5" height="3.5"/>
+  <rect x="5.25" y="5.25" width="3.5" height="3.5"/>
+  <rect x="10.25" y="5.25" width="3.5" height="3.5"/>
+  <rect x="15.25" y="5.25" width="3.5" height="3.5"/>
+  <rect x="20.25" y="5.25" width="3.5" height="3.5"/>
+  <rect x="5.25" y="10.25" width="3.5" height="3.5"/>
+  <rect x="15.25" y="10.25" width="3.5" height="3.5"/>
+  <rect x="0.25" y="15.25" width="3.5" height="3.5"/>
+  <rect x="5.25" y="15.25" width="3.5" height="3.5"/>
+  <rect x="10.25" y="15.25" width="3.5" height="3.5"/>
+  <rect x="15.25" y="15.25" width="3.5" height="3.5"/>
+  <rect x="20.25" y="15.25" width="3.5" height="3.5"/>
+  <rect x="5.25" y="20.25" width="3.5" height="3.5"/>
+  <rect x="15.25" y="20.25" width="3.5" height="3.5"/>
+ </g>
+</svg>
