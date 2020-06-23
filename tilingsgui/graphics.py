@@ -67,7 +67,7 @@ class GeoDrawer:
             # TODO: Do in batch
             # Maybe always add to bash and support flushing it...
             if n > 1:
-                vertices = [coord for pnt in pnt_path for coord in pnt]
+                vertices = [coord for pnt in pnt_path for coord in pnt.coords()]
                 pyglet.graphics.draw(
                     n,
                     pyglet.gl.GL_LINE_STRIP,
