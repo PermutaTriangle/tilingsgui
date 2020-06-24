@@ -1,7 +1,7 @@
 """[TODO]
 """
 
-from collections import deque
+from collections import Counter, deque
 from random import uniform
 from typing import ClassVar, Deque, Tuple
 
@@ -240,6 +240,7 @@ class TPlot:
 
 class TPlotManager(pyglet.event.EventDispatcher, Observer):
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
+    MAX_SEQUENCE_SIZE = 7
 
     def __init__(self, width: int, height: int, state: GuiState, dispatchers):
         Observer.__init__(self, dispatchers)
@@ -531,6 +532,15 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                     self.add(n_plot)
             except (InvalidOperationError, NotImplementedError):
                 pass
+
+    def on_print_sequence(self):
+        if not self.undo_deq:
+            return
+        print("Generating sequence... ", end=" ")
+        t = self.current().tiling
+        c = Counter(len(gp) for gp in t.gridded_perms(TPlotManager.MAX_SEQUENCE_SIZE))
+        seq = [c[i] for i in range(TPlotManager.MAX_SEQUENCE_SIZE + 1)]
+        print(seq)
 
 
 TPlotManager.register_event_type(CustomEvents.ON_EXPORT)
