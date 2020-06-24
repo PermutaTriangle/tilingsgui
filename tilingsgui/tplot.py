@@ -10,7 +10,7 @@ import pyglet
 from permuta import Perm
 from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
-from tilings.algorithms import Factor
+from tilings.algorithms import Factor, FactorWithInterleaving
 
 from .events import CustomEvents, Observer
 from .geometry import Point
@@ -337,31 +337,32 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             self.cell_insertion,
             self.cell_insertion_custom,
             self.factor,
+            self.factor_with_interleaving,
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_WEST
+            ),
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_EAST
+            ),
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_NORTH
+            ),
+            lambda x, y, button, modifiers: self.place_point(
+                x, y, button, modifiers, DIR_SOUTH
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_WEST
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_EAST
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_NORTH
+            ),
+            lambda x, y, button, modifiers: self.partial_place_point(
+                x, y, button, modifiers, DIR_SOUTH
+            ),
             self.move,
-            lambda x, y, button, modifiers: self.place_point(
-                x, y, button, modifiers, DIR_WEST
-            ),
-            lambda x, y, button, modifiers: self.place_point(
-                x, y, button, modifiers, DIR_EAST
-            ),
-            lambda x, y, button, modifiers: self.place_point(
-                x, y, button, modifiers, DIR_NORTH
-            ),
-            lambda x, y, button, modifiers: self.place_point(
-                x, y, button, modifiers, DIR_SOUTH
-            ),
-            lambda x, y, button, modifiers: self.partial_place_point(
-                x, y, button, modifiers, DIR_WEST
-            ),
-            lambda x, y, button, modifiers: self.partial_place_point(
-                x, y, button, modifiers, DIR_EAST
-            ),
-            lambda x, y, button, modifiers: self.partial_place_point(
-                x, y, button, modifiers, DIR_NORTH
-            ),
-            lambda x, y, button, modifiers: self.partial_place_point(
-                x, y, button, modifiers, DIR_SOUTH
-            ),
         ]
         n_plot = strats[self.state.strategy_selected](x, y, button, modifiers)
         if n_plot is not None:
@@ -474,11 +475,22 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             )
 
     def factor(self, x, y, button, modifiers):
-        t = self.undo_deq[0]
-        fac_algo = Factor(t.tiling)
+        tplot = self.current()
+        fac_algo = Factor(tplot.tiling)
         components = fac_algo.get_components()
         facs = fac_algo.factors()
-        cell = t.get_cell(Point(x, y))
+        cell = tplot.get_cell(Point(x, y))
+        for fac, component in zip(facs, components):
+            if cell in component:
+                return fac
+
+    # TODO: combine re-usable part with factor...
+    def factor_with_interleaving(self, x, y, button, modifiers):
+        tplot = self.current()
+        fac_algo = FactorWithInterleaving(tplot.tiling)
+        components = fac_algo.get_components()
+        facs = fac_algo.factors()
+        cell = tplot.get_cell(Point(x, y))
         for fac, component in zip(facs, components):
             if cell in component:
                 return fac

@@ -144,7 +144,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         self.keyboard.add_btn(9, 0, SelectionButton("add_point.png", toggled=True))
         self.keyboard.add_btn(9, 1, SelectionButton("add_custom.png"))
         self.keyboard.add_btn(9, 2, SelectionButton("factor.png"))
-        self.keyboard.add_btn(9, 3, SelectionButton("move.png"))
+        self.keyboard.add_btn(9, 3, SelectionButton("factor_int.png"))
         self.keyboard.add_btn(8, 0, SelectionButton("place_west.png"))
         self.keyboard.add_btn(8, 1, SelectionButton("place_east.png"))
         self.keyboard.add_btn(8, 2, SelectionButton("place_north.png"))
@@ -153,6 +153,8 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         self.keyboard.add_btn(7, 1, SelectionButton("pplace_east.png"))
         self.keyboard.add_btn(7, 2, SelectionButton("pplace_north.png"))
         self.keyboard.add_btn(7, 3, SelectionButton("pplace_south.png"))
+        self.keyboard.add_btn(6, 0, SelectionButton("move.png"))
+
         self.keyboard.add_selection_group(
             [
                 (9, 0),
@@ -167,6 +169,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 (7, 1),
                 (7, 2),
                 (7, 3),
+                (6, 0),
             ],
             on_click=self.state.set_strategy,
         )
