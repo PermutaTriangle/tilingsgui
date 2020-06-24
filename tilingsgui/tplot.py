@@ -11,6 +11,7 @@ from permuta import Perm
 from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
 from tilings.algorithms import Factor, FactorWithInterleaving
+from tilings.exception import InvalidOperationError
 
 from .events import CustomEvents, Observer
 from .geometry import Point
@@ -362,6 +363,14 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             lambda x, y, button, modifiers: self.partial_place_point(
                 x, y, button, modifiers, DIR_SOUTH
             ),
+            lambda x, y, button, modifiers: self.fusion(x, y, button, modifiers, True),
+            lambda x, y, button, modifiers: self.fusion(x, y, button, modifiers, False),
+            lambda x, y, button, modifiers: self.component_fusion(
+                x, y, button, modifiers, True
+            ),
+            lambda x, y, button, modifiers: self.component_fusion(
+                x, y, button, modifiers, False
+            ),
             self.move,
         ]
         n_plot = strats[self.state.strategy_selected](x, y, button, modifiers)
@@ -494,6 +503,34 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         for fac, component in zip(facs, components):
             if cell in component:
                 return fac
+
+    def fusion(self, x, y, button, modifiers, row: bool):
+        tplot = self.current()
+        c, r = tplot.get_cell(Point(x, y))
+        if self.undo_deq:
+            try:
+                if row:
+                    n_plot = TPlot(tplot.tiling.fusion(row=r), self.w, self.h)
+                else:
+                    n_plot = TPlot(tplot.tiling.fusion(col=c), self.w, self.h)
+                if n_plot is not None:
+                    self.add(n_plot)
+            except (InvalidOperationError, NotImplementedError):
+                pass
+
+    def component_fusion(self, x, y, button, modifiers, row: bool):
+        tplot = self.current()
+        c, r = tplot.get_cell(Point(x, y))
+        if self.undo_deq:
+            try:
+                if row:
+                    n_plot = TPlot(tplot.tiling.component_fusion(row=r), self.w, self.h)
+                else:
+                    n_plot = TPlot(tplot.tiling.component_fusion(col=c), self.w, self.h)
+                if n_plot is not None:
+                    self.add(n_plot)
+            except (InvalidOperationError, NotImplementedError):
+                pass
 
 
 TPlotManager.register_event_type(CustomEvents.ON_EXPORT)

@@ -153,7 +153,11 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         self.keyboard.add_btn(7, 1, SelectionButton("pplace_east.png"))
         self.keyboard.add_btn(7, 2, SelectionButton("pplace_north.png"))
         self.keyboard.add_btn(7, 3, SelectionButton("pplace_south.png"))
-        self.keyboard.add_btn(6, 0, SelectionButton("move.png"))
+        self.keyboard.add_btn(6, 0, SelectionButton("fusion_r.png"))
+        self.keyboard.add_btn(6, 1, SelectionButton("fusion_c.png"))
+        self.keyboard.add_btn(6, 2, SelectionButton("fusion_comp_r.png"))
+        self.keyboard.add_btn(6, 3, SelectionButton("fusion_comp_c.png"))
+        self.keyboard.add_btn(5, 0, SelectionButton("move.png"))
 
         self.keyboard.add_selection_group(
             [
@@ -170,27 +174,31 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 (7, 2),
                 (7, 3),
                 (6, 0),
+                (6, 1),
+                (6, 2),
+                (6, 3),
+                (5, 0),
             ],
             on_click=self.state.set_strategy,
         )
 
         # normal btns
         self.keyboard.add_btn(
-            5,
+            4,
             0,
             Button(
                 "undo.png", on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
             ),
         )
         self.keyboard.add_btn(
-            5,
+            4,
             1,
             Button(
                 "redo.png", on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
             ),
         )
         self.keyboard.add_btn(
-            4,
+            3,
             0,
             Button(
                 "rowcolsep.png",
@@ -200,7 +208,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
-            4,
+            3,
             1,
             Button(
                 "obstr-trans.png",
@@ -210,7 +218,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
-            4,
+            3,
             2,
             Button(
                 "export.png",
@@ -222,7 +230,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
 
         # toggle btns
         self.keyboard.add_btn(
-            2,
+            1,
             0,
             ToggleButton(
                 "shading.png",
@@ -231,7 +239,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
-            2,
+            1,
             1,
             ToggleButton(
                 "pretty.png",
@@ -240,7 +248,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
-            2,
+            1,
             2,
             ToggleButton(
                 "show_cross.png",
@@ -249,7 +257,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
-            2,
+            1,
             3,
             ToggleButton(
                 "show_local.png",
@@ -258,7 +266,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
-            1,
+            0,
             0,
             ToggleButton(
                 "htc.png",
