@@ -123,7 +123,14 @@ class TPlot:
             GeoDrawer.draw_filled_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
 
     def _draw_point_cells(self):
-        for c_x, c_y in self.tiling.point_cells:
+        point_cells_with_point_perm_req = {
+            req.pos[0]
+            for req_lis in self.tiling.requirements
+            for req in req_lis
+            if req.is_point_perm()
+        }.intersection(self.tiling.point_cells)
+
+        for c_x, c_y in point_cells_with_point_perm_req:
             x, y, w, h = self._cell_to_rect(c_x, c_y)
             GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)
 
@@ -147,11 +154,21 @@ class TPlot:
                         return i, j, k
 
     def _draw_obstructions(self, state: GuiState, mpos: Point):
+        # TODO: create once, re-use ... pass through drawing functions
+        # look for more such optimizations... when done...
+        point_cells_with_point_perm_req = self.tiling.point_cells.intersection(
+            {
+                req.pos[0]
+                for req_lis in self.tiling.requirements
+                for req in req_lis
+                if len(req) == 1
+            }
+        )
         hover_cell = self.get_cell(mpos)
         for obs, loc in zip(self.tiling.obstructions, self.obstruction_locs):
             if (state.shading and obs.is_point_perm()) or (
                 state.pretty_points
-                and all(p in self.tiling.point_cells for p in obs.pos)
+                and all(p in point_cells_with_point_perm_req for p in obs.pos)
             ):
                 continue
 
@@ -170,10 +187,14 @@ class TPlot:
     def _draw_requirements(self, state: GuiState, mpos: Point):
         hover_index = self.get_point_req_index(mpos)
         for i, reqlist in enumerate(self.requirement_locs):
-            if state.pretty_points and any(
-                p in self.tiling.point_cells
-                for req in self.tiling.requirements[i]
-                for p in req.pos
+            if (
+                len(reqlist[0]) == 1
+                and state.pretty_points
+                and any(
+                    p in self.tiling.point_cells
+                    for req in self.tiling.requirements[i]
+                    for p in req.pos
+                )
             ):
                 continue
             col = (
