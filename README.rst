@@ -66,9 +66,8 @@ Basis input
 
 Cell insertion
 ~~~~~~~~~~~~~~
-.. raw:: html
-
-   <svg src="https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/resources/img/svg/add_custom.svg" width="200"/>
+.. image:: resources/img/svg/add_custom.svg
+   :width: 600
 
 Factor
 ~~~~~~
