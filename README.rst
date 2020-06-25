@@ -66,12 +66,13 @@ Basis input
 
 Cell insertion
 ~~~~~~~~~~~~~~
+fdasf asldkfjas lfdasdflkj asdf
 asdfa |add_custom| adsfsadf
+afdsk ldsakfj saldkfjsadlkfj 
 
 .. |add_custom| image:: resources/img/svg/add_custom.svg
    :scale: 100 %
    :alt: img-error
-   :align: middle
 
 Factor
 ~~~~~~
