@@ -198,6 +198,14 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             ),
         )
         self.keyboard.add_btn(
+            4,
+            2,
+            Button(
+                "str.png",
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_TILING),
+            ),
+        )
+        self.keyboard.add_btn(
             3,
             0,
             Button(
@@ -360,3 +368,4 @@ RightMenu.register_event_type(CustomEvents.ON_REDO)
 RightMenu.register_event_type(CustomEvents.ON_ROW_COL_SEPERATION)
 RightMenu.register_event_type(CustomEvents.ON_OBSTRUCTION_TRANSIVITY)
 RightMenu.register_event_type(CustomEvents.ON_PRINT_SEQUENCE)
+RightMenu.register_event_type(CustomEvents.ON_PRINT_TILING)
