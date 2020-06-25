@@ -228,3 +228,7 @@ Highlight hovered cell
 .. |undo| image:: resources/img/svg/undo.svg
    :scale: 100 %
    :alt: img-error
+
+.. |verification| image:: resources/img/svg/verification.svg
+   :scale: 100 %
+   :alt: img-error

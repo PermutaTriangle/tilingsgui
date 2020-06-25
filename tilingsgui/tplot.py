@@ -12,6 +12,15 @@ from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import Tiling
 from tilings.algorithms import Factor, FactorWithInterleaving
 from tilings.exception import InvalidOperationError
+from tilings.strategies import (
+    BasicVerificationStrategy,
+    DatabaseVerificationStrategy,
+    ElementaryVerificationStrategy,
+    LocallyFactorableVerificationStrategy,
+    LocalVerificationStrategy,
+    MonotoneTreeVerificationStrategy,
+    OneByOneVerificationStrategy,
+)
 
 from .events import CustomEvents, Observer
 from .geometry import Point
@@ -548,6 +557,39 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         if self.undo_deq:
             tiling = self.current().tiling
             print(f"{str(tiling)}\n\n{repr(tiling)}")
+
+    def on_vertification(self):
+        if not self.undo_deq:
+            return
+        strats = [
+            "BasicVerificationStrategy",
+            "DatabaseVerificationStrategy",
+            "ElementaryVerificationStrategy",
+            "InsertionEncodingVerificationStrategy",
+            "LocallyFactorableVerificationStrategy",
+            "LocalVerificationStrategy",
+            "MonotoneTreeVerificationStrategy",
+            "OneByOneVerificationStrategy",
+        ]
+        pad = max(len(s) for s in strats)
+        t = self.current().tiling
+        verts = [
+            BasicVerificationStrategy().verified(t),
+            DatabaseVerificationStrategy().verified(t),
+            ElementaryVerificationStrategy().verified(t),
+            "?",  # InsertionEncodingVerificationStrategy().verified(t),
+            LocallyFactorableVerificationStrategy().verified(t),
+            LocalVerificationStrategy().verified(t),
+            MonotoneTreeVerificationStrategy().verified(t),
+            OneByOneVerificationStrategy().verified(t),
+        ]
+        print(
+            "\n".join(
+                f"{strat}{' '*(pad-len(strat))} : {str(vert)}"
+                for strat, vert in zip(strats, verts)
+            ),
+            end="\n\n",
+        )
 
 
 TPlotManager.register_event_type(CustomEvents.ON_EXPORT)
