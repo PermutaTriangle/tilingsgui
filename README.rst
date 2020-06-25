@@ -66,14 +66,9 @@ Basis input
 
 Cell insertion
 ~~~~~~~~~~~~~~
-aasdfsadf afd
+asdfa |test image size| adsfsadf
 
-.. image:: resources/img/svg/add_custom.svg
-   :scale: 200 %
-   :alt: img-error
-   :align: right
-
-adsfdsafdsa
+.. |add_custom| image:: resources/img/svg/add_custom.svg
 
 Factor
 ~~~~~~
