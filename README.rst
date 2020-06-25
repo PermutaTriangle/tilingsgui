@@ -67,8 +67,10 @@ Basis input
 Cell insertion
 ~~~~~~~~~~~~~~
 aasdfsadf afd
+
 .. image:: resources/img/svg/add_custom.svg
    :width: 100
+
 adsfdsafdsa
 
 Factor
