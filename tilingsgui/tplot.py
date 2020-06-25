@@ -95,8 +95,8 @@ class TPlot:
         else:
             if state.shading:
                 self._draw_shaded_cells()
-            if state.pretty_points:
-                self._draw_point_cells()
+            # if state.pretty_points:
+            #    self._draw_point_cells()
             self._draw_grid()
             self._draw_obstructions(state, mpos)
             self._draw_requirements(state, mpos)
@@ -123,7 +123,7 @@ class TPlot:
         for c_x, c_y in self.tiling.empty_cells:
             GeoDrawer.draw_filled_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
 
-    def _draw_point_cells(self):
+    """def _draw_point_cells(self):
         point_cells_with_point_perm_req = {
             req.pos[0]
             for req_lis in self.tiling.requirements
@@ -133,7 +133,7 @@ class TPlot:
 
         for c_x, c_y in point_cells_with_point_perm_req:
             x, y, w, h = self._cell_to_rect(c_x, c_y)
-            GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)
+            GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)"""
 
     def get_cell(self, mpos: Point):
         t_w, t_h = self.tiling.dimensions
@@ -197,6 +197,8 @@ class TPlot:
                     for p in req.pos
                 )
             ):
+                pnt = reqlist[0][0]
+                GeoDrawer.draw_circle(pnt.x, pnt.y, 10, Color.BLACK)
                 continue
             col = (
                 TPlot.HIGHLIGHT_COLOR
@@ -541,6 +543,11 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         c = Counter(len(gp) for gp in t.gridded_perms(TPlotManager.MAX_SEQUENCE_SIZE))
         seq = [c[i] for i in range(TPlotManager.MAX_SEQUENCE_SIZE + 1)]
         print(seq)
+
+    def on_print_tiling(self):
+        if self.undo_deq:
+            tiling = self.current().tiling
+            print(f"{str(tiling)}\n\n{repr(tiling)}")
 
 
 TPlotManager.register_event_type(CustomEvents.ON_EXPORT)

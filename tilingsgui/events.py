@@ -36,3 +36,4 @@ class CustomEvents:
     ON_BASIS_JSON_INPUT = "on_basis_json_input"
     ON_EXPORT = "on_export"
     ON_PRINT_SEQUENCE = "on_print_sequence"
+    ON_PRINT_TILING = "on_print_tiling"
