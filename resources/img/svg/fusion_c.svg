@@ -1,0 +1,11 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 100 100">
+  <text x="20" y="20" style="font: 20px serif; fill: black;">C</text>
+  <ellipse style="fill: rgba(0, 0, 0, 0); stroke: rgb(0, 0, 0); stroke-width: 4px;" cx="50" cy="50" rx="15" ry="40"/>
+  <ellipse style="fill: rgba(0, 0, 0, 0); stroke: rgb(0, 0, 0); stroke-width: 4px;" cx="50" cy="50" rx="15" ry="40" transform="rotate(60, 50, 50)"/>
+  <ellipse style="fill: rgba(0, 0, 0, 0); stroke: rgb(0, 0, 0); stroke-width: 4px;" cx="50" cy="50" rx="15" ry="40" transform="rotate(-60, 50, 50)"/>
+  <circle fill="black" cx="50" cy="50" r="10.5"/>
+  <circle fill="black" cx="60" cy="80" r="5"/>
+  <circle fill="black" cx="18" cy="42" r="5"/>
+  <circle fill="black" cx="74" cy="26" r="5"/>  
+</svg>

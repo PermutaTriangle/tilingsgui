@@ -21,6 +21,8 @@ black = "^19.10b0"
 pylint = "^2.5.3"
 mypy = "^0.780"
 isort = "^4.3.21"
+docutils = "^0.16"
+rstcheck = "^3.3.1"
 
 [tool.poetry.scripts]
 tilingsgui = 'tilingsgui.main:main'
