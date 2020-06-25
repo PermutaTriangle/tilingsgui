@@ -579,7 +579,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             ElementaryVerificationStrategy().verified(t),
             "?",  # InsertionEncodingVerificationStrategy().verified(t),
             LocallyFactorableVerificationStrategy().verified(t),
-            LocalVerificationStrategy().verified(t),
+            LocalVerificationStrategy(no_factors=False).verified(t),
             MonotoneTreeVerificationStrategy().verified(t),
             OneByOneVerificationStrategy().verified(t),
         ]
