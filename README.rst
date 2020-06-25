@@ -60,7 +60,7 @@ Without them the app still works but pasting won’t.
 
 Known issues
 -----------
-* Enter adds an additional char to input boxes on macs
+* Pressing enter adds an additional char to input boxes on macs
 
 Report a bug
 ~~~~~~~~~~~
@@ -71,7 +71,26 @@ User manual
 
 Basis input
 ~~~~~~~~~~~
-The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using `from_string`_ and `from_json`_ respectively. To confirm your input, press enter or click away from the text box. Escape cancels the input.
+The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using `from_string`_ and `from_json`_ respectively. A right click activates it. To confirm your input, press enter or click away from the text box. Escape cancels the input. Right clicking when activated will paste whatever is on the clipboard.
+
+**Example**:
+The following two inputs are two ways of producing the same initial tiling.
+
+.. code:: none
+
+   1432_12345
+   
+   {"class_module": "tilings.tiling", "comb_class": "Tiling", "obstructions": [{"patt": [0, 3, 2, 1], "pos": [[0, 0], [0, 0], [0, 0], [0, 0]]}, {"patt": [0, 1, 2, 3, 4], "pos": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]}], "requirements": [], "assumptions": []}
+   
+The initial tiling in question would be the following.
+
+.. code:: sh
+
+   +-+
+   |1|
+   +-+
+   1: Av(0321, 01234)
+   
 
 Cell insertion
 ~~~~~~~~~~~~~~
