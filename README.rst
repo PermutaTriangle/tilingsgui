@@ -69,6 +69,9 @@ Cell insertion
 asdfa |add_custom| adsfsadf
 
 .. |add_custom| image:: resources/img/svg/add_custom.svg
+   :scale: 100 %
+   :alt: img-error
+   :align: middle
 
 Factor
 ~~~~~~
