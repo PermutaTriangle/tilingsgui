@@ -58,11 +58,20 @@ Pyperclip requires clipboard tools that might not come pre-installed.
 
 Without them the app still works but pasting won’t.
 
+Known issues
+-----------
+* Enter adds an additional char to input boxes on macs
+
+Report a bug
+~~~~~~~~~~~
+Along with the description of the bug, please provide a json of the tiling which is exportable in the gui.
+
 User manual
 -----------
 
 Basis input
 ~~~~~~~~~~~
+The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using `from_string`_ and `from_json`_ respectively. To confirm your input, press enter or click away from the text box. Escape cancels the input.
 
 Cell insertion
 ~~~~~~~~~~~~~~
@@ -112,6 +121,8 @@ Highlight hovered cell
 
 .. _Tilings: https://github.com/PermutaTriangle/Tilings
 .. _Poetry: https://python-poetry.org/docs/#installation
+.. _from_string: https://github.com/PermutaTriangle/Tilings/blob/0f218f8139d16351d686445d271cf2d8e7c859b2/tilings/tiling.py#L472
+.. _from_json: https://github.com/PermutaTriangle/Tilings/blob/0f218f8139d16351d686445d271cf2d8e7c859b2/tilings/tiling.py#L496
 
 .. |add_point| image:: resources/img/svg/add_point.svg
    :scale: 100 %
