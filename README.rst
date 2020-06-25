@@ -68,7 +68,7 @@ Cell insertion
 ~~~~~~~~~~~~~~
 .. raw:: html
 
-   <svg src=https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/resources/img/svg/add_custom.svg width="200"/>
+   <svg src="https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/resources/img/svg/add_custom.svg" width="200"/>
 
 Factor
 ~~~~~~
