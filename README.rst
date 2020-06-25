@@ -66,7 +66,7 @@ Basis input
 
 Cell insertion
 ~~~~~~~~~~~~~~
-asdfa |test image size| adsfsadf
+asdfa |add_custom| adsfsadf
 
 .. |add_custom| image:: resources/img/svg/add_custom.svg
 
