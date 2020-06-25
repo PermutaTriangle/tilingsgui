@@ -66,6 +66,9 @@ Basis input
 
 Cell insertion
 ~~~~~~~~~~~~~~
+|Alt text|
+
+.. |Alt text| image:: ./controllers_brief.svg
 
 Factor
 ~~~~~~
