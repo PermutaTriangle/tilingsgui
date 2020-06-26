@@ -160,7 +160,34 @@ Obstruction transitivity
 
 Export
 ~~~~~~
-|export|
+Export, |export|, will store the current tiling in memory and upon closing the app, will add all stored tilings in the session to ``./export/history.json``. There is a session limit so the file become too large. If the session limit is reached, than adding more will remove the oldest. The format of the json can be seen below with time and tiling values empty.
+
+.. code:: JSON
+
+[
+  {
+    "session_time": "",
+    "tilings": [
+      {
+        "tiling_time": "",
+        "tiling": {}
+      },
+      {
+        "tiling_time": "",
+        "tiling": {}
+      }
+    ]
+  },
+  {
+    "session_time": "",
+    "tilings": [
+      {
+        "tiling_time": "",
+        "tiling": {}
+      }
+    ]
+  }
+]
 
 Print
 ~~~~~
