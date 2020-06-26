@@ -152,11 +152,11 @@ Given that there are previously drawn tilings, then undo, |undo|, will redraw th
 
 Row column separation
 ~~~~~~~~~~~~~~~~~~~~~
-|rowcolsep| TODO
+|rowcolsep| splits the row and columns of a tilings using the inequalities implied by the length two obstructions.
 
 Obstruction transitivity
 ~~~~~~~~~~~~~~~~~~~~~~~~
-|obstr-trans| TODO
+|obstr-trans| adds length 2 obstructions to the tiling using transitivity over positive cells.
 
 Export
 ~~~~~~
