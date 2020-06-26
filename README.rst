@@ -147,15 +147,15 @@ Pretty points
 
 Show localized
 ~~~~~~~~~~~~~~
-|show_local|
+With localized shown, |show_local|, requirements and obstructions that are contained in a single cell are shown. Without it they are not.
 
 Show crossing
 ~~~~~~~~~~~~~
-|show_cross|
+With crossing shown, |show_cross|, requirements and obstructions that reach across different cells are shown. Without it they are not.
 
 Highlight hovered cell
 ~~~~~~~~~~~~~~~~~~~~~~
-|htc|
+Turning on the hovered cell highlighting, |htc|, obstructions in the hovered cell are colored differently.
 
 Verification
 ~~~~~~~~~~~~
