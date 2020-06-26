@@ -93,7 +93,8 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
 
     def on_text(self, text):
         if self.text_box.has_focus():
-            self.text_box.on_text(text)
+            if text.isprintable():
+                self.text_box.on_text(text)
             return True
         return False
 
@@ -204,7 +205,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 "str.png",
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_TILING),
             ),
-        ),
+        )
         self.keyboard.add_btn(
             4,
             3,
@@ -358,7 +359,8 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
 
     def on_text(self, text):
         if self.text_box.has_focus():
-            self.text_box.on_text(text)
+            if text.isprintable():
+                self.text_box.on_text(text)
             return True
         return False
 
