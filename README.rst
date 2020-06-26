@@ -115,7 +115,7 @@ Fusion
 
 Undo and redo
 ~~~~~~~~~~~~~
-|undo| |redo|
+Given that there are previously drawn tilings, then undo, |undo|, will redraw the one before the last action. If you wish to revert the undo, you can use redo, |redo|. There is a limit on how many tilings are stored in memory.
 
 Row column separation
 ~~~~~~~~~~~~~~~~~~~~~
