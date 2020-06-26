@@ -164,30 +164,30 @@ Export, |export|, will store the current tiling in memory and upon closing the a
 
 .. code:: JSON
 
-[
-  {
-    "session_time": "",
-    "tilings": [
-      {
-        "tiling_time": "",
-        "tiling": {}
-      },
-      {
-        "tiling_time": "",
-        "tiling": {}
-      }
-    ]
-  },
-  {
-    "session_time": "",
-    "tilings": [
-      {
-        "tiling_time": "",
-        "tiling": {}
-      }
-    ]
-  }
-]
+  [
+    {
+      "session_time": "",
+      "tilings": [
+        {
+          "tiling_time": "",
+          "tiling": {}
+        },
+        {
+          "tiling_time": "",
+          "tiling": {}
+        }
+      ]
+    },
+    {
+      "session_time": "",
+      "tilings": [
+        {
+          "tiling_time": "",
+          "tiling": {}
+        }
+      ]
+    }
+  ]
 
 Print
 ~~~~~
