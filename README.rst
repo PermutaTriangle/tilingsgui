@@ -98,45 +98,64 @@ To insert a permutation into a single cell, one can choose either to add a point
 
 Factor
 ~~~~~~
+|factor| |factor_int|
 
 Place points
 ~~~~~~~~~~~~
+|place_east| |place_north| |place_south| |place_west|
 
 Partially place points
 ~~~~~~~~~~~~~~~~~~~~~~
+|pplace_east| |pplace_north| |pplace_south| |pplace_west|
 
 Fusion
 ~~~~~~
+|fusion_r| |fusion_c|
+|fusion_comp_r| |fusion_comp_c| 
 
 Undo and redo
 ~~~~~~~~~~~~~
+|undo| |redo|
 
 Row column separation
 ~~~~~~~~~~~~~~~~~~~~~
+|rowcolsep|
 
 Obstruction transitivity
 ~~~~~~~~~~~~~~~~~~~~~~~~
+|obstr-trans|
 
 Export
 ~~~~~~
+|export|
 
 Sequence
 ~~~~~~~~
+|sequence|
 
 Shading
 ~~~~~~~
+|shading|
 
 Pretty points
 ~~~~~~~~~~~~~
+|pretty|
 
 Show localized
 ~~~~~~~~~~~~~~
+|show_local|
 
 Show crossing
 ~~~~~~~~~~~~~
+|show_cross|
 
 Highlight hovered cell
 ~~~~~~~~~~~~~~~~~~~~~~
+|htc|
+
+Verification
+~~~~~~~~~~~~~~~~~~~~~~
+|verification|
 
 .. _Tilings: https://github.com/PermutaTriangle/Tilings
 .. _Poetry: https://python-poetry.org/docs/#installation
