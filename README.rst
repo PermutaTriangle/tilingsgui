@@ -159,7 +159,34 @@ Highlight hovered cell
 
 Verification
 ~~~~~~~~~~~~
-|verification|
+Given a tiling ``t``, the verification button, |verification|, will produce the following result.
+
+.. code:: python
+
+   [
+      BasicVerificationStrategy().verified(t),
+      DatabaseVerificationStrategy().verified(t),
+      ElementaryVerificationStrategy().verified(t),
+      InsertionEncodingVerificationStrategy().verified(t),
+      LocallyFactorableVerificationStrategy().verified(t),
+      LocalVerificationStrategy(no_factors=False).verified(t),
+      MonotoneTreeVerificationStrategy().verified(t),
+      OneByOneVerificationStrategy().verified(t)
+   ]
+
+An example output is shown below.
+
+.. code:: sh
+
+   BasicVerificationStrategy             : True
+   DatabaseVerificationStrategy          : False
+   ElementaryVerificationStrategy        : False
+   InsertionEncodingVerificationStrategy : True
+   LocallyFactorableVerificationStrategy : False
+   LocalVerificationStrategy             : True
+   MonotoneTreeVerificationStrategy      : False
+   OneByOneVerificationStrategy          : True
+
 
 .. _Tilings: https://github.com/PermutaTriangle/Tilings
 .. _Poetry: https://python-poetry.org/docs/#installation
