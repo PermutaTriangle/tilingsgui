@@ -149,7 +149,18 @@ By clicking a point of a requirement, we pass its gridded permutation along with
 
 Partially place points
 ~~~~~~~~~~~~~~~~~~~~~~
-|pplace_east| |pplace_north| |pplace_south| |pplace_west| TODO
+By clicking a point of a requirement, we pass its gridded permutation along with its index within it to ``partial_place_point_of_gridded_permutation`` and the direction set by the button chosen, east |pplace_east|, north |pplace_north|, south |pplace_south| or west |pplace_west|.
+
+.. code:: python
+
+    def partial_place_point_of_gridded_permutation(
+        self, gp: GriddedPerm, idx: int, direction: int
+    ) -> "Tiling":
+        """
+        Return the tiling where the directionmost occurrence of the idx point
+        in the gridded permutaion gp is placed. The point is placed onto its
+        own row or own column depending on the direction.
+        """
 
 Fusion
 ~~~~~~
