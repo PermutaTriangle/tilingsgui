@@ -180,7 +180,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 (6, 3),
                 (5, 0),
             ],
-            on_click=self.state.set_strategy,
+            on_click=self.state.set_mouse_click_action,
         )
 
         # normal btns
