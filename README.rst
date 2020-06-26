@@ -71,7 +71,7 @@ User manual
 
 Tiling input
 ~~~~~~~~~~~
-The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using `from_string`_ and `from_json`_ respectively. A right click activates it. To confirm your input, press enter or click away from the text box. Escape cancels the input. Right clicking when activated will paste whatever is on the clipboard.
+The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using ``from_string`` and ``from_json`` respectively. A right click activates it. To confirm your input, press enter or click away from the text box. Escape cancels the input. Right clicking when activated will paste whatever is on the clipboard.
 
 **Example**:
 The following two inputs are two ways of producing the same initial tiling.
@@ -94,7 +94,7 @@ The initial tiling in question would be the following.
 
 Cell insertion
 ~~~~~~~~~~~~~~
-To insert a permutation into a single cell, one can choose either to add a point, |add_point|, or a custom permutation, |add_custom|. For the latter, the latest confirmed input in the text box above the button grid is used. The text box works just like the one for inputting tilings. It uses `to_standard`_ to convert the input to a permutation. After having selected the permutation to insert, then clicking a cell will insert it. Left click inserts it as a requirement while a right click inserts it as a obstruction.
+To insert a permutation into a single cell, one can choose either to add a point, |add_point|, or a custom permutation, |add_custom|. For the latter, the latest confirmed input in the text box above the button grid is used. The text box works just like the one for inputting tilings. It uses ``to_standard`` to convert the input to a permutation. After having selected the permutation to insert, then clicking a cell will insert it. Left click inserts it as a requirement while a right click inserts it as a obstruction, using ``add_single_cell_requirement`` and ``add_single_cell_obstruction`` respectively.
 
 Factor
 ~~~~~~
@@ -140,9 +140,6 @@ Highlight hovered cell
 
 .. _Tilings: https://github.com/PermutaTriangle/Tilings
 .. _Poetry: https://python-poetry.org/docs/#installation
-.. _from_string: https://github.com/PermutaTriangle/Tilings/blob/0f218f8139d16351d686445d271cf2d8e7c859b2/tilings/tiling.py#L472
-.. _from_json: https://github.com/PermutaTriangle/Tilings/blob/0f218f8139d16351d686445d271cf2d8e7c859b2/tilings/tiling.py#L496
-.. _to_standard: https://github.com/PermutaTriangle/Permuta/blob/4d0de5daf858cf7f5e1c1db2803ec75f8d66fca0/permuta/perm.py#L78
 
 .. |add_point| image:: resources/img/svg/add_point.svg
    :scale: 100 %
