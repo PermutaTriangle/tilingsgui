@@ -76,10 +76,10 @@ Summary
 * |export| Export
 * |factor| Factor
 * |factor_int| Factor with interleaving
-* |fusion_c| Fusion with column=True 
-* |fusion_r| Fusion with row=True
-* |fusion_comp_c| Component fusion with column=True
-* |fusion_comp_r| Component fusion with row=True
+* |fusion_c| Fusion with column set
+* |fusion_r| Fusion with row set
+* |fusion_comp_c| Component fusion with column set
+* |fusion_comp_r| Component fusion with row set
 * |htc| Highlight hovered cell
 * |move| Move
 * |obstr-trans| Obstruction transitivity
@@ -143,8 +143,27 @@ Partially place points
 
 Fusion
 ~~~~~~
-|fusion_r| |fusion_c| TODO
-|fusion_comp_r| |fusion_comp_c| TODO
+Let ``c_r`` and ``c_c`` be the clicked row and column respectively. There are 4 types of fusions available. Fusion with ``row=c_r``, |fusion_r|, fusion with ``col=c_c``, |fusion_c|, component fusion with ``row=c_r``, |fusion_comp_r|, and component fusion with ``col=c_c``, |fusion_comp_c|. If the fusion are invalid, then exceptions are caught and nothing happens. 
+
+Fusion:
+
+.. code:: python
+
+   """
+   Fuse the tilings.
+   If `row` is not `None` then `row` and `row+1` are fused together.
+   If `col` is not `None` then `col` and `col+1` are fused together.
+   """
+
+Component fusion:
+
+.. code:: python
+
+   """
+   Fuse the tilings in such a way that it can be unfused by drawing a line between skew/sum-components.
+   If `row` is not `None` then `row` and `row+1` are fused together.
+   If `col` is not `None` then `col` and `col+1` are fused together.
+   """
 
 Undo and redo
 ~~~~~~~~~~~~~
