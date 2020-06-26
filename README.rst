@@ -135,16 +135,16 @@ There are two types of factorization, factor |factor| and factor with interleavi
 
 Place points
 ~~~~~~~~~~~~
-|place_east| |place_north| |place_south| |place_west|
+|place_east| |place_north| |place_south| |place_west| TODO
 
 Partially place points
 ~~~~~~~~~~~~~~~~~~~~~~
-|pplace_east| |pplace_north| |pplace_south| |pplace_west|
+|pplace_east| |pplace_north| |pplace_south| |pplace_west| TODO
 
 Fusion
 ~~~~~~
-|fusion_r| |fusion_c|
-|fusion_comp_r| |fusion_comp_c| 
+|fusion_r| |fusion_c| TODO
+|fusion_comp_r| |fusion_comp_c| TODO
 
 Undo and redo
 ~~~~~~~~~~~~~
@@ -152,11 +152,11 @@ Given that there are previously drawn tilings, then undo, |undo|, will redraw th
 
 Row column separation
 ~~~~~~~~~~~~~~~~~~~~~
-|rowcolsep|
+|rowcolsep| TODO
 
 Obstruction transitivity
 ~~~~~~~~~~~~~~~~~~~~~~~~
-|obstr-trans|
+|obstr-trans| TODO
 
 Export
 ~~~~~~
@@ -211,15 +211,42 @@ Writing the current tiling to ``stdout``, |str|, will produce both the ``__str__
 
 Sequence
 ~~~~~~~~
-|sequence|
+The first few terms of the sequence of gridded permutations griddable on the current tiling can be written to ``stdout``, |sequence|, where for example the following tiling
+
+.. code:: sh
+
+   +-+-+-+-+
+   | |●| | |
+   +-+-+-+-+
+   |1| |1| |
+   +-+-+-+-+
+   | | | |●|
+   +-+-+-+-+
+   | | |1| |
+   +-+-+-+-+
+   1: Av(021)
+   ●: point
+   Crossing obstructions:
+   01: (0, 2), (2, 2)
+   01: (2, 0), (2, 2)
+   Requirement 0:
+   0: (1, 3)
+   Requirement 1:
+   0: (3, 1)
+
+would produce this output.
+
+.. code:: sh
+
+   [0, 0, 1, 3, 9, 28, 90, 297]
 
 Shading
 ~~~~~~~
-|shading|
+With shading on, |shading|, then a 1 restriction is not drawn as a point but rather as a filled cell.
 
 Pretty points
 ~~~~~~~~~~~~~
-|pretty|
+With pretty points on, |pretty|, then 12 and 21 restrictions along with a 1 requirement within the same cell are drawn as a single point.
 
 Show localized
 ~~~~~~~~~~~~~~
