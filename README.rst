@@ -60,7 +60,7 @@ Without them the app still works but pasting won’t.
 
 Known issues
 -----------
-* Pressing enter adds an additional char to input boxes on macs
+* 
 
 Report a bug
 ~~~~~~~~~~~
@@ -191,7 +191,23 @@ Export, |export|, will store the current tiling in memory and upon closing the a
 
 Print
 ~~~~~
-|str|
+Writing the current tiling to ``stdout``, |str|, will produce both the ``__str__`` and ``__repr__`` representation of the tiling. An example output is shown below.
+
+.. code:: sh
+
+   +-+-+-+
+   | |●| |
+   +-+-+-+
+   |1| |1|
+   +-+-+-+
+   1: Av(021)
+   ●: point
+   Crossing obstructions:
+   01: (0, 0), (2, 0)
+   Requirement 0:
+   0: (1, 1)
+
+   Tiling(obstructions=(GriddedPerm(Perm((0,)), ((0, 1),)), GriddedPerm(Perm((0,)), ((1, 0),)), GriddedPerm(Perm((0,)), ((2, 1),)), GriddedPerm(Perm((0, 1)), ((0, 0), (2, 0))), GriddedPerm(Perm((0, 1)), ((1, 1), (1, 1))), GriddedPerm(Perm((1, 0)), ((1, 1), (1, 1))), GriddedPerm(Perm((0, 2, 1)), ((0, 0), (0, 0), (0, 0))), GriddedPerm(Perm((0, 2, 1)), ((2, 0), (2, 0), (2, 0)))), requirements=((GriddedPerm(Perm((0,)), ((1, 1),)),),), assumptions=())
 
 Sequence
 ~~~~~~~~
