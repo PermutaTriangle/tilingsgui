@@ -60,7 +60,7 @@ Without them the app still works but pasting won’t.
 
 Known issues
 -----------
-* Pressing enter adds an additional char to input boxes on macs
+* 
 
 Report a bug
 ~~~~~~~~~~~
@@ -76,10 +76,10 @@ Summary
 * |export| Export
 * |factor| Factor
 * |factor_int| Factor with interleaving
-* |fusion_c| Fusion with column=True 
-* |fusion_r| Fusion with row=True
-* |fusion_comp_c| Component fusion with column=True
-* |fusion_comp_r| Component fusion with row=True
+* |fusion_c| Fusion with column set
+* |fusion_r| Fusion with row set
+* |fusion_comp_c| Component fusion with column set
+* |fusion_comp_r| Component fusion with row set
 * |htc| Highlight hovered cell
 * |move| Move
 * |obstr-trans| Obstruction transitivity
@@ -135,16 +135,56 @@ There are two types of factorization, factor |factor| and factor with interleavi
 
 Place points
 ~~~~~~~~~~~~
-|place_east| |place_north| |place_south| |place_west|
+By clicking a point of a requirement, we pass its gridded permutation along with its index within it to ``place_point_of_gridded_permutation`` and the direction set by the button chosen, east |place_east|, north |place_north|, south |place_south| or west |place_west|.
+
+.. code:: python
+
+   def place_point_of_gridded_permutation(
+           self, gp: GriddedPerm, idx: int, direction: int
+       ) -> "Tiling":
+           """
+           Return the tiling where the directionmost occurrence of the idx point
+           in the gridded permutaion gp is placed.
+           """
 
 Partially place points
 ~~~~~~~~~~~~~~~~~~~~~~
-|pplace_east| |pplace_north| |pplace_south| |pplace_west|
+By clicking a point of a requirement, we pass its gridded permutation along with its index within it to ``partial_place_point_of_gridded_permutation`` and the direction set by the button chosen, east |pplace_east|, north |pplace_north|, south |pplace_south| or west |pplace_west|.
+
+.. code:: python
+
+    def partial_place_point_of_gridded_permutation(
+        self, gp: GriddedPerm, idx: int, direction: int
+    ) -> "Tiling":
+        """
+        Return the tiling where the directionmost occurrence of the idx point
+        in the gridded permutaion gp is placed. The point is placed onto its
+        own row or own column depending on the direction.
+        """
 
 Fusion
 ~~~~~~
-|fusion_r| |fusion_c|
-|fusion_comp_r| |fusion_comp_c| 
+Let ``c_r`` and ``c_c`` be the row and column respectively of the clicked cell. There are 4 types of fusions available. Fusion with ``row=c_r``, |fusion_r|, fusion with ``col=c_c``, |fusion_c|, component fusion with ``row=c_r``, |fusion_comp_r|, and component fusion with ``col=c_c``, |fusion_comp_c|. If the fusion are invalid, then exceptions are caught and nothing happens. 
+
+Fusion:
+
+.. code:: python
+
+   """
+   Fuse the tilings.
+   If `row` is not `None` then `row` and `row+1` are fused together.
+   If `col` is not `None` then `col` and `col+1` are fused together.
+   """
+
+Component fusion:
+
+.. code:: python
+
+   """
+   Fuse the tilings in such a way that it can be unfused by drawing a line between skew/sum-components.
+   If `row` is not `None` then `row` and `row+1` are fused together.
+   If `col` is not `None` then `col` and `col+1` are fused together.
+   """
 
 Undo and redo
 ~~~~~~~~~~~~~
@@ -152,11 +192,11 @@ Given that there are previously drawn tilings, then undo, |undo|, will redraw th
 
 Row column separation
 ~~~~~~~~~~~~~~~~~~~~~
-|rowcolsep|
+|rowcolsep| splits the row and columns of a tilings using the inequalities implied by the length two obstructions.
 
 Obstruction transitivity
 ~~~~~~~~~~~~~~~~~~~~~~~~
-|obstr-trans|
+|obstr-trans| adds length 2 obstructions to the tiling using transitivity over positive cells.
 
 Export
 ~~~~~~
@@ -191,19 +231,62 @@ Export, |export|, will store the current tiling in memory and upon closing the a
 
 Print
 ~~~~~
-|str|
+Writing the current tiling to ``stdout``, |str|, will produce both the ``__str__`` and ``__repr__`` representation of the tiling. An example output is shown below.
+
+.. code:: sh
+
+   +-+-+-+
+   | |●| |
+   +-+-+-+
+   |1| |1|
+   +-+-+-+
+   1: Av(021)
+   ●: point
+   Crossing obstructions:
+   01: (0, 0), (2, 0)
+   Requirement 0:
+   0: (1, 1)
+
+   Tiling(obstructions=(GriddedPerm(Perm((0,)), ((0, 1),)), GriddedPerm(Perm((0,)), ((1, 0),)), GriddedPerm(Perm((0,)), ((2, 1),)), GriddedPerm(Perm((0, 1)), ((0, 0), (2, 0))), GriddedPerm(Perm((0, 1)), ((1, 1), (1, 1))), GriddedPerm(Perm((1, 0)), ((1, 1), (1, 1))), GriddedPerm(Perm((0, 2, 1)), ((0, 0), (0, 0), (0, 0))), GriddedPerm(Perm((0, 2, 1)), ((2, 0), (2, 0), (2, 0)))), requirements=((GriddedPerm(Perm((0,)), ((1, 1),)),),), assumptions=())
 
 Sequence
 ~~~~~~~~
-|sequence|
+The first few terms of the sequence of gridded permutations griddable on the current tiling can be written to ``stdout``, |sequence|, where for example the following tiling
+
+.. code:: sh
+
+   +-+-+-+-+
+   | |●| | |
+   +-+-+-+-+
+   |1| |1| |
+   +-+-+-+-+
+   | | | |●|
+   +-+-+-+-+
+   | | |1| |
+   +-+-+-+-+
+   1: Av(021)
+   ●: point
+   Crossing obstructions:
+   01: (0, 2), (2, 2)
+   01: (2, 0), (2, 2)
+   Requirement 0:
+   0: (1, 3)
+   Requirement 1:
+   0: (3, 1)
+
+would produce this output.
+
+.. code:: sh
+
+   [0, 0, 1, 3, 9, 28, 90, 297]
 
 Shading
 ~~~~~~~
-|shading|
+With shading on, |shading|, then a 1 restriction is not drawn as a point but rather as a filled cell.
 
 Pretty points
 ~~~~~~~~~~~~~
-|pretty|
+With pretty points on, |pretty|, then 12 and 21 restrictions along with a 1 requirement within the same cell are drawn as a single point.
 
 Show localized
 ~~~~~~~~~~~~~~
