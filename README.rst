@@ -131,7 +131,7 @@ To insert a permutation into a single cell, one can choose either to add a point
 
 Factor
 ~~~~~~
-|factor| |factor_int|
+There are two types of factorization, factor |factor| and factor with interleaving |factor_int|. In both cases they are applied to the cell that is clicked. Two active cells are in the same factor if they are in the same row or column, or they share an obstruction or a requirement. For factoring with interleaving, two non-empty cells are in the same factor if they share an obstruction or a requirement.
 
 Place points
 ~~~~~~~~~~~~
