@@ -69,6 +69,39 @@ Along with the description of the bug, please provide a json of the tiling which
 User manual
 -----------
 
+Summary
+~~~~~~~
+* |add_point| Point insertion
+* |add_custom| Permutation insertion
+* |export| Export
+* |factor| Factor
+* |factor_int| Factor with interleaving
+* |fusion_c| Fusion with column=True 
+* |fusion_r| Fusion with row=True
+* |fusion_comp_c| Component fusion with column=True
+* |fusion_comp_r| Component fusion with row=True
+* |htc| Highlight hovered cell
+* |move| Move
+* |obstr-trans| Obstruction transitivity
+* |place_east| East placement
+* |place_north| North placement
+* |place_south| South placement
+* |place_west| West placement
+* |pplace_east| East partial placement
+* |pplace_north| North partial placement
+* |pplace_south| South partial placement
+* |pplace_west| West partial placement
+* |pretty| Pretty points
+* |undo| Undo
+* |redo| Redo
+* |rowcolsep| Row column separation
+* |sequence| Sequece
+* |shading| Shading
+* |show_cross| Show crossing
+* |show_local| Show localized
+* |str| Print
+* |verification| Verification
+
 Tiling input
 ~~~~~~~~~~~
 The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using ``from_string`` and ``from_json`` respectively. A right click activates it. To confirm your input, press enter or click away from the text box. Escape cancels the input. Right clicking when activated will paste whatever is on the clipboard.
