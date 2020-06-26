@@ -135,7 +135,17 @@ There are two types of factorization, factor |factor| and factor with interleavi
 
 Place points
 ~~~~~~~~~~~~
-|place_east| |place_north| |place_south| |place_west| TODO
+By clicking a point of a requirement, we pass its gridded permutation along with its index within it to ``place_point_of_gridded_permutation`` and the direction set by the button chosen, east |place_east|, north |place_north|, south |place_south| or west |place_west|.
+
+.. code:: python
+
+   def place_point_of_gridded_permutation(
+           self, gp: GriddedPerm, idx: int, direction: int
+       ) -> "Tiling":
+           """
+           Return the tiling where the directionmost occurrence of the idx point
+           in the gridded permutaion gp is placed.
+           """
 
 Partially place points
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -143,7 +153,7 @@ Partially place points
 
 Fusion
 ~~~~~~
-Let ``c_r`` and ``c_c`` be the clicked row and column respectively. There are 4 types of fusions available. Fusion with ``row=c_r``, |fusion_r|, fusion with ``col=c_c``, |fusion_c|, component fusion with ``row=c_r``, |fusion_comp_r|, and component fusion with ``col=c_c``, |fusion_comp_c|. If the fusion are invalid, then exceptions are caught and nothing happens. 
+Let ``c_r`` and ``c_c`` be the row and column respectively of the clicked cell. There are 4 types of fusions available. Fusion with ``row=c_r``, |fusion_r|, fusion with ``col=c_c``, |fusion_c|, component fusion with ``row=c_r``, |fusion_comp_r|, and component fusion with ``col=c_c``, |fusion_comp_c|. If the fusion are invalid, then exceptions are caught and nothing happens. 
 
 Fusion:
 
