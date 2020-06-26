@@ -129,6 +129,10 @@ Export
 ~~~~~~
 |export|
 
+Print
+~~~~~
+|str|
+
 Sequence
 ~~~~~~~~
 |sequence|
@@ -154,7 +158,7 @@ Highlight hovered cell
 |htc|
 
 Verification
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 |verification|
 
 .. _Tilings: https://github.com/PermutaTriangle/Tilings
