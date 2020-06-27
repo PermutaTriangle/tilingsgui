@@ -392,29 +392,29 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     def move(self, x, y, button, modifiers):
 
         if button == pyglet.window.mouse.LEFT:
-            self.state.move_type = 0
+            self.state.move_state.move_type = 0
         elif button == pyglet.window.mouse.RIGHT:
-            self.state.move_type = 1
+            self.state.move_state.move_type = 1
         else:
             return
 
         t = self.undo_deq[0]
-        self.state.selected_point = t.get_point_obs_index(Point(x, y))
-        if self.state.selected_point is not None:
-            i, j = self.state.selected_point
+        self.state.move_state.selected_point = t.get_point_obs_index(Point(x, y))
+        if self.state.move_state.selected_point is not None:
+            i, j = self.state.move_state.selected_point
             gploc = t.obstruction_locs[i]
             gp = t.tiling.obstructions[i]
         else:
-            self.state.selected_point = t.get_point_req_index(Point(x, y))
-            if self.state.selected_point is not None:
-                a, i, j = self.state.selected_point
+            self.state.move_state.selected_point = t.get_point_req_index(Point(x, y))
+            if self.state.move_state.selected_point is not None:
+                a, i, j = self.state.move_state.selected_point
                 gploc = t.requirement_locs[a][i]
                 gp = t.tiling.requirements[a][i]
             else:
                 self.state.init_move_state()
                 return
 
-        self.state.has_selected_pnt = True
+        self.state.move_state.has_selected_pnt = True
         v = gp.patt[j]
         cell = gp.pos[j]
         a, b, c, d = t._cell_to_rect(*cell)
@@ -431,21 +431,21 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 mny = max(mny, gploc[k].y + min_space)
             if gp.patt[k] == v + 1:
                 mxy = min(mxy, gploc[k].y - min_space)
-        self.state.point_move_bounds = (mnx, mxx, mny, mxy)
+        self.state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
 
         # check click pnt, check btn, set selected in sta
         # print("move")
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
 
-        if not self.state.has_selected_pnt or not self.undo_deq:
+        if not self.state.move_state.has_selected_pnt or not self.undo_deq:
             return
 
         t = self.undo_deq[0]
-        if len(self.state.selected_point) == 2:
-            i, j = self.state.selected_point
-            mnx, mxx, mny, mxy = self.state.point_move_bounds
-            if self.state.move_type == 0:
+        if len(self.state.move_state.selected_point) == 2:
+            i, j = self.state.move_state.selected_point
+            mnx, mxx, mny, mxy = self.state.move_state.point_move_bounds
+            if self.state.move_state.move_type == 0:
                 t.obstruction_locs[i][j] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy))
             else:
                 for k in range(len(t.obstruction_locs[i])):
@@ -456,12 +456,12 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         else:
             # TODO: does not support types of movement, add that
             # (was not in the original eihter...)
-            i, j, k = self.state.selected_point
-            mnx, mxx, mny, mxy = self.state.point_move_bounds
+            i, j, k = self.state.move_state.selected_point
+            mnx, mxx, mny, mxy = self.state.move_state.point_move_bounds
             t.requirement_locs[i][j][k] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy),)
 
     def on_mouse_release(self, x, y, button, modifiers):
-        self.state.init_move_state()
+        self.state.move_state.reset()
 
     def cell_insertion(self, x, y, button, modifiers):
         t = self.undo_deq[0]

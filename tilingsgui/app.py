@@ -45,10 +45,10 @@ class TilingGui(pyglet.window.Window):
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
         # The current state with initial values.
-        self.state = GuiState()
+        self.state: GuiState = GuiState()
 
         # The bar above the tiling plot.
-        self.top_bar = TopMenu(
+        self.top_bar: TopMenu = TopMenu(
             0,
             self.height - TilingGui._TOP_BAR_HEIGHT,
             self.width - TilingGui._RIGHT_BAR_WIDTH,
@@ -57,7 +57,7 @@ class TilingGui(pyglet.window.Window):
         )
 
         # The bar to the right of the tiling plot.
-        self.right_bar = RightMenu(
+        self.right_bar: RightMenu = RightMenu(
             self.width - TilingGui._RIGHT_BAR_WIDTH,
             0,
             TilingGui._RIGHT_BAR_WIDTH,
@@ -68,12 +68,12 @@ class TilingGui(pyglet.window.Window):
         )
 
         # The tiling plot.
-        self.tplot_man = TPlotManager(
+        self.tplot_man: TPlotManager = TPlotManager(
             self.width, self.height, self.state, [self, self.top_bar, self.right_bar]
         )
 
         # export data handler.
-        self.history = History([self, self.right_bar, self.tplot_man])
+        self.history: History = History([self, self.right_bar, self.tplot_man])
 
     def start(self) -> None:
         """Start the app.

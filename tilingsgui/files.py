@@ -203,3 +203,39 @@ class History(Observer):
             bool: True iff the user has exported this session.
         """
         return bool(self._get_current_session_tiling_list())
+
+
+class Images:
+    """A collection of string constants with names of image files.
+    """
+
+    ADD_POINT: ClassVar[str] = "add_point.png"
+    ADD_CUSOM: ClassVar[str] = "add_custom.png"
+    FACTOR: ClassVar[str] = "factor.png"
+    FACTOR_INT: ClassVar[str] = "factor_int.png"
+    PLACE_WEST: ClassVar[str] = "place_west.png"
+    PLACE_EAST: ClassVar[str] = "place_east.png"
+    PLACE_NORTH: ClassVar[str] = "place_north.png"
+    PLACE_SOUTH: ClassVar[str] = "place_south.png"
+    PPLACE_WEST: ClassVar[str] = "pplace_west.png"
+    PPLACE_EAST: ClassVar[str] = "pplace_east.png"
+    PPLACE_NORTH: ClassVar[str] = "pplace_north.png"
+    PPLACE_SOUTH: ClassVar[str] = "pplace_south.png"
+    FUSION_R: ClassVar[str] = "fusion_r.png"
+    FUSION_C: ClassVar[str] = "fusion_c.png"
+    FUSION_COM_R: ClassVar[str] = "fusion_comp_r.png"
+    FUSION_COM_C: ClassVar[str] = "fusion_comp_c.png"
+    MOVE: ClassVar[str] = "move.png"
+    UNDO: ClassVar[str] = "undo.png"
+    REDO: ClassVar[str] = "redo.png"
+    STR: ClassVar[str] = "str.png"
+    VERIFICATION: ClassVar[str] = "verification.png"
+    ROWCOLSEP: ClassVar[str] = "rowcolsep.png"
+    OBSTR_TRANS: ClassVar[str] = "obstr_trans.png"
+    EXPORT: ClassVar[str] = "export.png"
+    SEQUENCE: ClassVar[str] = "sequence.png"
+    SHADING: ClassVar[str] = "shading.png"
+    PRETTY: ClassVar[str] = "pretty.png"
+    SHOW_CROSS: ClassVar[str] = "show_cross.png"
+    SHOW_LOCAL: ClassVar[str] = "show_local.png"
+    HTC: ClassVar[str] = "htc.png"

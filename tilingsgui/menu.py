@@ -3,6 +3,7 @@ import pyglet
 from tilings import Tiling
 
 from .events import CustomEvents, Observer
+from .files import Images
 from .geometry import Rectangle
 from .graphics import Color, GeoDrawer
 from .state import GuiState
@@ -142,23 +143,23 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
 
         # Select grp
         # TODO: Collect these into variables
-        self.keyboard.add_btn(9, 0, SelectionButton("add_point.png", toggled=True))
-        self.keyboard.add_btn(9, 1, SelectionButton("add_custom.png"))
-        self.keyboard.add_btn(9, 2, SelectionButton("factor.png"))
-        self.keyboard.add_btn(9, 3, SelectionButton("factor_int.png"))
-        self.keyboard.add_btn(8, 0, SelectionButton("place_west.png"))
-        self.keyboard.add_btn(8, 1, SelectionButton("place_east.png"))
-        self.keyboard.add_btn(8, 2, SelectionButton("place_north.png"))
-        self.keyboard.add_btn(8, 3, SelectionButton("place_south.png"))
-        self.keyboard.add_btn(7, 0, SelectionButton("pplace_west.png"))
-        self.keyboard.add_btn(7, 1, SelectionButton("pplace_east.png"))
-        self.keyboard.add_btn(7, 2, SelectionButton("pplace_north.png"))
-        self.keyboard.add_btn(7, 3, SelectionButton("pplace_south.png"))
-        self.keyboard.add_btn(6, 0, SelectionButton("fusion_r.png"))
-        self.keyboard.add_btn(6, 1, SelectionButton("fusion_c.png"))
-        self.keyboard.add_btn(6, 2, SelectionButton("fusion_comp_r.png"))
-        self.keyboard.add_btn(6, 3, SelectionButton("fusion_comp_c.png"))
-        self.keyboard.add_btn(5, 0, SelectionButton("move.png"))
+        self.keyboard.add_btn(9, 0, SelectionButton(Images.ADD_POINT, toggled=True))
+        self.keyboard.add_btn(9, 1, SelectionButton(Images.ADD_CUSOM))
+        self.keyboard.add_btn(9, 2, SelectionButton(Images.FACTOR))
+        self.keyboard.add_btn(9, 3, SelectionButton(Images.FACTOR_INT))
+        self.keyboard.add_btn(8, 0, SelectionButton(Images.PLACE_WEST))
+        self.keyboard.add_btn(8, 1, SelectionButton(Images.PLACE_EAST))
+        self.keyboard.add_btn(8, 2, SelectionButton(Images.PLACE_NORTH))
+        self.keyboard.add_btn(8, 3, SelectionButton(Images.PLACE_SOUTH))
+        self.keyboard.add_btn(7, 0, SelectionButton(Images.PPLACE_WEST))
+        self.keyboard.add_btn(7, 1, SelectionButton(Images.PPLACE_EAST))
+        self.keyboard.add_btn(7, 2, SelectionButton(Images.PPLACE_NORTH))
+        self.keyboard.add_btn(7, 3, SelectionButton(Images.PPLACE_SOUTH))
+        self.keyboard.add_btn(6, 0, SelectionButton(Images.FUSION_R))
+        self.keyboard.add_btn(6, 1, SelectionButton(Images.FUSION_C))
+        self.keyboard.add_btn(6, 2, SelectionButton(Images.FUSION_COM_R))
+        self.keyboard.add_btn(6, 3, SelectionButton(Images.FUSION_COM_C))
+        self.keyboard.add_btn(5, 0, SelectionButton(Images.MOVE))
 
         self.keyboard.add_selection_group(
             [
@@ -188,21 +189,21 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             4,
             0,
             Button(
-                "undo.png", on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
+                Images.UNDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
             ),
         )
         self.keyboard.add_btn(
             4,
             1,
             Button(
-                "redo.png", on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
+                Images.REDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
             ),
         )
         self.keyboard.add_btn(
             4,
             2,
             Button(
-                "str.png",
+                Images.STR,
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_TILING),
             ),
         )
@@ -210,7 +211,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             4,
             3,
             Button(
-                "verification.png",
+                Images.VERIFICATION,
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_VERTIFICATION),
             ),
         )
@@ -218,7 +219,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             3,
             0,
             Button(
-                "rowcolsep.png",
+                Images.ROWCOLSEP,
                 on_click=lambda: self.dispatch_event(
                     CustomEvents.ON_ROW_COL_SEPERATION
                 ),
@@ -228,7 +229,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             3,
             1,
             Button(
-                "obstr-trans.png",
+                Images.OBSTR_TRANS,
                 on_click=lambda: self.dispatch_event(
                     CustomEvents.ON_OBSTRUCTION_TRANSIVITY
                 ),
@@ -238,7 +239,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             3,
             2,
             Button(
-                "export.png",
+                Images.EXPORT,
                 on_click=lambda: self.dispatch_event(
                     CustomEvents.ON_FETCH_TILING_FOR_EXPORT
                 ),
@@ -248,7 +249,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             3,
             3,
             Button(
-                "sequence.png",
+                Images.SEQUENCE,
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_SEQUENCE),
             ),
         )
@@ -258,7 +259,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             1,
             0,
             ToggleButton(
-                "shading.png",
+                Images.SHADING,
                 on_click=self.state.toggle_shading,
                 toggled=self.state.shading,
             ),
@@ -267,7 +268,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             1,
             1,
             ToggleButton(
-                "pretty.png",
+                Images.PRETTY,
                 on_click=self.state.toggle_pretty_points,
                 toggled=self.state.pretty_points,
             ),
@@ -276,7 +277,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             1,
             2,
             ToggleButton(
-                "show_cross.png",
+                Images.SHOW_CROSS,
                 on_click=self.state.toggle_show_crossing,
                 toggled=self.state.show_crossing,
             ),
@@ -285,7 +286,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             1,
             3,
             ToggleButton(
-                "show_local.png",
+                Images.SHOW_LOCAL,
                 on_click=self.state.toggle_show_localized,
                 toggled=self.state.show_localized,
             ),
@@ -294,7 +295,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             0,
             0,
             ToggleButton(
-                "htc.png",
+                Images.HTC,
                 on_click=self.state.toggle_highlight_touching_cell,
                 toggled=self.state.highlight_touching_cell,
             ),

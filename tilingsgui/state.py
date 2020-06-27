@@ -4,6 +4,31 @@
 from typing import Tuple
 
 
+class MoveState:
+    """A collection of states that have to do with draggin points.
+
+    Initial values:
+        has_selected_pnt        = False
+        selected_point          = tuple()
+        point_move_bounds       = tuple()
+        move_type               = 0
+    """
+
+    def __init__(self) -> None:
+        self.has_selected_pnt: bool = False
+        self.selected_point: Tuple = tuple()
+        self.point_move_bounds: Tuple = tuple()
+        self.move_type: int = 0
+
+    def reset(self) -> None:
+        """Reset all values to their default values.
+        """
+        self.has_selected_pnt = False
+        self.selected_point = tuple()
+        self.point_move_bounds = tuple()
+        self.move_type = 0
+
+
 class GuiState:
     """A collection of various states that are used by multiple components.
 
@@ -14,10 +39,7 @@ class GuiState:
         show_localized          = True
         highlight_touching_cell = False
         strategy_selected       = 0
-        has_selected_pnt        = False
-        selected_points         = tuple()
-        point_move_bounds       = tuple()
-        move_type               = 0
+        move_state              = MoveState init's value
     """
 
     def __init__(self) -> None:
@@ -30,19 +52,7 @@ class GuiState:
         self.show_localized: bool = True
         self.highlight_touching_cell: bool = False
         self.strategy_selected: int = 0
-        self.has_selected_pnt: bool = False
-        self.selected_points: Tuple = tuple()
-        self.point_move_bounds: Tuple = tuple()
-        self.move_type: int = 0
-
-    def init_move_state(self) -> None:
-        """Set all values that have to do with the move
-        state to their initial values.
-        """
-        self.has_selected_pnt = False
-        self.selected_points = tuple()
-        self.point_move_bounds = tuple()
-        self.move_type = 0
+        self.move_state = MoveState()
 
     def toggle_shading(self) -> None:
         """If shading is on, turn if off and vice versa.

@@ -32,4 +32,5 @@ def get_current_time_string() -> str:
 
 
 def clamp(x, mnx, mxx):
+
     return min(mxx, max(x, mnx))
