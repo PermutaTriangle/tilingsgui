@@ -171,7 +171,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             self.rect.w - 2 * RightMenu._PADDING,
             self.t - 2 * RightMenu._PADDING,
         )
-        self.keyboard.resize(
+        self.keyboard.position(
             self.rect.x, self.rect.y, self.rect.w, self.rect.h - self.t
         )
 
@@ -225,45 +225,51 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         self._add_toggle_btns()
 
     def _add_selection_btns(self):
-        self.keyboard.add_btn(7, 0, SelectionButton(Images.ADD_POINT, toggled=True))
-        self.keyboard.add_btn(7, 1, SelectionButton(Images.ADD_CUSOM))
-        self.keyboard.add_btn(7, 2, SelectionButton(Images.FACTOR))
-        self.keyboard.add_btn(7, 3, SelectionButton(Images.FACTOR_INT))
-        self.keyboard.add_btn(6, 0, SelectionButton(Images.PLACE_WEST))
-        self.keyboard.add_btn(6, 1, SelectionButton(Images.PLACE_EAST))
-        self.keyboard.add_btn(6, 2, SelectionButton(Images.PLACE_NORTH))
-        self.keyboard.add_btn(6, 3, SelectionButton(Images.PLACE_SOUTH))
-        self.keyboard.add_btn(5, 0, SelectionButton(Images.PPLACE_WEST))
-        self.keyboard.add_btn(5, 1, SelectionButton(Images.PPLACE_EAST))
-        self.keyboard.add_btn(5, 2, SelectionButton(Images.PPLACE_NORTH))
-        self.keyboard.add_btn(5, 3, SelectionButton(Images.PPLACE_SOUTH))
-        self.keyboard.add_btn(4, 0, SelectionButton(Images.FUSION_R))
-        self.keyboard.add_btn(4, 1, SelectionButton(Images.FUSION_C))
-        self.keyboard.add_btn(4, 2, SelectionButton(Images.FUSION_COM_R))
-        self.keyboard.add_btn(4, 3, SelectionButton(Images.FUSION_COM_C))
-        self.keyboard.add_btn(3, 0, SelectionButton(Images.MOVE))
+        positions = [
+            (7, 0),
+            (7, 1),
+            (7, 2),
+            (7, 3),
+            (6, 0),
+            (6, 1),
+            (6, 2),
+            (6, 3),
+            (5, 0),
+            (5, 1),
+            (5, 2),
+            (5, 3),
+            (4, 0),
+            (4, 1),
+            (4, 2),
+            (4, 3),
+            (3, 0),
+        ]
+
+        buttons = [
+            SelectionButton(Images.ADD_POINT, selected=True),
+            SelectionButton(Images.ADD_CUSOM),
+            SelectionButton(Images.FACTOR),
+            SelectionButton(Images.FACTOR_INT),
+            SelectionButton(Images.PLACE_WEST),
+            SelectionButton(Images.PLACE_EAST),
+            SelectionButton(Images.PLACE_NORTH),
+            SelectionButton(Images.PLACE_SOUTH),
+            SelectionButton(Images.PPLACE_WEST),
+            SelectionButton(Images.PPLACE_EAST),
+            SelectionButton(Images.PPLACE_NORTH),
+            SelectionButton(Images.PPLACE_SOUTH),
+            SelectionButton(Images.FUSION_R),
+            SelectionButton(Images.FUSION_C),
+            SelectionButton(Images.FUSION_COM_R),
+            SelectionButton(Images.FUSION_COM_C),
+            SelectionButton(Images.MOVE),
+        ]
+
+        for pos, btn in zip(positions, buttons):
+            self.keyboard.add_btn(*pos, btn)
 
         self.keyboard.add_selection_group(
-            [
-                (7, 0),
-                (7, 1),
-                (7, 2),
-                (7, 3),
-                (6, 0),
-                (6, 1),
-                (6, 2),
-                (6, 3),
-                (5, 0),
-                (5, 1),
-                (5, 2),
-                (5, 3),
-                (4, 0),
-                (4, 1),
-                (4, 2),
-                (4, 3),
-                (3, 0),
-            ],
-            on_click=self.state.set_mouse_click_action,
+            positions, on_click=self.state.set_mouse_click_action,
         )
 
     def _add_btns(self):
