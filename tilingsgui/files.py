@@ -125,8 +125,8 @@ class History(Observer):
         export_path = PathManager.get_exports_abs_path()
         export_path.mkdir(parents=True, exist_ok=True)
 
-        self.path: pathlib.Path = export_path.joinpath(History._FILE_NAME)
-        self.data: List[Dict[str, Any]] = self._get_history_data()
+        self._path: pathlib.Path = export_path.joinpath(History._FILE_NAME)
+        self._data: List[Dict[str, Any]] = self._get_history_data()
 
     def on_close(self) -> bool:
         """A handler for the closing of the window event. If any exports have occurred
@@ -137,11 +137,11 @@ class History(Observer):
             bool: False as we do not want to consume this event.
         """
         if self._session_has_export():
-            with open(self.path.as_posix(), "w") as history_file:
-                if len(self.data) > History._MAX_SESSIONS:
-                    json.dump(self.data[1:], history_file)
+            with open(self._path.as_posix(), "w") as history_file:
+                if len(self._data) > History._MAX_SESSIONS:
+                    json.dump(self._data[1:], history_file)
                 else:
-                    json.dump(self.data, history_file)
+                    json.dump(self._data, history_file)
         return False
 
     def on_export(self, tiling_json: dict) -> bool:
@@ -170,12 +170,12 @@ class History(Observer):
             List[Dict[str, Any]]: A list of sessions, including the current one.
         """
         try:
-            with open(self.path.as_posix(), "r") as history_file:
+            with open(self._path.as_posix(), "r") as history_file:
                 data = json.load(history_file)
             data.append(History._get_empty_session_object())
             return data
         except FileNotFoundError:
-            self.path.touch()
+            self._path.touch()
             return History._get_empty_json_object()
         except json.decoder.JSONDecodeError:
             return History._get_empty_json_object()
@@ -186,7 +186,7 @@ class History(Observer):
         Returns:
             Dict[str, Any]: The current session dictionary.
         """
-        return self.data[-1]
+        return self._data[-1]
 
     def _get_current_session_tiling_list(self) -> List:
         """Return the current session's list of tilings.
@@ -194,7 +194,7 @@ class History(Observer):
         Returns:
             List: A list of tiling entries.
         """
-        return self.data[-1][History._TILINGS]
+        return self._data[-1][History._TILINGS]
 
     def _session_has_export(self) -> bool:
         """Check if any exports have taken place this session.

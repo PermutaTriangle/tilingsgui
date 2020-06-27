@@ -1,3 +1,6 @@
+"""Control stations.
+"""
+
 import pyglet
 
 from tilings import Tiling
@@ -10,29 +13,36 @@ from .state import GuiState
 from .utils import paste
 from .widgets import Button, ButtonGrid, SelectionButton, TextBox, ToggleButton
 
+# RGB = Tuple[float, float, float]
+# RGBA = Tuple[float, float, float, float]
+
 
 class TopMenu(pyglet.event.EventDispatcher, Observer):
-    PADDING = 1
-    INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
-    FONT_SIZE = 12
-    TEXT_COLOR = Color.alpha_extend(Color.BLACK)
-    TEXT_BOX_COLOR = Color.DARK_GRAY
-    BACKGROUND_COLOR = Color.BLACK
+    _PADDING = 1
+    _INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
+    _FONT_SIZE = 12
+    _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
+    _TEXT_BOX_COLOR = Color.DARK_GRAY
+    _BACKGROUND_COLOR = Color.BLACK
 
     def __init__(self, x, y, w, h, dispatchers):
         Observer.__init__(self, dispatchers)
         self.rect = Rectangle(x, y, w, h)
         self.text_box = TextBox(
-            TopMenu.INITIAL_MESSAGE,
-            TopMenu.FONT_SIZE,
-            TopMenu.TEXT_COLOR,
-            TopMenu.TEXT_BOX_COLOR,
+            TopMenu._INITIAL_MESSAGE,
+            TopMenu._FONT_SIZE,
+            TopMenu._TEXT_COLOR,
+            TopMenu._TEXT_BOX_COLOR,
         )
         self.position(w, h)
 
     def on_draw(self):
         GeoDrawer.draw_rectangle(
-            self.rect.x, self.rect.y, self.rect.w, self.rect.h, TopMenu.BACKGROUND_COLOR
+            self.rect.x,
+            self.rect.y,
+            self.rect.w,
+            self.rect.h,
+            TopMenu._BACKGROUND_COLOR,
         )
         self.text_box.draw()
 
@@ -40,10 +50,10 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         self.rect.w = width
         self.rect.y = height
         self.text_box.position(
-            self.rect.x + TopMenu.PADDING,
-            self.rect.y + TopMenu.PADDING,
-            self.rect.w - 2 * TopMenu.PADDING,
-            self.rect.h - 2 * TopMenu.PADDING,
+            self.rect.x + TopMenu._PADDING,
+            self.rect.y + TopMenu._PADDING,
+            self.rect.w - 2 * TopMenu._PADDING,
+            self.rect.h - 2 * TopMenu._PADDING,
         )
 
     def on_key_press(self, symbol, modifiers):
@@ -119,188 +129,26 @@ TopMenu.register_event_type(CustomEvents.ON_BASIS_JSON_INPUT)
 
 
 class RightMenu(pyglet.event.EventDispatcher, Observer):
-    INITIAL_MESSAGE = "12"
-    FONT_SIZE = 12
-    TEXT_COLOR = Color.alpha_extend(Color.BLACK)
-    TEXT_BOX_COLOR = Color.DARK_GRAY
-    BACKGROUND_COLOR = Color.BLACK
+    _PADDING = 1
+    _INITIAL_MESSAGE = "12"
+    _FONT_SIZE = 12
+    _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
+    _TEXT_BOX_COLOR = Color.DARK_GRAY
+    _BACKGROUND_COLOR = Color.BLACK
 
     def __init__(self, x, y, w, h, t, state: GuiState, dispatchers):
         Observer.__init__(self, dispatchers)
         self.rect = Rectangle(x, y, w, h)
         self.t = t
-
         self.state = state
-
         self.text_box = TextBox(
-            RightMenu.INITIAL_MESSAGE,
-            RightMenu.FONT_SIZE,
-            RightMenu.TEXT_COLOR,
-            RightMenu.TEXT_BOX_COLOR,
+            RightMenu._INITIAL_MESSAGE,
+            RightMenu._FONT_SIZE,
+            RightMenu._TEXT_COLOR,
+            RightMenu._TEXT_BOX_COLOR,
         )
-
-        self.keyboard = ButtonGrid(10, 4)
-
-        # Select grp
-        # TODO: Collect these into variables
-        self.keyboard.add_btn(9, 0, SelectionButton(Images.ADD_POINT, toggled=True))
-        self.keyboard.add_btn(9, 1, SelectionButton(Images.ADD_CUSOM))
-        self.keyboard.add_btn(9, 2, SelectionButton(Images.FACTOR))
-        self.keyboard.add_btn(9, 3, SelectionButton(Images.FACTOR_INT))
-        self.keyboard.add_btn(8, 0, SelectionButton(Images.PLACE_WEST))
-        self.keyboard.add_btn(8, 1, SelectionButton(Images.PLACE_EAST))
-        self.keyboard.add_btn(8, 2, SelectionButton(Images.PLACE_NORTH))
-        self.keyboard.add_btn(8, 3, SelectionButton(Images.PLACE_SOUTH))
-        self.keyboard.add_btn(7, 0, SelectionButton(Images.PPLACE_WEST))
-        self.keyboard.add_btn(7, 1, SelectionButton(Images.PPLACE_EAST))
-        self.keyboard.add_btn(7, 2, SelectionButton(Images.PPLACE_NORTH))
-        self.keyboard.add_btn(7, 3, SelectionButton(Images.PPLACE_SOUTH))
-        self.keyboard.add_btn(6, 0, SelectionButton(Images.FUSION_R))
-        self.keyboard.add_btn(6, 1, SelectionButton(Images.FUSION_C))
-        self.keyboard.add_btn(6, 2, SelectionButton(Images.FUSION_COM_R))
-        self.keyboard.add_btn(6, 3, SelectionButton(Images.FUSION_COM_C))
-        self.keyboard.add_btn(5, 0, SelectionButton(Images.MOVE))
-
-        self.keyboard.add_selection_group(
-            [
-                (9, 0),
-                (9, 1),
-                (9, 2),
-                (9, 3),
-                (8, 0),
-                (8, 1),
-                (8, 2),
-                (8, 3),
-                (7, 0),
-                (7, 1),
-                (7, 2),
-                (7, 3),
-                (6, 0),
-                (6, 1),
-                (6, 2),
-                (6, 3),
-                (5, 0),
-            ],
-            on_click=self.state.set_mouse_click_action,
-        )
-
-        # normal btns
-        self.keyboard.add_btn(
-            4,
-            0,
-            Button(
-                Images.UNDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
-            ),
-        )
-        self.keyboard.add_btn(
-            4,
-            1,
-            Button(
-                Images.REDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
-            ),
-        )
-        self.keyboard.add_btn(
-            4,
-            2,
-            Button(
-                Images.STR,
-                on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_TILING),
-            ),
-        )
-        self.keyboard.add_btn(
-            4,
-            3,
-            Button(
-                Images.VERIFICATION,
-                on_click=lambda: self.dispatch_event(CustomEvents.ON_VERTIFICATION),
-            ),
-        )
-        self.keyboard.add_btn(
-            3,
-            0,
-            Button(
-                Images.ROWCOLSEP,
-                on_click=lambda: self.dispatch_event(
-                    CustomEvents.ON_ROW_COL_SEPERATION
-                ),
-            ),
-        )
-        self.keyboard.add_btn(
-            3,
-            1,
-            Button(
-                Images.OBSTR_TRANS,
-                on_click=lambda: self.dispatch_event(
-                    CustomEvents.ON_OBSTRUCTION_TRANSIVITY
-                ),
-            ),
-        )
-        self.keyboard.add_btn(
-            3,
-            2,
-            Button(
-                Images.EXPORT,
-                on_click=lambda: self.dispatch_event(
-                    CustomEvents.ON_FETCH_TILING_FOR_EXPORT
-                ),
-            ),
-        )
-        self.keyboard.add_btn(
-            3,
-            3,
-            Button(
-                Images.SEQUENCE,
-                on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_SEQUENCE),
-            ),
-        )
-
-        # toggle btns
-        self.keyboard.add_btn(
-            1,
-            0,
-            ToggleButton(
-                Images.SHADING,
-                on_click=self.state.toggle_shading,
-                toggled=self.state.shading,
-            ),
-        )
-        self.keyboard.add_btn(
-            1,
-            1,
-            ToggleButton(
-                Images.PRETTY,
-                on_click=self.state.toggle_pretty_points,
-                toggled=self.state.pretty_points,
-            ),
-        )
-        self.keyboard.add_btn(
-            1,
-            2,
-            ToggleButton(
-                Images.SHOW_CROSS,
-                on_click=self.state.toggle_show_crossing,
-                toggled=self.state.show_crossing,
-            ),
-        )
-        self.keyboard.add_btn(
-            1,
-            3,
-            ToggleButton(
-                Images.SHOW_LOCAL,
-                on_click=self.state.toggle_show_localized,
-                toggled=self.state.show_localized,
-            ),
-        )
-        self.keyboard.add_btn(
-            0,
-            0,
-            ToggleButton(
-                Images.HTC,
-                on_click=self.state.toggle_highlight_touching_cell,
-                toggled=self.state.highlight_touching_cell,
-            ),
-        )
-
+        self.keyboard = ButtonGrid(8, 4)
+        self._populate_keyboard()
         self.position(w, h)
 
     def on_draw(self):
@@ -309,7 +157,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             self.rect.y,
             self.rect.w,
             self.rect.h,
-            RightMenu.BACKGROUND_COLOR,
+            RightMenu._BACKGROUND_COLOR,
         )
         self.text_box.draw()
         self.keyboard.draw()
@@ -318,10 +166,10 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         self.rect.x = width
         self.rect.h = height
         self.text_box.position(
-            self.rect.x + TopMenu.PADDING,
-            self.rect.h - self.t + TopMenu.PADDING,
-            self.rect.w - 2 * TopMenu.PADDING,
-            self.t - 2 * TopMenu.PADDING,
+            self.rect.x + RightMenu._PADDING,
+            self.rect.h - self.t + RightMenu._PADDING,
+            self.rect.w - 2 * RightMenu._PADDING,
+            self.t - 2 * RightMenu._PADDING,
         )
         self.keyboard.resize(
             self.rect.x, self.rect.y, self.rect.w, self.rect.h - self.t
@@ -370,6 +218,170 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             self.text_box.on_text_motion(motion)
             return True
         return False
+
+    def _populate_keyboard(self):
+        self._add_selection_btns()
+        self._add_btns()
+        self._add_toggle_btns()
+
+    def _add_selection_btns(self):
+        self.keyboard.add_btn(7, 0, SelectionButton(Images.ADD_POINT, toggled=True))
+        self.keyboard.add_btn(7, 1, SelectionButton(Images.ADD_CUSOM))
+        self.keyboard.add_btn(7, 2, SelectionButton(Images.FACTOR))
+        self.keyboard.add_btn(7, 3, SelectionButton(Images.FACTOR_INT))
+        self.keyboard.add_btn(6, 0, SelectionButton(Images.PLACE_WEST))
+        self.keyboard.add_btn(6, 1, SelectionButton(Images.PLACE_EAST))
+        self.keyboard.add_btn(6, 2, SelectionButton(Images.PLACE_NORTH))
+        self.keyboard.add_btn(6, 3, SelectionButton(Images.PLACE_SOUTH))
+        self.keyboard.add_btn(5, 0, SelectionButton(Images.PPLACE_WEST))
+        self.keyboard.add_btn(5, 1, SelectionButton(Images.PPLACE_EAST))
+        self.keyboard.add_btn(5, 2, SelectionButton(Images.PPLACE_NORTH))
+        self.keyboard.add_btn(5, 3, SelectionButton(Images.PPLACE_SOUTH))
+        self.keyboard.add_btn(4, 0, SelectionButton(Images.FUSION_R))
+        self.keyboard.add_btn(4, 1, SelectionButton(Images.FUSION_C))
+        self.keyboard.add_btn(4, 2, SelectionButton(Images.FUSION_COM_R))
+        self.keyboard.add_btn(4, 3, SelectionButton(Images.FUSION_COM_C))
+        self.keyboard.add_btn(3, 0, SelectionButton(Images.MOVE))
+
+        self.keyboard.add_selection_group(
+            [
+                (7, 0),
+                (7, 1),
+                (7, 2),
+                (7, 3),
+                (6, 0),
+                (6, 1),
+                (6, 2),
+                (6, 3),
+                (5, 0),
+                (5, 1),
+                (5, 2),
+                (5, 3),
+                (4, 0),
+                (4, 1),
+                (4, 2),
+                (4, 3),
+                (3, 0),
+            ],
+            on_click=self.state.set_mouse_click_action,
+        )
+
+    def _add_btns(self):
+        self.keyboard.add_btn(
+            3,
+            2,
+            Button(
+                Images.UNDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
+            ),
+        )
+        self.keyboard.add_btn(
+            3,
+            3,
+            Button(
+                Images.REDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            0,
+            Button(
+                Images.EXPORT,
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_FETCH_TILING_FOR_EXPORT
+                ),
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            1,
+            Button(
+                Images.SEQUENCE,
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_SEQUENCE),
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            2,
+            Button(
+                Images.STR,
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_TILING),
+            ),
+        )
+        self.keyboard.add_btn(
+            2,
+            3,
+            Button(
+                Images.VERIFICATION,
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_VERTIFICATION),
+            ),
+        )
+        self.keyboard.add_btn(
+            1,
+            0,
+            Button(
+                Images.ROWCOLSEP,
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_ROW_COL_SEPERATION
+                ),
+            ),
+        )
+        self.keyboard.add_btn(
+            1,
+            1,
+            Button(
+                Images.OBSTR_TRANS,
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_OBSTRUCTION_TRANSIVITY
+                ),
+            ),
+        )
+
+    def _add_toggle_btns(self):
+        self.keyboard.add_btn(
+            1,
+            3,
+            ToggleButton(
+                Images.HTC,
+                on_click=self.state.toggle_highlight_touching_cell,
+                toggled=self.state.highlight_touching_cell,
+            ),
+        )
+        self.keyboard.add_btn(
+            0,
+            0,
+            ToggleButton(
+                Images.SHADING,
+                on_click=self.state.toggle_shading,
+                toggled=self.state.shading,
+            ),
+        )
+        self.keyboard.add_btn(
+            0,
+            1,
+            ToggleButton(
+                Images.PRETTY,
+                on_click=self.state.toggle_pretty_points,
+                toggled=self.state.pretty_points,
+            ),
+        )
+        self.keyboard.add_btn(
+            0,
+            2,
+            ToggleButton(
+                Images.SHOW_CROSS,
+                on_click=self.state.toggle_show_crossing,
+                toggled=self.state.show_crossing,
+            ),
+        )
+        self.keyboard.add_btn(
+            0,
+            3,
+            ToggleButton(
+                Images.SHOW_LOCAL,
+                on_click=self.state.toggle_show_localized,
+                toggled=self.state.show_localized,
+            ),
+        )
 
 
 RightMenu.register_event_type(CustomEvents.ON_PLACEMENT_INPUT)

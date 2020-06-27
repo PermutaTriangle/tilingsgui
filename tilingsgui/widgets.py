@@ -7,16 +7,17 @@ import pyglet
 
 from .graphics import Color, GeoDrawer
 
+RGB = Tuple[float, float, float]
+RGBA = Tuple[float, float, float, float]
+
 
 class Text:
     """A class for input text.
     """
 
-    LEFT_PAD: ClassVar[int] = 5
+    _LEFT_PAD: ClassVar[int] = 5
 
-    def __init__(
-        self, init_text: str, font_size: int, color: Tuple[float, float, float, float]
-    ) -> None:
+    def __init__(self, init_text: str, font_size: int, color: RGBA) -> None:
         """Create an instance of a user editable text.
 
         Args:
@@ -39,9 +40,9 @@ class Text:
         self.caret.visible = False
 
     def position(self, x: float, y: float, w: float, h: float) -> None:
-        self.layout.x = x + Text.LEFT_PAD
+        self.layout.x = x + Text._LEFT_PAD
         self.layout.y = y
-        self.layout.width = w - Text.LEFT_PAD
+        self.layout.width = w - Text._LEFT_PAD
         self.layout.height = h
 
     def set_focus(self) -> None:
@@ -65,9 +66,6 @@ class Text:
     def draw(self) -> None:
         self.batch.draw()
 
-    def get_batch(self) -> pyglet.graphics.Batch:
-        return self.batch
-
     def on_text(self, text: str) -> None:
         self.caret.on_text(text)
 
@@ -80,11 +78,7 @@ class TextBox(Text):
     """
 
     def __init__(
-        self,
-        init_text: str,
-        font_size: int,
-        text_color: Tuple[float, float, float, float],
-        box_color: Tuple[float, float, float],
+        self, init_text: str, font_size: int, text_color: RGBA, box_color: RGB,
     ) -> None:
         super().__init__(init_text, font_size, text_color)
         self.vertex_list: pyglet.graphics.vertexdomain.VertexList = self.batch.add(
@@ -104,7 +98,7 @@ class TextBox(Text):
 
 
 class Button:
-    BUTTON_COLOR: ClassVar[Tuple[float, float, float]] = Color.GRAY
+    BUTTON_COLOR: ClassVar[RGB] = Color.GRAY
 
     def __init__(
         self, image: str, on_click: Optional[Callable[[], None]] = None
