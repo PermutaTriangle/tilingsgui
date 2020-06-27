@@ -97,7 +97,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
             return False
         if self.text_box.has_focus():
             if button == pyglet.window.mouse.RIGHT:
-                self.text_box.append_text(paste())
+                self.text_box.add_text(paste())
         else:
             self.text_box.set_focus()
         return False
@@ -105,13 +105,13 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
     def on_text(self, text):
         if self.text_box.has_focus():
             if text.isprintable():
-                self.text_box.on_text(text)
+                self.text_box.add_text(text)
             return True
         return False
 
     def on_text_motion(self, motion):
         if self.text_box.has_focus():
-            self.text_box.on_text_motion(motion)
+            self.text_box.move_text(motion)
             return True
         return False
 
@@ -199,7 +199,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         else:
             if self.text_box.has_focus():
                 if button == pyglet.window.mouse.RIGHT:
-                    self.text_box.append_text(paste())
+                    self.text_box.add_text(paste())
             else:
                 self.text_box.set_focus()
             return False
@@ -209,13 +209,13 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
     def on_text(self, text):
         if self.text_box.has_focus():
             if text.isprintable():
-                self.text_box.on_text(text)
+                self.text_box.add_text(text)
             return True
         return False
 
     def on_text_motion(self, motion):
         if self.text_box.has_focus():
-            self.text_box.on_text_motion(motion)
+            self.text_box.move_text(motion)
             return True
         return False
 

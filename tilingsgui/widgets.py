@@ -40,36 +40,66 @@ class Text:
         self.caret.visible = False
 
     def position(self, x: float, y: float, w: float, h: float) -> None:
+        """Position the component within the viewport.
+
+        Args:
+            x (float): The left end of the component.
+            y (float): The bottom end of the component.
+            w (float): The horizontal length of the component.
+            h (float): The vertical length of the component.
+        """
         self.layout.x = x + Text._LEFT_PAD
         self.layout.y = y
         self.layout.width = w - Text._LEFT_PAD
         self.layout.height = h
 
     def set_focus(self) -> None:
+        """Set focus on the input text. This is needed to write to it.
+        """
         self.document.text = ""
         self.caret.visible = True
 
     def release_focus(self) -> None:
+        """Remove focus from the input text.
+        """
         self.caret.visible = False
         self.caret.mark = self.caret.position = 0
 
-    def append_text(self, text: str) -> None:
-        self.document.text = self.document.text + text
-        self.caret.mark = self.caret.position = len(self.document.text)
+    def add_text(self, text: str) -> None:
+        """Add text to the current caret position
+
+        Args:
+            text (str): The text to add.
+        """
+        self.caret.on_text(text)
 
     def has_focus(self) -> bool:
+        """Check if input text has focus.
+
+        Returns:
+            bool: True iff has focus.
+        """
         return self.caret.visible
 
     def get_current_text(self) -> str:
+        """Get the text for the text input.
+
+        Returns:
+            str: The current input.
+        """
         return self.document.text
 
     def draw(self) -> None:
+        """Draw the text.
+        """
         self.batch.draw()
 
-    def on_text(self, text: str) -> None:
-        self.caret.on_text(text)
+    def move_text(self, motion: int) -> None:
+        """Update the caret with events such as home, left, right, delete, etc.
 
-    def on_text_motion(self, motion: int) -> None:
+        Args:
+            motion (int): The motion event.
+        """
         self.caret.on_text_motion(motion)
 
 

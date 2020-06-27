@@ -19,6 +19,7 @@ def paste() -> str:
     try:
         return pyperclip.paste()
     except pyperclip.PyperclipException:
+        print("Required clipboard tools for pyperclip missing")
         return ""
 
 
