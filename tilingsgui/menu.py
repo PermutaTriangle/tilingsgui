@@ -29,7 +29,12 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
     _BACKGROUND_COLOR = Color.BLACK
 
     def __init__(
-        self, x: int, y: int, w: int, h: int, dispatchers: Iterable[Observer]
+        self,
+        x: int,
+        y: int,
+        w: int,
+        h: int,
+        dispatchers: Iterable[pyglet.event.EventDispatcher],
     ) -> None:
         """Create the top menu.
 
@@ -42,8 +47,8 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
             should listen to.
         """
         Observer.__init__(self, dispatchers)
-        self.rect: Rectangle = Rectangle(x, y, w, h)
-        self.text_box: TextBox = TextBox(
+        self._rect: Rectangle = Rectangle(x, y, w, h)
+        self._text_box: TextBox = TextBox(
             TopMenu._INITIAL_MESSAGE,
             TopMenu._FONT_SIZE,
             TopMenu._TEXT_COLOR,
@@ -58,13 +63,13 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
             width (int): The new width.
             y (int): The new vertical position.
         """
-        self.rect.w = width
-        self.rect.y = y
-        self.text_box.position(
-            self.rect.x + TopMenu._PADDING,
-            self.rect.y + TopMenu._PADDING,
-            self.rect.w - 2 * TopMenu._PADDING,
-            self.rect.h - 2 * TopMenu._PADDING,
+        self._rect.w = width
+        self._rect.y = y
+        self._text_box.position(
+            self._rect.x + TopMenu._PADDING,
+            self._rect.y + TopMenu._PADDING,
+            self._rect.w - 2 * TopMenu._PADDING,
+            self._rect.h - 2 * TopMenu._PADDING,
         )
 
     ##################
@@ -75,13 +80,13 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         """Draw event handler.
         """
         GeoDrawer.draw_rectangle(
-            self.rect.x,
-            self.rect.y,
-            self.rect.w,
-            self.rect.h,
+            self._rect.x,
+            self._rect.y,
+            self._rect.w,
+            self._rect.h,
             TopMenu._BACKGROUND_COLOR,
         )
-        self.text_box.draw()
+        self._text_box.draw()
 
     def on_key_press(self, symbol: int, _modifiers: int) -> bool:
         """Key pressed event handler.
@@ -93,9 +98,9 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         Returns:
             bool: True if the event is consumed by the handler, false otherwise.
         """
-        if self.text_box.has_focus():
+        if self._text_box.has_focus():
             if symbol == pyglet.window.key.ESCAPE:
-                self.text_box.release_focus()
+                self._text_box.release_focus()
             elif symbol == pyglet.window.key.ENTER:
                 self._dispatch_input_if_not_empty()
             return True
@@ -113,20 +118,21 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         Returns:
             bool: True if the event is consumed by the handler, false otherwise.
         """
-        if not self.text_box.hit_test(x, y):
-            if self.text_box.has_focus():
+        if not self._text_box.hit_test(x, y):
+            if self._text_box.has_focus():
                 self._dispatch_input_if_not_empty()
                 return True
             return False
-        if self.text_box.has_focus():
+        if self._text_box.has_focus():
             if button == pyglet.window.mouse.RIGHT:
-                self.text_box.add_text(paste())
+                self._text_box.add_text(paste())
         else:
-            self.text_box.set_focus()
+            self._text_box.set_focus()
         return False
 
     def on_text(self, text: str) -> bool:
-        """Text input event handler.
+        """Text input event handler. If text box does not have focus, we ignore it.
+        All non-printable characters are also ignored.
 
         Args:
             text (str): The newly written text.
@@ -134,9 +140,9 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         Returns:
             bool: True if the event is consumed by the handler, false otherwise.
         """
-        if self.text_box.has_focus():
+        if self._text_box.has_focus():
             if text.isprintable():
-                self.text_box.add_text(text)
+                self._text_box.add_text(text)
             return True
         return False
 
@@ -149,8 +155,8 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         Returns:
             bool: True if the event is consumed by the handler, false otherwise.
         """
-        if self.text_box.has_focus():
-            self.text_box.move_text(motion)
+        if self._text_box.has_focus():
+            self._text_box.move_text(motion)
             return True
         return False
 
@@ -163,8 +169,8 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         If it is a valid tiling json, dispatch a starting tiling decoded from it.
         Otherwise, use string to construct one with from_string.
         """
-        self.text_box.release_focus()
-        input_string = self.text_box.get_current_text()
+        self._text_box.release_focus()
+        input_string = self._text_box.get_current_text()
         if not input_string:
             return
         if input_string[0] == "{" and input_string[-1] == "}":
@@ -182,6 +188,9 @@ TopMenu.register_event_type(CustomEvents.ON_TILING_JSON_INPUT)
 
 
 class RightMenu(pyglet.event.EventDispatcher, Observer):
+    """A menu that sits to the right of the tiling plot.
+    """
+
     _PADDING = 1
     _INITIAL_MESSAGE = "12"
     _FONT_SIZE = 12
@@ -189,90 +198,149 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
     _TEXT_BOX_COLOR = Color.DARK_GRAY
     _BACKGROUND_COLOR = Color.BLACK
 
-    def __init__(self, x, y, w, h, top, state: GuiState, dispatchers):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        w: int,
+        h: int,
+        top: int,
+        state: GuiState,
+        dispatchers: Iterable[pyglet.event.EventDispatcher],
+    ) -> None:
+        """Create a right menu instance.
+
+        Args:
+            x (int): The x coordinate of the SW corner of its surrounding rectangle.
+            y (int): The y coordinate of the SW corner of its surrounding rectangle.
+            w (int): The horizontal length of the surrounding rectangle.
+            h (int): The vertical length of the surrounding rectangle.
+            top (int): The height of the top bar.
+            dispatchers (Iterable[Observer]): A collection of dispatchers that the menu
+            should listen to.
+        """
         Observer.__init__(self, dispatchers)
-        self.rect: Rectangle = Rectangle(x, y, w, h)
-        self.top: int = top
-        self.state: GuiState = state
-        self.text_box: TextBox = TextBox(
+        self._rect: Rectangle = Rectangle(x, y, w, h)
+        self._top: int = top
+        self._state: GuiState = state
+        self._text_box: TextBox = TextBox(
             RightMenu._INITIAL_MESSAGE,
             RightMenu._FONT_SIZE,
             RightMenu._TEXT_COLOR,
             RightMenu._TEXT_BOX_COLOR,
         )
-        self.keyboard: ButtonGrid = ButtonGrid(8, 4)
+        self._keyboard: ButtonGrid = ButtonGrid(8, 4)
         self._populate_keyboard()
         self.position(w, h)
 
-    def position(self, width, height):
-        self.rect.x = width
-        self.rect.h = height
-        self.text_box.position(
-            self.rect.x + RightMenu._PADDING,
-            self.rect.h - self.top + RightMenu._PADDING,
-            self.rect.w - 2 * RightMenu._PADDING,
-            self.top - 2 * RightMenu._PADDING,
+    def position(self, x: int, height: int):
+        """Position the right bar, after a resize event.
+
+        Args:
+            x (int): The x coordinate of the bar's SW position.
+            height (int): The height of the bar.
+        """
+        self._rect.x = x
+        self._rect.h = height
+        self._text_box.position(
+            self._rect.x + RightMenu._PADDING,
+            self._rect.h - self._top + RightMenu._PADDING,
+            self._rect.w - 2 * RightMenu._PADDING,
+            self._top - 2 * RightMenu._PADDING,
         )
-        self.keyboard.position(
-            self.rect.x, self.rect.y, self.rect.w, self.rect.h - self.top
+        self._keyboard.position(
+            self._rect.x, self._rect.y, self._rect.w, self._rect.h - self._top
         )
 
     ##################
     # Event Handlers #
     ##################
 
-    def on_draw(self):
+    def on_draw(self) -> None:
+        """Draw event handler.
+        """
         GeoDrawer.draw_rectangle(
-            self.rect.x,
-            self.rect.y,
-            self.rect.w,
-            self.rect.h,
+            self._rect.x,
+            self._rect.y,
+            self._rect.w,
+            self._rect.h,
             RightMenu._BACKGROUND_COLOR,
         )
-        self.text_box.draw()
-        self.keyboard.draw()
+        self._text_box.draw()
+        self._keyboard.draw()
 
-    def on_key_press(self, symbol, _modifiers):
+    def on_key_press(self, symbol, _modifiers) -> bool:
+        """Key pressed event handler.
 
-        if self.text_box.has_focus():
+        Args:
+            symbol (int): The key pressed.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+
+        Returns:
+            bool: True if the event is consumed by the handler, false otherwise.
+        """
+        if self._text_box.has_focus():
             if symbol == pyglet.window.key.ESCAPE:
-                self.text_box.release_focus()
+                self._text_box.release_focus()
             if symbol == pyglet.window.key.ENTER:
-                self.text_box.release_focus()
-                input_text = self.text_box.get_current_text()
-                if input_text:
-                    self.dispatch_event(CustomEvents.ON_PLACEMENT_INPUT, input_text)
+                self._dispatch_input_if_not_empty()
             return True
         return False
 
-    def on_mouse_press(self, x, y, button, _modifiers):
-        if not self.text_box.hit_test(x, y):
-            if self.text_box.has_focus():
-                input_string = self.text_box.get_current_text()
-                if input_string:
-                    self.dispatch_event(CustomEvents.ON_PLACEMENT_INPUT, input_string)
-                self.text_box.release_focus()
+    def on_mouse_press(self, x, y, button, _modifiers) -> bool:
+        """Mouse click event handler.
+
+        Args:
+            x (int): The x coordinate of the click.
+            y (int): The y coordinate of the click.
+            button (int): The mouse button that was clicked.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+
+        Returns:
+            bool: True if the event is consumed by the handler, false otherwise.
+        """
+        if not self._text_box.hit_test(x, y):
+            if self._text_box.has_focus():
+                self._dispatch_input_if_not_empty()
                 return True
         else:
-            if self.text_box.has_focus():
+            if self._text_box.has_focus():
                 if button == pyglet.window.mouse.RIGHT:
-                    self.text_box.add_text(paste())
+                    self._text_box.add_text(paste())
             else:
-                self.text_box.set_focus()
+                self._text_box.set_focus()
             return False
 
-        self.keyboard.click_check(x, y)
+        self._keyboard.click_check(x, y)
+        return False
 
     def on_text(self, text):
-        if self.text_box.has_focus():
+        """Text input event handler. If text box does not have focus, we ignore it.
+        All non-printable characters are also ignored.
+
+        Args:
+            text (str): The newly written text.
+
+        Returns:
+            bool: True if the event is consumed by the handler, false otherwise.
+        """
+        if self._text_box.has_focus():
             if text.isprintable():
-                self.text_box.add_text(text)
+                self._text_box.add_text(text)
             return True
         return False
 
     def on_text_motion(self, motion):
-        if self.text_box.has_focus():
-            self.text_box.move_text(motion)
+        """Text motion event handler.
+
+        Args:
+            motion (int): The motion type.
+
+        Returns:
+            bool: True if the event is consumed by the handler, false otherwise.
+        """
+        if self._text_box.has_focus():
+            self._text_box.move_text(motion)
             return True
         return False
 
@@ -280,12 +348,25 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
     # Private helpers #
     ###################
 
+    def _dispatch_input_if_not_empty(self):
+        """Release focus of text input and dispatch the event of handling it
+        if it is non-empty.
+        """
+        self._text_box.release_focus()
+        input_string = self._text_box.get_current_text()
+        if input_string:
+            self.dispatch_event(CustomEvents.ON_PLACEMENT_INPUT, input_string)
+
     def _populate_keyboard(self):
+        """Populate key grid.
+        """
         self._add_selection_btns()
         self._add_btns()
         self._add_toggle_btns()
 
     def _add_selection_btns(self):
+        """Adds selection buttons to grid.
+        """
         positions = [
             (7, 0),
             (7, 1),
@@ -305,7 +386,6 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             (4, 3),
             (3, 0),
         ]
-
         buttons = [
             SelectionButton(Images.ADD_POINT, selected=True),
             SelectionButton(Images.ADD_CUSOM),
@@ -325,30 +405,30 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             SelectionButton(Images.FUSION_COM_C),
             SelectionButton(Images.MOVE),
         ]
-
         for pos, btn in zip(positions, buttons):
-            self.keyboard.add_btn(*pos, btn)
-
-        self.keyboard.add_selection_group(
-            positions, on_click=self.state.set_mouse_click_action,
+            self._keyboard.add_btn(*pos, btn)
+        self._keyboard.add_selection_group(
+            positions, on_click=self._state.set_mouse_click_action,
         )
 
     def _add_btns(self):
-        self.keyboard.add_btn(
+        """Adds normal buttons to grid.
+        """
+        self._keyboard.add_btn(
             3,
             2,
             Button(
                 Images.UNDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_UNDO)
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             3,
             3,
             Button(
                 Images.REDO, on_click=lambda: self.dispatch_event(CustomEvents.ON_REDO)
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             2,
             0,
             Button(
@@ -358,7 +438,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 ),
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             2,
             1,
             Button(
@@ -366,7 +446,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_SEQUENCE),
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             2,
             2,
             Button(
@@ -374,7 +454,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_PRINT_TILING),
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             2,
             3,
             Button(
@@ -382,7 +462,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 on_click=lambda: self.dispatch_event(CustomEvents.ON_VERTIFICATION),
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             1,
             0,
             Button(
@@ -392,7 +472,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
                 ),
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             1,
             1,
             Button(
@@ -404,49 +484,51 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         )
 
     def _add_toggle_btns(self):
-        self.keyboard.add_btn(
+        """Adds toggle buttons to grid.
+        """
+        self._keyboard.add_btn(
             1,
             3,
             ToggleButton(
                 Images.HTC,
-                on_click=self.state.toggle_highlight_touching_cell,
-                toggled=self.state.highlight_touching_cell,
+                on_click=self._state.toggle_highlight_touching_cell,
+                toggled=self._state.highlight_touching_cell,
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             0,
             0,
             ToggleButton(
                 Images.SHADING,
-                on_click=self.state.toggle_shading,
-                toggled=self.state.shading,
+                on_click=self._state.toggle_shading,
+                toggled=self._state.shading,
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             0,
             1,
             ToggleButton(
                 Images.PRETTY,
-                on_click=self.state.toggle_pretty_points,
-                toggled=self.state.pretty_points,
+                on_click=self._state.toggle_pretty_points,
+                toggled=self._state.pretty_points,
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             0,
             2,
             ToggleButton(
                 Images.SHOW_CROSS,
-                on_click=self.state.toggle_show_crossing,
-                toggled=self.state.show_crossing,
+                on_click=self._state.toggle_show_crossing,
+                toggled=self._state.show_crossing,
             ),
         )
-        self.keyboard.add_btn(
+        self._keyboard.add_btn(
             0,
             3,
             ToggleButton(
                 Images.SHOW_LOCAL,
-                on_click=self.state.toggle_show_localized,
-                toggled=self.state.show_localized,
+                on_click=self._state.toggle_show_localized,
+                toggled=self._state.show_localized,
             ),
         )
 
