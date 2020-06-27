@@ -1,15 +1,15 @@
-"""[TODO]
+"""The tiling drawing tools.
 """
 
 from collections import Counter, deque
 from random import uniform
-from typing import ClassVar, Deque, Tuple
+from typing import ClassVar, Deque, List, Optional, Tuple
 
 import pyglet
 
 from permuta import Perm
 from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
-from tilings import Tiling
+from tilings import GriddedPerm, Tiling
 from tilings.algorithms import Factor, FactorWithInterleaving
 from tilings.exception import InvalidOperationError
 from tilings.strategies import (
@@ -30,17 +30,31 @@ from .utils import clamp
 
 
 class TPlot:
-    OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
-    REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
-    HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.ORANGE
-    FUZZYNESS = 0.25  # Should be in (0,0.5)
+    """A single tiling image.
+    """
+
+    _OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
+    _REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
+    _HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.ORANGE
+    _FUZZYNESS = 0.25  # Should be in [0,0.5)
 
     @staticmethod
-    def _col_row_and_count(gp, gridsz):
-        colcount = [0] * gridsz[0]
-        rowcount = [0] * gridsz[1]
-        col = [[] for i in range(gridsz[0])]
-        row = [[] for i in range(gridsz[1])]
+    def _col_row_and_count(
+        gp: GriddedPerm, grid_size: Tuple[int, int]
+    ) -> Tuple[List[int], List[int], List[List[int]], List[List[int]]]:
+        """[summary]
+
+        Args:
+            gp (GriddedPerm): [description]
+            grid_size (Tuple[int, int]): [description]
+
+        Returns:
+            Tuple[List[int], List[int], List[List[int]], List[List[int]]]: [description]
+        """
+        colcount = [0] * grid_size[0]
+        rowcount = [0] * grid_size[1]
+        col: List[List[int]] = [[] for i in range(grid_size[0])]
+        row: List[List[int]] = [[] for i in range(grid_size[1])]
         for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt)):
             colcount[c_x] += 1
             rowcount[c_y] += 1
@@ -51,46 +65,57 @@ class TPlot:
         return colcount, rowcount, col, row
 
     @staticmethod
-    def gridded_perm_initial_locations(gp, gridsz, cellsz):
-        colcount, rowcount, col, row = TPlot._col_row_and_count(gp, gridsz)
-        locs = [
+    def gridded_perm_initial_locations(
+        gp: GriddedPerm, grid_size: Tuple[int, int], cell_size: Tuple[float, float]
+    ) -> List[Point]:
+        """[summary]
+
+        Args:
+            gp (GriddedPerm): [description]
+            grid_size (Tuple[int, int]): [description]
+            cell_size (Tuple[float, float]): [description]
+
+        Returns:
+            List[Point]: [description]
+        """
+        colcount, rowcount, col, row = TPlot._col_row_and_count(gp, grid_size)
+        return [
             Point(
-                cellsz[0]
+                cell_size[0]
                 * (
                     c_x
                     + (
                         col[c_x].index(ind)
                         + 1
-                        + uniform(-TPlot.FUZZYNESS, TPlot.FUZZYNESS)
+                        + uniform(-TPlot._FUZZYNESS, TPlot._FUZZYNESS)
                     )
                     / (colcount[c_x] + 1)
                 ),
-                cellsz[1]
+                cell_size[1]
                 * (
                     c_y
                     + (
                         row[c_y].index(val)
                         + 1
-                        + uniform(-TPlot.FUZZYNESS, TPlot.FUZZYNESS)
+                        + uniform(-TPlot._FUZZYNESS, TPlot._FUZZYNESS)
                     )
                     / (rowcount[c_y] + 1)
                 ),
             )
             for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt))
         ]
-        return locs
 
-    def __init__(self, tiling, w, h):
-        self.tiling = tiling
-        self.w = w
-        self.h = h
-        t_w, t_h = self.tiling.dimensions
-        self.obstruction_locs = [
+    def __init__(self, tiling: Tiling, w: float, h: float) -> None:
+        t_w, t_h = tiling.dimensions
+
+        self.tiling: Tiling = tiling
+        self._w: float = w
+        self._h: float = h
+        self._obstruction_locs: List[List[Point]] = [
             TPlot.gridded_perm_initial_locations(gp, (t_w, t_h), (w / t_w, h / t_h))
             for gp in self.tiling.obstructions
         ]
-
-        self.requirement_locs = [
+        self._requirement_locs: List[List[List[Point]]] = [
             [
                 TPlot.gridded_perm_initial_locations(gp, (t_w, t_h), (w / t_w, h / t_h))
                 for gp in reqlist
@@ -98,72 +123,60 @@ class TPlot:
             for reqlist in self.tiling.requirements
         ]
 
-    def draw(self, state: GuiState, mpos: Point):
+    def draw(self, state: GuiState, mpos: Point) -> None:
         if any(len(obs) == 0 for obs in self.tiling.obstructions):
-            GeoDrawer.draw_rectangle(0, 0, self.w, self.h, Color.GRAY)
+            GeoDrawer.draw_rectangle(0, 0, self._w, self._h, Color.GRAY)
         else:
             if state.shading:
                 self._draw_shaded_cells()
-            # if state.pretty_points:
-            #    self._draw_point_cells()
             self._draw_grid()
             self._draw_obstructions(state, mpos)
             self._draw_requirements(state, mpos)
 
-    def resize(self, width, height):
-        for obs in self.obstruction_locs:
+    def resize(self, width: int, height: int) -> None:
+        for obs in self._obstruction_locs:
             for pnt in obs:
-                pnt.x = pnt.x / self.w * width
-                pnt.y = pnt.y / self.h * height
-        for reqlist in self.requirement_locs:
+                pnt.x = pnt.x / self._w * width
+                pnt.y = pnt.y / self._h * height
+        for reqlist in self._requirement_locs:
             for req in reqlist:
                 for pnt in req:
-                    pnt.x = pnt.x / self.w * width
-                    pnt.y = pnt.y / self.h * height
-        self.w = width
-        self.h = height
+                    pnt.x = pnt.x / self._w * width
+                    pnt.y = pnt.y / self._h * height
+        self._w = width
+        self._h = height
 
-    def _cell_to_rect(self, c_x, c_y):
+    def get_cell(self, mpos: Point) -> Tuple[int, int]:
         t_w, t_h = self.tiling.dimensions
-        c_w, c_h = self.w / t_w, self.h / t_h
-        return c_x * c_w, c_y * c_h, c_w, c_h
-
-    def _draw_shaded_cells(self):
-        for c_x, c_y in self.tiling.empty_cells:
-            GeoDrawer.draw_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
-
-    """def _draw_point_cells(self):
-        point_cells_with_point_perm_req = {
-            req.pos[0]
-            for req_lis in self.tiling.requirements
-            for req in req_lis
-            if req.is_point_perm()
-        }.intersection(self.tiling.point_cells)
-
-        for c_x, c_y in point_cells_with_point_perm_req:
-            x, y, w, h = self._cell_to_rect(c_x, c_y)
-            GeoDrawer.draw_circle(x + w / 2, y + h / 2, 10, Color.BLACK)"""
-
-    def get_cell(self, mpos: Point):
-        t_w, t_h = self.tiling.dimensions
-        c_w, c_h = self.w / t_w, self.h / t_h
+        c_w, c_h = self._w / t_w, self._h / t_h
         c_x, c_y = int(mpos.x / c_w), int(mpos.y / c_h)
         return c_x, c_y
 
-    def get_point_obs_index(self, mpos: Point):
-        for j, loc in enumerate(self.obstruction_locs):
+    def get_point_obs_index(self, mpos: Point) -> Optional[Tuple[int, int]]:
+        for j, loc in enumerate(self._obstruction_locs):
             for k, pnt in enumerate(loc):
                 if mpos.dist_squared_to(pnt) <= 100:
                     return j, k
+        return None
 
-    def get_point_req_index(self, mpos: Point):
-        for i, reqlist in enumerate(self.requirement_locs):
+    def get_point_req_index(self, mpos: Point) -> Optional[Tuple[int, int, int]]:
+        for i, reqlist in enumerate(self._requirement_locs):
             for j, loc in enumerate(reqlist):
                 for k, pnt in enumerate(loc):
                     if mpos.dist_squared_to(pnt) <= 100:
                         return i, j, k
+        return None
 
-    def _draw_obstructions(self, state: GuiState, mpos: Point):
+    def _cell_to_rect(self, c_x: int, c_y: int) -> Tuple[float, float, float, float]:
+        t_w, t_h = self.tiling.dimensions
+        c_w, c_h = self._w / t_w, self._h / t_h
+        return c_x * c_w, c_y * c_h, c_w, c_h
+
+    def _draw_shaded_cells(self) -> None:
+        for c_x, c_y in self.tiling.empty_cells:
+            GeoDrawer.draw_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
+
+    def _draw_obstructions(self, state: GuiState, mpos: Point) -> None:
         # TODO: create once, re-use ... pass through drawing functions
         # look for more such optimizations... when done...
         point_cells_with_point_perm_req = self.tiling.point_cells.intersection(
@@ -175,7 +188,7 @@ class TPlot:
             }
         )
         hover_cell = self.get_cell(mpos)
-        for obs, loc in zip(self.tiling.obstructions, self.obstruction_locs):
+        for obs, loc in zip(self.tiling.obstructions, self._obstruction_locs):
             if (state.shading and obs.is_point_perm()) or (
                 state.pretty_points
                 and all(p in point_cells_with_point_perm_req for p in obs.pos)
@@ -183,10 +196,10 @@ class TPlot:
                 continue
 
             col = (
-                TPlot.HIGHLIGHT_COLOR
+                TPlot._HIGHLIGHT_COLOR
                 if state.highlight_touching_cell
                 and any(p == hover_cell for p in obs.pos)
-                else TPlot.OBSTRUCTION_COLOR
+                else TPlot._OBSTRUCTION_COLOR
             )
             localized = obs.is_localized()
             if (localized and state.show_localized) or (
@@ -194,9 +207,9 @@ class TPlot:
             ):
                 GeoDrawer.draw_point_path(loc, col, 5)
 
-    def _draw_requirements(self, state: GuiState, mpos: Point):
+    def _draw_requirements(self, state: GuiState, mpos: Point) -> None:
         hover_index = self.get_point_req_index(mpos)
-        for i, reqlist in enumerate(self.requirement_locs):
+        for i, reqlist in enumerate(self._requirement_locs):
             if (
                 len(reqlist[0]) == 1
                 and state.pretty_points
@@ -210,9 +223,9 @@ class TPlot:
                 GeoDrawer.draw_circle(pnt.x, pnt.y, 10, Color.BLACK)
                 continue
             col = (
-                TPlot.HIGHLIGHT_COLOR
+                TPlot._HIGHLIGHT_COLOR
                 if hover_index is not None and i == hover_index[0]
-                else TPlot.REQUIREMENT_COLOR
+                else TPlot._REQUIREMENT_COLOR
             )
 
             for j, loc in enumerate(reqlist):
@@ -222,17 +235,199 @@ class TPlot:
                 ):
                     GeoDrawer.draw_point_path(loc, col, 5)
 
-    def _draw_grid(self):
+    def _draw_grid(self) -> None:
         t_w, t_h = self.tiling.dimensions
         for i in range(t_w):
-            x = self.w * i / t_w
-            GeoDrawer.draw_line_segment(x, self.h, x, 0, Color.BLACK)
+            x = self._w * i / t_w
+            GeoDrawer.draw_line_segment(x, self._h, x, 0, Color.BLACK)
         for i in range(t_h):
-            y = self.h * i / t_h
-            GeoDrawer.draw_line_segment(0, y, self.w, y, Color.BLACK)
+            y = self._h * i / t_h
+            GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
 
 
 """
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
+###############################
 ###############################
 ###############################
 ###############################
