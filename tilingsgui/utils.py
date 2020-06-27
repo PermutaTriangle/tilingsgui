@@ -19,6 +19,7 @@ def paste() -> str:
     try:
         return pyperclip.paste()
     except pyperclip.PyperclipException:
+        print("Required clipboard tools for pyperclip missing")
         return ""
 
 
@@ -31,5 +32,15 @@ def get_current_time_string() -> str:
     return datetime.datetime.now().isoformat()
 
 
-def clamp(x, mnx, mxx):
-    return min(mxx, max(x, mnx))
+def clamp(value: float, min_value: float, max_value: float) -> float:
+    """Returns the closest value to value in [min_value, max_value].
+
+    Args:
+        value (float): The value to map.
+        min_value (float): Minimum value of interval.
+        max_value (float): Maximum value of interval.
+
+    Returns:
+        float: The value clamped between boundaries
+    """
+    return min(max_value, max(value, min_value))

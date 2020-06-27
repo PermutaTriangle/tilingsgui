@@ -59,11 +59,11 @@ Pyperclip requires clipboard tools that might not come pre-installed.
 Without them the app still works but pasting won’t.
 
 Known issues
------------
+------------
 * 
 
 Report a bug
-~~~~~~~~~~~
+~~~~~~~~~~~~
 Along with the description of the bug, please provide a json of the tiling which is exportable in the gui.
 
 User manual
@@ -82,7 +82,7 @@ Summary
 * |fusion_comp_r| Component fusion with row set
 * |htc| Highlight hovered cell
 * |move| Move
-* |obstr-trans| Obstruction transitivity
+* |obstr_trans| Obstruction transitivity
 * |place_east| East placement
 * |place_north| North placement
 * |place_south| South placement
@@ -103,7 +103,7 @@ Summary
 * |verification| Verification
 
 Tiling input
-~~~~~~~~~~~
+~~~~~~~~~~~~
 The input box directly above the tiling canvas can be used to create an initial tiling. It accepts both strings and json, using ``from_string`` and ``from_json`` respectively. A right click activates it. To confirm your input, press enter or click away from the text box. Escape cancels the input. Right clicking when activated will paste whatever is on the clipboard.
 
 **Example**:
@@ -196,7 +196,7 @@ Row column separation
 
 Obstruction transitivity
 ~~~~~~~~~~~~~~~~~~~~~~~~
-|obstr-trans| adds length 2 obstructions to the tiling using transitivity over positive cells.
+|obstr_trans| adds length 2 obstructions to the tiling using transitivity over positive cells.
 
 Export
 ~~~~~~
@@ -378,7 +378,7 @@ An example output is shown below.
    :scale: 200 %
    :alt: img-error
 
-.. |obstr-trans| image:: resources/img/svg/obstr-trans.svg
+.. |obstr_trans| image:: resources/img/svg/obstr_trans.svg
    :scale: 200 %
    :alt: img-error
 

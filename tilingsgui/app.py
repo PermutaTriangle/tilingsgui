@@ -18,14 +18,14 @@ class TilingGui(pyglet.window.Window):
     """The TilingsGui application.
     """
 
-    TITLE: ClassVar[str] = "Tilings GUI"
-    MIN_WIDTH: ClassVar[int] = 500
-    MIN_HEIGHT: ClassVar[int] = 400
-    INITIAL_WIDTH: ClassVar[int] = 800
-    INITIAL_HEIGHT: ClassVar[int] = 650
-    RIGHT_BAR_WIDTH: ClassVar[int] = 200
-    TOP_BAR_HEIGHT: ClassVar[int] = 24
-    CLEAR_COLOR: ClassVar[Tuple[float, float, float, float]] = (
+    _TITLE: ClassVar[str] = "Tilings GUI"
+    _MIN_WIDTH: ClassVar[int] = 500
+    _MIN_HEIGHT: ClassVar[int] = 400
+    _INITIAL_WIDTH: ClassVar[int] = 800
+    _INITIAL_HEIGHT: ClassVar[int] = 650
+    _RIGHT_BAR_WIDTH: ClassVar[int] = 200
+    _TOP_BAR_HEIGHT: ClassVar[int] = 24
+    _CLEAR_COLOR: ClassVar[Tuple[float, float, float, float]] = (
         Color.alpha_extend_and_scale_to_01(Color.WHITE)
     )
 
@@ -34,9 +34,9 @@ class TilingGui(pyglet.window.Window):
         sub components and systems for the app.
         """
         super().__init__(
-            TilingGui.INITIAL_WIDTH,
-            TilingGui.INITIAL_HEIGHT,
-            TilingGui.TITLE,
+            TilingGui._INITIAL_WIDTH,
+            TilingGui._INITIAL_HEIGHT,
+            TilingGui._TITLE,
             *args,
             **kargs,
         )
@@ -45,35 +45,35 @@ class TilingGui(pyglet.window.Window):
         pyglet.resource.path = [PathManager.as_string(PathManager.get_png_abs_path())]
 
         # The current state with initial values.
-        self.state = GuiState()
+        self._state: GuiState = GuiState()
 
         # The bar above the tiling plot.
-        self.top_bar = TopMenu(
+        self._top_bar: TopMenu = TopMenu(
             0,
-            self.height - TilingGui.TOP_BAR_HEIGHT,
-            self.width - TilingGui.RIGHT_BAR_WIDTH,
-            TilingGui.TOP_BAR_HEIGHT,
+            self.height - TilingGui._TOP_BAR_HEIGHT,
+            self.width - TilingGui._RIGHT_BAR_WIDTH,
+            TilingGui._TOP_BAR_HEIGHT,
             [self],
         )
 
         # The bar to the right of the tiling plot.
-        self.right_bar = RightMenu(
-            self.width - TilingGui.RIGHT_BAR_WIDTH,
+        self._right_bar: RightMenu = RightMenu(
+            self.width - TilingGui._RIGHT_BAR_WIDTH,
             0,
-            TilingGui.RIGHT_BAR_WIDTH,
+            TilingGui._RIGHT_BAR_WIDTH,
             self.height,
-            TilingGui.TOP_BAR_HEIGHT,
-            self.state,
+            TilingGui._TOP_BAR_HEIGHT,
+            self._state,
             [self],
         )
 
         # The tiling plot.
-        self.tplot_man = TPlotManager(
-            self.width, self.height, self.state, [self, self.top_bar, self.right_bar]
+        self._tplot_man: TPlotManager = TPlotManager(
+            self.width, self.height, self._state, [self, self._top_bar, self._right_bar]
         )
 
         # export data handler.
-        self.history = History([self, self.right_bar, self.tplot_man])
+        self._history: History = History([self, self._right_bar, self._tplot_man])
 
     def start(self) -> None:
         """Start the app.
@@ -92,10 +92,10 @@ class TilingGui(pyglet.window.Window):
         )
 
         # Limit how small the window may be.
-        self.set_minimum_size(TilingGui.MIN_WIDTH, TilingGui.MIN_HEIGHT)
+        self.set_minimum_size(TilingGui._MIN_WIDTH, TilingGui._MIN_HEIGHT)
 
         # Handle clearing the canvas on each draw.
-        pyglet.gl.glClearColor(*TilingGui.CLEAR_COLOR)
+        pyglet.gl.glClearColor(*TilingGui._CLEAR_COLOR)
         self.push_handlers(on_draw=self.clear)
 
     def on_resize(self, width: int, height: int) -> bool:
@@ -112,13 +112,13 @@ class TilingGui(pyglet.window.Window):
         super().on_resize(width, height)
 
         # Re-position subcomponents.
-        self.tplot_man.position(
-            width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
+        self._tplot_man.position(
+            width - TilingGui._RIGHT_BAR_WIDTH, height - TilingGui._TOP_BAR_HEIGHT
         )
-        self.top_bar.position(
-            width - TilingGui.RIGHT_BAR_WIDTH, height - TilingGui.TOP_BAR_HEIGHT
+        self._top_bar.position(
+            width - TilingGui._RIGHT_BAR_WIDTH, height - TilingGui._TOP_BAR_HEIGHT
         )
-        self.right_bar.position(width - TilingGui.RIGHT_BAR_WIDTH, height)
+        self._right_bar.position(width - TilingGui._RIGHT_BAR_WIDTH, height)
 
         # on_resize is not handle anywhere else, so we can stop looking for handlers.
         return True

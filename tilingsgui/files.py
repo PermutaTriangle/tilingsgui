@@ -125,8 +125,8 @@ class History(Observer):
         export_path = PathManager.get_exports_abs_path()
         export_path.mkdir(parents=True, exist_ok=True)
 
-        self.path: pathlib.Path = export_path.joinpath(History._FILE_NAME)
-        self.data: List[Dict[str, Any]] = self._get_history_data()
+        self._path: pathlib.Path = export_path.joinpath(History._FILE_NAME)
+        self._data: List[Dict[str, Any]] = self._get_history_data()
 
     def on_close(self) -> bool:
         """A handler for the closing of the window event. If any exports have occurred
@@ -137,11 +137,11 @@ class History(Observer):
             bool: False as we do not want to consume this event.
         """
         if self._session_has_export():
-            with open(self.path.as_posix(), "w") as history_file:
-                if len(self.data) > History._MAX_SESSIONS:
-                    json.dump(self.data[1:], history_file)
+            with open(self._path.as_posix(), "w") as history_file:
+                if len(self._data) > History._MAX_SESSIONS:
+                    json.dump(self._data[1:], history_file)
                 else:
-                    json.dump(self.data, history_file)
+                    json.dump(self._data, history_file)
         return False
 
     def on_export(self, tiling_json: dict) -> bool:
@@ -170,12 +170,12 @@ class History(Observer):
             List[Dict[str, Any]]: A list of sessions, including the current one.
         """
         try:
-            with open(self.path.as_posix(), "r") as history_file:
+            with open(self._path.as_posix(), "r") as history_file:
                 data = json.load(history_file)
             data.append(History._get_empty_session_object())
             return data
         except FileNotFoundError:
-            self.path.touch()
+            self._path.touch()
             return History._get_empty_json_object()
         except json.decoder.JSONDecodeError:
             return History._get_empty_json_object()
@@ -186,7 +186,7 @@ class History(Observer):
         Returns:
             Dict[str, Any]: The current session dictionary.
         """
-        return self.data[-1]
+        return self._data[-1]
 
     def _get_current_session_tiling_list(self) -> List:
         """Return the current session's list of tilings.
@@ -194,7 +194,7 @@ class History(Observer):
         Returns:
             List: A list of tiling entries.
         """
-        return self.data[-1][History._TILINGS]
+        return self._data[-1][History._TILINGS]
 
     def _session_has_export(self) -> bool:
         """Check if any exports have taken place this session.
@@ -203,3 +203,39 @@ class History(Observer):
             bool: True iff the user has exported this session.
         """
         return bool(self._get_current_session_tiling_list())
+
+
+class Images:
+    """A collection of string constants with names of image files.
+    """
+
+    ADD_POINT: ClassVar[str] = "add_point.png"
+    ADD_CUSOM: ClassVar[str] = "add_custom.png"
+    FACTOR: ClassVar[str] = "factor.png"
+    FACTOR_INT: ClassVar[str] = "factor_int.png"
+    PLACE_WEST: ClassVar[str] = "place_west.png"
+    PLACE_EAST: ClassVar[str] = "place_east.png"
+    PLACE_NORTH: ClassVar[str] = "place_north.png"
+    PLACE_SOUTH: ClassVar[str] = "place_south.png"
+    PPLACE_WEST: ClassVar[str] = "pplace_west.png"
+    PPLACE_EAST: ClassVar[str] = "pplace_east.png"
+    PPLACE_NORTH: ClassVar[str] = "pplace_north.png"
+    PPLACE_SOUTH: ClassVar[str] = "pplace_south.png"
+    FUSION_R: ClassVar[str] = "fusion_r.png"
+    FUSION_C: ClassVar[str] = "fusion_c.png"
+    FUSION_COM_R: ClassVar[str] = "fusion_comp_r.png"
+    FUSION_COM_C: ClassVar[str] = "fusion_comp_c.png"
+    MOVE: ClassVar[str] = "move.png"
+    UNDO: ClassVar[str] = "undo.png"
+    REDO: ClassVar[str] = "redo.png"
+    STR: ClassVar[str] = "str.png"
+    VERIFICATION: ClassVar[str] = "verification.png"
+    ROWCOLSEP: ClassVar[str] = "rowcolsep.png"
+    OBSTR_TRANS: ClassVar[str] = "obstr_trans.png"
+    EXPORT: ClassVar[str] = "export.png"
+    SEQUENCE: ClassVar[str] = "sequence.png"
+    SHADING: ClassVar[str] = "shading.png"
+    PRETTY: ClassVar[str] = "pretty.png"
+    SHOW_CROSS: ClassVar[str] = "show_cross.png"
+    SHOW_LOCAL: ClassVar[str] = "show_local.png"
+    HTC: ClassVar[str] = "htc.png"
