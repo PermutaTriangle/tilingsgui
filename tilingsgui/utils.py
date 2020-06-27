@@ -31,6 +31,15 @@ def get_current_time_string() -> str:
     return datetime.datetime.now().isoformat()
 
 
-def clamp(x, mnx, mxx):
+def clamp(value: float, min_value: float, max_value: float) -> float:
+    """Returns the closest value to value in [min_value, max_value].
 
-    return min(mxx, max(x, mnx))
+    Args:
+        value (float): The value to map.
+        min_value (float): Minimum value of interval.
+        max_value (float): Maximum value of interval.
+
+    Returns:
+        float: The value clamped between boundaries
+    """
+    return min(max_value, max(value, min_value))
