@@ -273,7 +273,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     def on_basis_input(self, basis):
         self.add(TPlot(Tiling.from_string(basis), self.w, self.h))
 
-    def on_basis_json_input(self, basis):
+    def on_tiling_json_input(self, basis):
         self.add(TPlot(basis, self.w, self.h))
 
     def on_placement_input(self, perm):

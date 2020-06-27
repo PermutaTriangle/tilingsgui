@@ -137,7 +137,7 @@ class TextBox(Text):
         for i, vertex in enumerate((x, y, x + w, y, x + w, y + h, x, y + h)):
             self._vertex_list.vertices[i] = vertex
 
-    def hit_test(self, x: float, y: float) -> None:
+    def hit_test(self, x: float, y: float) -> bool:
         """Is the point (x,y) inside the rectangle that the text box forms.
 
         Args:

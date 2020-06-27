@@ -33,7 +33,7 @@ class CustomEvents:
     ON_ROW_COL_SEPERATION = "on_row_col_seperation"
     ON_OBSTRUCTION_TRANSIVITY = "on_obstruction_transivity"
     ON_BASIS_INPUT = "on_basis_input"
-    ON_BASIS_JSON_INPUT = "on_basis_json_input"
+    ON_TILING_JSON_INPUT = "on_tiling_json_input"
     ON_EXPORT = "on_export"
     ON_PRINT_SEQUENCE = "on_print_sequence"
     ON_PRINT_TILING = "on_print_tiling"
