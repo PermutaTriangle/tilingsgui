@@ -100,7 +100,7 @@ class TPlot:
 
     def draw(self, state: GuiState, mpos: Point):
         if any(len(obs) == 0 for obs in self.tiling.obstructions):
-            GeoDrawer.draw_filled_rectangle(0, 0, self.w, self.h, Color.GRAY)
+            GeoDrawer.draw_rectangle(0, 0, self.w, self.h, Color.GRAY)
         else:
             if state.shading:
                 self._draw_shaded_cells()
@@ -130,7 +130,7 @@ class TPlot:
 
     def _draw_shaded_cells(self):
         for c_x, c_y in self.tiling.empty_cells:
-            GeoDrawer.draw_filled_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
+            GeoDrawer.draw_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
 
     """def _draw_point_cells(self):
         point_cells_with_point_perm_req = {
@@ -411,7 +411,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 gploc = t.requirement_locs[a][i]
                 gp = t.tiling.requirements[a][i]
             else:
-                self.state.init_move_state()
+                self.state.move_state.reset()
                 return
 
         self.state.move_state.has_selected_pnt = True

@@ -129,9 +129,7 @@ class Button:
         return False
 
     def draw(self) -> None:
-        GeoDrawer.draw_filled_rectangle(
-            self.x, self.y, self.w, self.h, Button.BUTTON_COLOR
-        )
+        GeoDrawer.draw_rectangle(self.x, self.y, self.w, self.h, Button.BUTTON_COLOR)
         self.sprite.draw()
 
     def position(self, x: float, y: float, w: float, h: float) -> None:
@@ -168,7 +166,7 @@ class ToggleButton(Button):
 
     def draw(self) -> None:
         color = ToggleButton.TOGGLE_COLOR if self.toggled else Button.BUTTON_COLOR
-        GeoDrawer.draw_filled_rectangle(self.x, self.y, self.w, self.h, color)
+        GeoDrawer.draw_rectangle(self.x, self.y, self.w, self.h, color)
         self.sprite.draw()
 
 

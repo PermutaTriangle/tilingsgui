@@ -31,7 +31,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         self.position(w, h)
 
     def on_draw(self):
-        GeoDrawer.draw_filled_rectangle(
+        GeoDrawer.draw_rectangle(
             self.rect.x, self.rect.y, self.rect.w, self.rect.h, TopMenu.BACKGROUND_COLOR
         )
         self.text_box.draw()
@@ -304,7 +304,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         self.position(w, h)
 
     def on_draw(self):
-        GeoDrawer.draw_filled_rectangle(
+        GeoDrawer.draw_rectangle(
             self.rect.x,
             self.rect.y,
             self.rect.w,
