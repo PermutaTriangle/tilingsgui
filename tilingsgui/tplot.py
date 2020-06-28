@@ -256,12 +256,12 @@ class TPlot:
                         return i, j, k
         return None
 
-    def _cell_to_rect(self, c_x: int, c_y: int) -> Tuple[float, float, float, float]:
+    def cell_to_rect(self, c_x: float, c_y: float) -> Tuple[float, float, float, float]:
         """Get the rectangle for a cell.
 
         Args:
-            c_x (int): The column of the cell.
-            c_y (int): The row of the cell.
+            c_x (float): The column of the cell.
+            c_y (float): The row of the cell.
 
         Returns:
             Tuple[float, float, float, float]: A tuple with (x, y, w, h) where (x, y)
@@ -277,7 +277,7 @@ class TPlot:
         """
         for c_x, c_y in self.tiling.empty_cells:
             GeoDrawer.draw_rectangle(
-                *self._cell_to_rect(c_x, c_y), TPlot._SHADED_CELL_COLOR
+                *self.cell_to_rect(c_x, c_y), TPlot._SHADED_CELL_COLOR
             )
 
     def _draw_obstructions(self, state: GuiState, mpos: Point) -> None:
@@ -382,6 +382,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         "MonotoneTreeVerificationStrategy",
         "OneByOneVerificationStrategy",
     ]
+    _POINT_PERM: ClassVar[Perm] = Perm((0,))
 
     @staticmethod
     def _verify(tiling: Tiling) -> List[str]:
@@ -655,11 +656,8 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         Returns:
             bool: False as we do not want to consume this event.
         """
-        if x > self._w or y > self._h or self._empty():
-            return False
-        n_plot = self._actions[self._state.action_selected](x, y, button, modifiers)
-        if n_plot is not None:
-            self._add_plot(TPlot(n_plot, self._w, self._h))
+        if x < self._w and y < self._h and not self._empty():
+            self._actions[self._state.action_selected](x, y, button, modifiers)
         return False
 
     def on_mouse_drag(
@@ -753,6 +751,28 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         if len(self._undo_deq()) > TPlotManager._MAX_DEQUEUE_SIZE:
             self._undo_deq().pop()
 
+    def _add_tiling(self, tiling: Tiling) -> None:
+        """Add a new tiling plot, overtaking the current one if any.
+
+        Args:
+            tiling (Tiling): The tiling to use to create a tiling plot.
+        """
+        self._add_plot(TPlot(tiling, self._w, self._h))
+
+    def _factor_from_algorithm(self, cell: Tuple[int, int], fac_algo: Factor) -> None:
+        """Helper for factor actions.
+
+        Args:
+            cell (Tuple[int, int]): The clicked cell.
+            fac_algo (Factor): The facorize algorithm to use.
+        """
+        components = fac_algo.get_components()
+        facs = fac_algo.factors()
+        for fac, component in zip(facs, components):
+            if cell in component:
+                self._add_tiling(fac)
+                break
+
     def _get_actions(self) -> List[Action]:
         """Construct the list of actions.
 
@@ -813,8 +833,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     # Actions #
     ###########
 
-    def _move(self, x, y, button, modifiers):
-
+    def _move(self, x: int, y: int, button: int, _modifiers: int) -> None:
         if button == pyglet.window.mouse.LEFT:
             self._state.move_state.move_type = 0
         elif button == pyglet.window.mouse.RIGHT:
@@ -841,7 +860,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         self._state.move_state.has_selected_pnt = True
         v = gp.patt[j]
         cell = gp.pos[j]
-        a, b, c, d = t._cell_to_rect(*cell)
+        a, b, c, d = t.cell_to_rect(*cell)
         loc, sz = (a, b), (c, d)
         min_space = 10
         mnx, mny = loc[0] + min_space, loc[1] + min_space
@@ -857,64 +876,134 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 mxy = min(mxy, gploc[k].y - min_space)
         self._state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
 
-    def _cell_insertion(self, x, y, button, modifiers):
-        t = self._current()
-        cx, cy = t.get_cell(Point(x, y))
-        if button == pyglet.window.mouse.LEFT:
-            return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
-        elif button == pyglet.window.mouse.RIGHT:
-            return t.tiling.add_single_cell_obstruction(Perm((0,)), (cx, cy))
+    def _cell_insertion(self, x: int, y: int, button: int, _modifiers: int) -> None:
+        """Add a length 1 obstruction or requirement to a single cell.
 
-    def _cell_insertion_custom(self, x, y, button, modifiers):
-        t = self._current()
-        cx, cy = t.get_cell(Point(x, y))
-        if button == pyglet.window.mouse.LEFT:
-            return t.tiling.add_single_cell_requirement(
-                self._custom_placement, (cx, cy)
-            )
-        elif button == pyglet.window.mouse.RIGHT:
-            return t.tiling.add_single_cell_obstruction(
-                self._custom_placement, (cx, cy)
-            )
-
-    def _place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
-        t = self._current()
-        ind = t.get_point_req_index(Point(x, y))
-        if ind is not None:
-            return t.tiling.place_point_of_gridded_permutation(
-                t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
-            )
-
-    def _partial_place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
-        t = self._current()
-        ind = t.get_point_req_index(Point(x, y))
-        if ind is not None:
-            return t.tiling.partial_place_point_of_gridded_permutation(
-                t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
-            )
-
-    def _factor(self, x, y, button, modifiers):
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            button (int): The mouse button clicked.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+        """
         tplot = self._current()
-        fac_algo = Factor(tplot.tiling)
-        components = fac_algo.get_components()
-        facs = fac_algo.factors()
-        cell = tplot.get_cell(Point(x, y))
-        for fac, component in zip(facs, components):
-            if cell in component:
-                return fac
+        if button == pyglet.window.mouse.LEFT:
+            self._add_tiling(
+                tplot.tiling.add_single_cell_requirement(
+                    TPlotManager._POINT_PERM, tplot.get_cell(Point(x, y))
+                )
+            )
+        elif button == pyglet.window.mouse.RIGHT:
+            self._add_tiling(
+                tplot.tiling.add_single_cell_obstruction(
+                    TPlotManager._POINT_PERM, tplot.get_cell(Point(x, y))
+                )
+            )
 
-    # TODO: combine re-usable part with factor...
-    def _factor_with_interleaving(self, x, y, button, modifiers):
+    def _cell_insertion_custom(
+        self, x: int, y: int, button: int, _modifiers: int
+    ) -> None:
+        """Add a custom obstruction or requirement to a single cell.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            button (int): The mouse button clicked.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+        """
         tplot = self._current()
-        fac_algo = FactorWithInterleaving(tplot.tiling)
-        components = fac_algo.get_components()
-        facs = fac_algo.factors()
-        cell = tplot.get_cell(Point(x, y))
-        for fac, component in zip(facs, components):
-            if cell in component:
-                return fac
+        if button == pyglet.window.mouse.LEFT:
+            self._add_tiling(
+                tplot.tiling.add_single_cell_requirement(
+                    self._custom_placement, tplot.get_cell(Point(x, y))
+                )
+            )
+        elif button == pyglet.window.mouse.RIGHT:
+            self._add_tiling(
+                tplot.tiling.add_single_cell_obstruction(
+                    self._custom_placement, tplot.get_cell(Point(x, y))
+                )
+            )
 
-    def _fusion(self, x, y, button, modifiers, row: bool):
+    def _place_point(
+        self, x: int, y: int, _button: int, _modifiers: int, force_dir: int = DIR_NONE
+    ) -> None:
+        """Place point in a direction.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            _button (int): The mouse button clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+            force_dir (int, optional): The placement direction. Defaults to DIR_NONE.
+        """
+        tplot = self._current()
+        ind = tplot.get_point_req_index(Point(x, y))
+        if ind is not None:
+            self._add_tiling(
+                tplot.tiling.place_point_of_gridded_permutation(
+                    tplot.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
+                )
+            )
+
+    def _partial_place_point(
+        self, x: int, y: int, _button: int, _modifiers: int, force_dir: int = DIR_NONE
+    ) -> None:
+        """Partially place a point in a direction.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            _button (int): The mouse button clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+            force_dir (int, optional): The placement direction. Defaults to DIR_NONE.
+        """
+        tplot = self._current()
+        ind = tplot.get_point_req_index(Point(x, y))
+        if ind is not None:
+            self._add_tiling(
+                tplot.tiling.partial_place_point_of_gridded_permutation(
+                    tplot.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
+                )
+            )
+
+    def _factor(self, x: int, y: int, _button: int, _modifiers: int) -> None:
+        """Factor the clicked cell.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            _button (int): The mouse button clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+        """
+        tplot = self._current()
+        self._factor_from_algorithm(tplot.get_cell(Point(x, y)), Factor(tplot.tiling))
+
+    def _factor_with_interleaving(
+        self, x: int, y: int, _button: int, _modifiers: int
+    ) -> None:
+        """Factor the clicked cell with interleaving.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            _button (int): The mouse button clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+        """
+        tplot = self._current()
+        self._factor_from_algorithm(
+            tplot.get_cell(Point(x, y)), FactorWithInterleaving(tplot.tiling)
+        )
+
+    def _fusion(self, x: int, y: int, _button: int, _modifiers: int, row: bool) -> None:
+        """Fusion with either the clicked row or column.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            _button (int): The mouse button clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+            row (bool): Set row in fusion?
+        """
         tplot = self._current()
         c, r = tplot.get_cell(Point(x, y))
         if not self._empty():
@@ -928,7 +1017,18 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             except (InvalidOperationError, NotImplementedError):
                 pass
 
-    def _component_fusion(self, x, y, button, modifiers, row: bool):
+    def _component_fusion(
+        self, x: int, y: int, _button: int, _modifiers: int, row: bool
+    ) -> None:
+        """Component fusion with either the clicked row or column.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            _button (int): The mouse button clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+            row (bool): Set row in fusion?
+        """
         tplot = self._current()
         c, r = tplot.get_cell(Point(x, y))
         if not self._empty():
