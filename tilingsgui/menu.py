@@ -459,7 +459,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             3,
             Button(
                 Images.VERIFICATION,
-                on_click=lambda: self.dispatch_event(CustomEvents.ON_VERTIFICATION),
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_VERIFICATION),
             ),
         )
         self._keyboard.add_btn(
@@ -541,4 +541,4 @@ RightMenu.register_event_type(CustomEvents.ON_ROW_COL_SEPERATION)
 RightMenu.register_event_type(CustomEvents.ON_OBSTRUCTION_TRANSIVITY)
 RightMenu.register_event_type(CustomEvents.ON_PRINT_SEQUENCE)
 RightMenu.register_event_type(CustomEvents.ON_PRINT_TILING)
-RightMenu.register_event_type(CustomEvents.ON_VERTIFICATION)
+RightMenu.register_event_type(CustomEvents.ON_VERIFICATION)

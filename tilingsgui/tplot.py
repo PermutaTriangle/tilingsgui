@@ -3,7 +3,7 @@
 
 from collections import Counter, deque
 from random import uniform
-from typing import ClassVar, Deque, List, Optional, Tuple
+from typing import Callable, ClassVar, Deque, Iterable, List, Optional, Tuple
 
 import pyglet
 
@@ -137,6 +137,34 @@ class TPlot:
             ]
             for reqlist in self.tiling.requirements
         ]
+
+    def get_requirement_gridded_perm_locations(
+        self, requirement_list_index: int, gridded_perm_index: int
+    ) -> List[Point]:
+        """Get a gridded perm as locations of points from requirements.
+
+        Args:
+            requirement_list_index (int): The requirement list it belongs to.
+            gridded_perm_index (int): The index of the gridded perm within
+            the requirement list.
+
+        Returns:
+            List[Point]: A gridded perm as a list of points.
+        """
+        return self._requirement_locs[requirement_list_index][gridded_perm_index]
+
+    def get_obstruction_gridded_perm_location(
+        self, gridded_perm_index: int
+    ) -> List[Point]:
+        """Get a gridded perm as locations of points from obstructions.
+
+        Args:
+            gridded_perm_index (int): The index of the gridded perm.
+
+        Returns:
+            List[Point]: A gridded perm as a list of points.
+        """
+        return self._obstruction_locs[gridded_perm_index]
 
     def draw(self, state: GuiState, mpos: Point) -> None:
         """Draw the tiling.
@@ -333,173 +361,484 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
 
 
-# TODO: CLEAN!
+Action = Callable[[int, int, int, int], None]
+
+
 class TPlotManager(pyglet.event.EventDispatcher, Observer):
-    MAX_DEQUEUE_SIZE: ClassVar[int] = 100
-    MAX_SEQUENCE_SIZE = 7
+    """A manager that handles drawing the tiling plot and observing
+    events that have to do with it. It halso handles dispatching some
+    events and memory for undo and redos.
+    """
 
-    def __init__(self, width: int, height: int, state: GuiState, dispatchers=()):
+    _MAX_DEQUEUE_SIZE: ClassVar[int] = 100
+    _MAX_SEQUENCE_SIZE: ClassVar[int] = 7
+    _VERIFICATION_STRATS: ClassVar[List[str]] = [
+        "BasicVerificationStrategy",
+        "DatabaseVerificationStrategy",
+        "ElementaryVerificationStrategy",
+        "InsertionEncodingVerificationStrategy",
+        "LocallyFactorableVerificationStrategy",
+        "LocalVerificationStrategy",
+        "MonotoneTreeVerificationStrategy",
+        "OneByOneVerificationStrategy",
+    ]
+
+    @staticmethod
+    def _verify(tiling: Tiling) -> List[str]:
+        """Apply all verification strategies on a tiling.
+
+        Args:
+            tiling (Tiling): The tiling to apply strategies to.
+
+        Returns:
+            List[str]: A list of boolean results, converted to strings.
+        """
+        return [
+            str(BasicVerificationStrategy().verified(tiling)),
+            str(DatabaseVerificationStrategy().verified(tiling)),
+            str(ElementaryVerificationStrategy().verified(tiling)),
+            # Not implemented on Tiling's master yet, add when that is the case
+            "?",  # InsertionEncodingVerificationStrategy().verified(tiling),
+            str(LocallyFactorableVerificationStrategy().verified(tiling)),
+            str(LocalVerificationStrategy(no_factors=False).verified(tiling)),
+            str(MonotoneTreeVerificationStrategy().verified(tiling)),
+            str(OneByOneVerificationStrategy().verified(tiling)),
+        ]
+
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        state: GuiState,
+        dispatchers: Iterable[pyglet.event.EventDispatcher] = (),
+    ) -> None:
+        """Create an instance of a tiling plot manager.
+
+        Args:
+            width (int): The width to use for the drawing
+            height (int): The height to use for the drawing.
+            state (GuiState): The current state for various settings.
+            dispatchers (Iterable[pyglet.event.EventDispatcher], optional): A collection
+            of dispatchers that this observer should listen ot. Defaults to ().
+        """
         Observer.__init__(self, dispatchers)
-        self.undo_deq: Deque[TPlot] = deque()
-        self.redo_deq: Deque[TPlot] = deque()
+        self.deques: List[Deque[TPlot]] = [deque(), deque()]
+        self._mouse_pos: Point = Point(0, 0)
+        self._custom_placement: Perm = Perm((0, 1))
+        self._state: GuiState = state
+        self._w: int = width
+        self._h: int = height
+        self._actions: List[Action] = self._get_actions()
         self.position(width, height)
-        self.mouse_pos = Point(0, 0)
-        self.custom_placement: Perm = Perm((0, 1))
-        self.state = state
 
-    # Handlers
+    def position(self, width: int, height: int) -> None:
+        """Resize the tiling plot canvas.
 
-    def on_fetch_tiling_for_export(self):
-        if not self.empty():
+        Args:
+            width (int): The new width.
+            height (int): The new height.
+        """
+        self._w = width
+        self._h = height
+        if not self._empty():
+            self._current().resize(width, height)
+
+    ##################
+    # Event Handlers #
+    ##################
+
+    def on_draw(self) -> bool:
+        """Draw event handler. Draws the current tiling plot if any.
+
+        Returns:
+            bool: False as we do not want to consume event.
+        """
+        if not self._empty():
+            self._current().draw(self._state, self._mouse_pos)
+        return False
+
+    def on_fetch_tiling_for_export(self) -> bool:
+        """Event for request for exporting the current tiling. We dispatch our
+        own event here for the export observer to deal with it.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
             self.dispatch_event(
-                CustomEvents.ON_EXPORT, self.current().tiling.to_jsonable()
+                CustomEvents.ON_EXPORT, self._current().tiling.to_jsonable()
             )
+        return True
 
-    def on_basis_input(self, basis):
-        self.add(TPlot(Tiling.from_string(basis), self.w, self.h))
+    def on_basis_input(self, basis: str) -> bool:
+        """Event handler for processing basis input.
 
-    def on_tiling_json_input(self, basis):
-        self.add(TPlot(basis, self.w, self.h))
+        Args:
+            basis (str): The input.
 
-    def on_placement_input(self, perm):
-        self.custom_placement = Perm.to_standard(perm)
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        self._add_plot(TPlot(Tiling.from_string(basis), self._w, self._h))
+        return True
 
-    def on_undo(self):
-        if self.has_older():
-            self.redo_deq.append(self.undo_deq.popleft())
-            self.current().resize(self.w, self.h)
+    def on_tiling_json_input(self, basis: Tiling) -> bool:
+        """Event handler for processing tiling input.
 
-    def on_redo(self):
-        if self.redo_deq:
-            self.undo_deq.appendleft(self.redo_deq.pop())
-            self.undo_deq[0].resize(self.w, self.h)
+        Args:
+            basis (Tiling): A tiling object.
 
-    def on_draw(self):
-        if self.undo_deq:
-            self.undo_deq[0].draw(self.state, self.mouse_pos)
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        self._add_plot(TPlot(basis, self._w, self._h))
+        return True
 
-    def add(self, drawing: TPlot):
-        self.undo_deq.appendleft(drawing)
-        self.redo_deq.clear()
-        if len(self.undo_deq) > TPlotManager.MAX_DEQUEUE_SIZE:
-            self.undo_deq.pop()
+    def on_placement_input(self, perm: Perm) -> bool:
+        """Event handler for setting the custom placement permutation.
 
-    def empty(self):
+        Args:
+            perm (Perm): The placement permutation to use.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        self._custom_placement = Perm.to_standard(perm)
+        return True
+
+    def on_row_col_seperation(self) -> bool:
+        """Event handler for applying row column seperation on the current tiling
+        if any.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            n_plot = TPlot(
+                self._current().tiling.row_and_column_separation(), self._w, self._h
+            )
+            if n_plot is not None:
+                self._add_plot(n_plot)
+        return True
+
+    def on_obstruction_transivity(self) -> bool:
+        """Event handler for applying obstruction transivity on the current tiling
+        if any.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            n_plot = TPlot(
+                self._current().tiling.obstruction_transitivity(), self._w, self._h
+            )
+            if n_plot is not None:
+                self._add_plot(n_plot)
+        return True
+
+    def on_print_sequence(self) -> bool:
+        """Event handler for printing the sequence of number of griddable permutations
+        on the current tiling. It does so up to a max length.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            print("Sequence: ", end="")
+            c = Counter(
+                len(gp)
+                for gp in self._current().tiling.gridded_perms(
+                    TPlotManager._MAX_SEQUENCE_SIZE
+                )
+            )
+            print(
+                ", ".join(str(c[i]) for i in range(TPlotManager._MAX_SEQUENCE_SIZE + 1))
+            )
+        return True
+
+    def on_print_tiling(self) -> bool:
+        """Event handler for printing the current tiling if any. Prints both the str
+        and repr format of the tiling.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            tiling = self._current().tiling
+            print(f"{str(tiling)}\n\n{repr(tiling)}\n")
+        return True
+
+    def on_verification(self) -> bool:
+        """Event handler for verification on the current tiling.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            pad = max(len(s) for s in TPlotManager._VERIFICATION_STRATS)
+            print(
+                "\n".join(
+                    f"{strat}{' '*(pad-len(strat))} : {vert}"
+                    for strat, vert in zip(
+                        TPlotManager._VERIFICATION_STRATS,
+                        TPlotManager._verify(self._current().tiling),
+                    )
+                ),
+                end="\n\n",
+            )
+        return True
+
+    def on_undo(self) -> bool:
+        """Event handler for undo.
+
+        Returns:
+            bool: True as we want to consume event.
+        """
+        if len(self._undo_deq()) > 1:
+            self._redo_deq().append(self._undo_deq().popleft())
+            self._current().resize(self._w, self._h)
+        return True
+
+    def on_redo(self) -> bool:
+        """Event handler for redo.
+
+        Returns:
+            bool: True as we want to consume event.
+        """
+        if self._redo_deq():
+            self._undo_deq().appendleft(self._redo_deq().pop())
+            self._current().resize(self._w, self._h)
+        return True
+
+    def on_mouse_motion(self, x: int, y: int, _dx: int, _dy: int) -> bool:
+        """Event hander for when the mouse is moved.
+
+        Args:
+            x (int): The x coordinate of the mouse.
+            y (int): The y coordinate of the mouse.
+            _dx (int): The horizontal distance moved since last time the event
+            was dispatched. This is unused.
+            _dy (int): The vertical distance moved since last time the event
+            was dispatched. This is unused.
+
+        Returns:
+            bool: False as the event is not consumed here.
+        """
+        self._mouse_pos.x = x
+        self._mouse_pos.y = y
+        return False
+
+    def on_mouse_release(self, _x: int, _y: int, _button: int, _modifiers: int) -> bool:
+        """Event handler for when the mouse button is released.
+
+        Args:
+            _x (int): The x coordinate of the mouse. Unused.
+            _y (int): The y coordinate of the mouse. Unused.
+            _button (int): Which button was released. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+
+        Returns:
+            bool: False as we do not want to consume this event.
+        """
+        self._state.move_state.reset()
+        return False
+
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> bool:
+        """On mouse click event handler.
+
+        Args:
+            x (int): The x coordinate of the click.
+            y (int): The y coordinate of the click.
+            button (int): The mouse button that was clicked.
+            modifiers (int): If combinded with modifiers (e.g. ctrl).
+
+        Returns:
+            bool: False as we do not want to consume this event.
+        """
+        if x > self._w or y > self._h or self._empty():
+            return False
+        n_plot = self._actions[self._state.action_selected](x, y, button, modifiers)
+        if n_plot is not None:
+            self._add_plot(TPlot(n_plot, self._w, self._h))
+        return False
+
+    def on_mouse_drag(
+        self, x: int, y: int, dx: int, dy: int, _button: int, _modifiers: int
+    ) -> bool:
+        """Event handler for draggin the mouse.
+
+        Args:
+            x (int): The x coordinate of the click.
+            y (int): The y coordinate of the click.
+            dx (int): The horizontal distance moved.
+            dy (int): The vertical distance moved.
+            _button (int): The mouse button that was clicked. Unused.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+
+        Returns:
+            bool: False as we do not want to consume this event.
+        """
+
+        if not self._state.move_state.has_selected_pnt or self._empty():
+            return False
+
+        tplot = self._current()
+
+        if len(self._state.move_state.selected_point) == 2:
+            # If moving obstruction
+            i, j = self._state.move_state.selected_point
+            mnx, mxx, mny, mxy = self._state.move_state.point_move_bounds
+            if self._state.move_state.move_type == 0:
+                # Moving a single point, must confine to the permutation's structure.
+                pnt = tplot.get_obstruction_gridded_perm_location(i)[j]
+                pnt.x, pnt.y = clamp(x, mnx, mxx), clamp(y, mny, mxy)
+            else:
+                # Moving all with no restrictions
+                for k in range(len(tplot.get_obstruction_gridded_perm_location(i))):
+                    pnt = tplot.get_obstruction_gridded_perm_location(i)[k]
+                    pnt.x += dx
+                    pnt.y += dy
+        else:
+            # If moving requirement
+            i, j, k = self._state.move_state.selected_point
+            mnx, mxx, mny, mxy = self._state.move_state.point_move_bounds
+            pnt = tplot.get_requirement_gridded_perm_locations(i, j)[k]
+            pnt.x, pnt.y = clamp(x, mnx, mxx), clamp(y, mny, mxy)
+        return False
+
+    ###################
+    # Private helpers #
+    ###################
+
+    def _undo_deq(self) -> Deque[TPlot]:
+        """Getter for the undo deque.
+
+        Returns:
+            Deque[TPlot]: The undo deque.
+        """
+        return self.deques[0]
+
+    def _redo_deq(self) -> Deque[TPlot]:
+        """Getter for the redo deque.
+
+        Returns:
+            Deque[TPlot]: The redo deque.
+        """
+        return self.deques[1]
+
+    def _empty(self) -> bool:
+        """Is there currently a tiling plot?
+
+        Returns:
+            bool: True iff no tiling plot.
+        """
         return not self
 
-    def has_older(self):
-        return len(self.undo_deq) > 1
+    def _current(self) -> TPlot:
+        """Get the current tiling plot.
 
-    def __bool__(self):
-        return bool(self.undo_deq)
+        Returns:
+            TPlot: The tiling plot currently being rendered.
+        """
+        return self._undo_deq()[0]
 
-    def current(self):
-        return self.undo_deq[0]
+    def _add_plot(self, drawing: TPlot) -> None:
+        """Add a new tiling plot, overtaking the current one if any.
 
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.mouse_pos.x = x
-        self.mouse_pos.y = y
+        Args:
+            drawing (TPlot): The new tiling plot to render.
+        """
+        self._undo_deq().appendleft(drawing)
+        self._redo_deq().clear()
+        if len(self._undo_deq()) > TPlotManager._MAX_DEQUEUE_SIZE:
+            self._undo_deq().pop()
 
-    def position(self, width, height):
-        self.w = width
-        self.h = height
-        if self.undo_deq:
-            self.undo_deq[0].resize(width, height)
+    def _get_actions(self) -> List[Action]:
+        """Construct the list of actions.
 
-    def on_row_col_seperation(self):
-        if self.undo_deq:
-            n_plot = TPlot(
-                self.undo_deq[0].tiling.row_and_column_separation(), self.w, self.h
-            )
-            if n_plot is not None:
-                self.add(n_plot)
-
-    def on_obstruction_transivity(self):
-        if self.undo_deq:
-            n_plot = TPlot(
-                self.undo_deq[0].tiling.obstruction_transitivity(), self.w, self.h
-            )
-            if n_plot is not None:
-                self.add(n_plot)
-
-    def on_mouse_press(self, x, y, button, modifiers):
-        if x > self.w or y > self.h:
-            return
-
-        if not self.undo_deq:
-            return
-        # Find a better way for this...
-        # Wrap in a class?
-
-        strats = [
-            self.cell_insertion,
-            self.cell_insertion_custom,
-            self.factor,
-            self.factor_with_interleaving,
-            lambda x, y, button, modifiers: self.place_point(
+        Returns:
+            List[Action]: List of actions.
+        """
+        return [
+            self._cell_insertion,
+            self._cell_insertion_custom,
+            self._factor,
+            self._factor_with_interleaving,
+            lambda x, y, button, modifiers: self._place_point(
                 x, y, button, modifiers, DIR_WEST
             ),
-            lambda x, y, button, modifiers: self.place_point(
+            lambda x, y, button, modifiers: self._place_point(
                 x, y, button, modifiers, DIR_EAST
             ),
-            lambda x, y, button, modifiers: self.place_point(
+            lambda x, y, button, modifiers: self._place_point(
                 x, y, button, modifiers, DIR_NORTH
             ),
-            lambda x, y, button, modifiers: self.place_point(
+            lambda x, y, button, modifiers: self._place_point(
                 x, y, button, modifiers, DIR_SOUTH
             ),
-            lambda x, y, button, modifiers: self.partial_place_point(
+            lambda x, y, button, modifiers: self._partial_place_point(
                 x, y, button, modifiers, DIR_WEST
             ),
-            lambda x, y, button, modifiers: self.partial_place_point(
+            lambda x, y, button, modifiers: self._partial_place_point(
                 x, y, button, modifiers, DIR_EAST
             ),
-            lambda x, y, button, modifiers: self.partial_place_point(
+            lambda x, y, button, modifiers: self._partial_place_point(
                 x, y, button, modifiers, DIR_NORTH
             ),
-            lambda x, y, button, modifiers: self.partial_place_point(
+            lambda x, y, button, modifiers: self._partial_place_point(
                 x, y, button, modifiers, DIR_SOUTH
             ),
-            lambda x, y, button, modifiers: self.fusion(x, y, button, modifiers, True),
-            lambda x, y, button, modifiers: self.fusion(x, y, button, modifiers, False),
-            lambda x, y, button, modifiers: self.component_fusion(
-                x, y, button, modifiers, True
-            ),
-            lambda x, y, button, modifiers: self.component_fusion(
+            lambda x, y, button, modifiers: self._fusion(x, y, button, modifiers, True),
+            lambda x, y, button, modifiers: self._fusion(
                 x, y, button, modifiers, False
             ),
-            self.move,
+            lambda x, y, button, modifiers: self._component_fusion(
+                x, y, button, modifiers, True
+            ),
+            lambda x, y, button, modifiers: self._component_fusion(
+                x, y, button, modifiers, False
+            ),
+            self._move,
         ]
-        n_plot = strats[self.state.strategy_selected](x, y, button, modifiers)
-        if n_plot is not None:
-            self.add(TPlot(n_plot, self.w, self.h))
 
-    def move(self, x, y, button, modifiers):
+    def __bool__(self) -> bool:
+        """The bool conversion of self tells if there is currently a tiling plot.
+
+        Returns:
+            bool: True iff there is a tiling plot.
+        """
+        return bool(self._undo_deq())
+
+    ###########
+    # Actions #
+    ###########
+
+    def _move(self, x, y, button, modifiers):
 
         if button == pyglet.window.mouse.LEFT:
-            self.state.move_state.move_type = 0
+            self._state.move_state.move_type = 0
         elif button == pyglet.window.mouse.RIGHT:
-            self.state.move_state.move_type = 1
+            self._state.move_state.move_type = 1
         else:
             return
 
-        t = self.undo_deq[0]
-        self.state.move_state.selected_point = t.get_point_obs_index(Point(x, y))
-        if self.state.move_state.selected_point is not None:
-            i, j = self.state.move_state.selected_point
-            gploc = t._obstruction_locs[i]
+        t = self._current()
+        self._state.move_state.selected_point = t.get_point_obs_index(Point(x, y))
+        if self._state.move_state.selected_point is not None:
+            i, j = self._state.move_state.selected_point
+            gploc = t.get_obstruction_gridded_perm_location(i)
             gp = t.tiling.obstructions[i]
         else:
-            self.state.move_state.selected_point = t.get_point_req_index(Point(x, y))
-            if self.state.move_state.selected_point is not None:
-                a, i, j = self.state.move_state.selected_point
-                gploc = t._requirement_locs[a][i]
+            self._state.move_state.selected_point = t.get_point_req_index(Point(x, y))
+            if self._state.move_state.selected_point is not None:
+                a, i, j = self._state.move_state.selected_point
+                gploc = t.get_requirement_gridded_perm_locations(a, i)
                 gp = t.tiling.requirements[a][i]
             else:
-                self.state.move_state.reset()
+                self._state.move_state.reset()
                 return
 
-        self.state.move_state.has_selected_pnt = True
+        self._state.move_state.has_selected_pnt = True
         v = gp.patt[j]
         cell = gp.pos[j]
         a, b, c, d = t._cell_to_rect(*cell)
@@ -516,76 +855,46 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 mny = max(mny, gploc[k].y + min_space)
             if gp.patt[k] == v + 1:
                 mxy = min(mxy, gploc[k].y - min_space)
-        self.state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
+        self._state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
 
-        # check click pnt, check btn, set selected in sta
-        # print("move")
-
-    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-
-        if not self.state.move_state.has_selected_pnt or not self.undo_deq:
-            return
-
-        t = self.undo_deq[0]
-        if len(self.state.move_state.selected_point) == 2:
-            i, j = self.state.move_state.selected_point
-            mnx, mxx, mny, mxy = self.state.move_state.point_move_bounds
-            if self.state.move_state.move_type == 0:
-                t._obstruction_locs[i][j] = Point(
-                    clamp(x, mnx, mxx), clamp(y, mny, mxy)
-                )
-            else:
-                for k in range(len(t._obstruction_locs[i])):
-                    ox, oy = t._obstruction_locs[i][k]
-                    ox += dx
-                    oy += dy
-                    t._obstruction_locs[i][k] = Point(ox, oy)
-        else:
-            # TODO: does not support types of movement, add that
-            # (was not in the original eihter...)
-            i, j, k = self.state.move_state.selected_point
-            mnx, mxx, mny, mxy = self.state.move_state.point_move_bounds
-            t._requirement_locs[i][j][k] = Point(
-                clamp(x, mnx, mxx), clamp(y, mny, mxy),
-            )
-
-    def on_mouse_release(self, x, y, button, modifiers):
-        self.state.move_state.reset()
-
-    def cell_insertion(self, x, y, button, modifiers):
-        t = self.undo_deq[0]
+    def _cell_insertion(self, x, y, button, modifiers):
+        t = self._current()
         cx, cy = t.get_cell(Point(x, y))
         if button == pyglet.window.mouse.LEFT:
             return t.tiling.add_single_cell_requirement(Perm((0,)), (cx, cy))
         elif button == pyglet.window.mouse.RIGHT:
             return t.tiling.add_single_cell_obstruction(Perm((0,)), (cx, cy))
 
-    def cell_insertion_custom(self, x, y, button, modifiers):
-        t = self.undo_deq[0]
+    def _cell_insertion_custom(self, x, y, button, modifiers):
+        t = self._current()
         cx, cy = t.get_cell(Point(x, y))
         if button == pyglet.window.mouse.LEFT:
-            return t.tiling.add_single_cell_requirement(self.custom_placement, (cx, cy))
+            return t.tiling.add_single_cell_requirement(
+                self._custom_placement, (cx, cy)
+            )
         elif button == pyglet.window.mouse.RIGHT:
-            return t.tiling.add_single_cell_obstruction(self.custom_placement, (cx, cy))
+            return t.tiling.add_single_cell_obstruction(
+                self._custom_placement, (cx, cy)
+            )
 
-    def place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
-        t = self.undo_deq[0]
+    def _place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
+        t = self._current()
         ind = t.get_point_req_index(Point(x, y))
         if ind is not None:
             return t.tiling.place_point_of_gridded_permutation(
                 t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
             )
 
-    def partial_place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
-        t = self.undo_deq[0]
+    def _partial_place_point(self, x, y, button, modifiers, force_dir=DIR_NONE):
+        t = self._current()
         ind = t.get_point_req_index(Point(x, y))
         if ind is not None:
             return t.tiling.partial_place_point_of_gridded_permutation(
                 t.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
             )
 
-    def factor(self, x, y, button, modifiers):
-        tplot = self.current()
+    def _factor(self, x, y, button, modifiers):
+        tplot = self._current()
         fac_algo = Factor(tplot.tiling)
         components = fac_algo.get_components()
         facs = fac_algo.factors()
@@ -595,8 +904,8 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 return fac
 
     # TODO: combine re-usable part with factor...
-    def factor_with_interleaving(self, x, y, button, modifiers):
-        tplot = self.current()
+    def _factor_with_interleaving(self, x, y, button, modifiers):
+        tplot = self._current()
         fac_algo = FactorWithInterleaving(tplot.tiling)
         components = fac_algo.get_components()
         facs = fac_algo.factors()
@@ -605,80 +914,37 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             if cell in component:
                 return fac
 
-    def fusion(self, x, y, button, modifiers, row: bool):
-        tplot = self.current()
+    def _fusion(self, x, y, button, modifiers, row: bool):
+        tplot = self._current()
         c, r = tplot.get_cell(Point(x, y))
-        if self.undo_deq:
+        if not self._empty():
             try:
                 if row:
-                    n_plot = TPlot(tplot.tiling.fusion(row=r), self.w, self.h)
+                    n_plot = TPlot(tplot.tiling.fusion(row=r), self._w, self._h)
                 else:
-                    n_plot = TPlot(tplot.tiling.fusion(col=c), self.w, self.h)
+                    n_plot = TPlot(tplot.tiling.fusion(col=c), self._w, self._h)
                 if n_plot is not None:
-                    self.add(n_plot)
+                    self._add_plot(n_plot)
             except (InvalidOperationError, NotImplementedError):
                 pass
 
-    def component_fusion(self, x, y, button, modifiers, row: bool):
-        tplot = self.current()
+    def _component_fusion(self, x, y, button, modifiers, row: bool):
+        tplot = self._current()
         c, r = tplot.get_cell(Point(x, y))
-        if self.undo_deq:
+        if not self._empty():
             try:
                 if row:
-                    n_plot = TPlot(tplot.tiling.component_fusion(row=r), self.w, self.h)
+                    n_plot = TPlot(
+                        tplot.tiling.component_fusion(row=r), self._w, self._h
+                    )
                 else:
-                    n_plot = TPlot(tplot.tiling.component_fusion(col=c), self.w, self.h)
+                    n_plot = TPlot(
+                        tplot.tiling.component_fusion(col=c), self._w, self._h
+                    )
                 if n_plot is not None:
-                    self.add(n_plot)
+                    self._add_plot(n_plot)
             except (InvalidOperationError, NotImplementedError):
                 pass
-
-    def on_print_sequence(self):
-        if not self.undo_deq:
-            return
-        print("Generating sequence... ", end=" ")
-        t = self.current().tiling
-        c = Counter(len(gp) for gp in t.gridded_perms(TPlotManager.MAX_SEQUENCE_SIZE))
-        seq = [c[i] for i in range(TPlotManager.MAX_SEQUENCE_SIZE + 1)]
-        print(seq)
-
-    def on_print_tiling(self):
-        if self.undo_deq:
-            tiling = self.current().tiling
-            print(f"{str(tiling)}\n\n{repr(tiling)}")
-
-    def on_vertification(self):
-        if not self.undo_deq:
-            return
-        strats = [
-            "BasicVerificationStrategy",
-            "DatabaseVerificationStrategy",
-            "ElementaryVerificationStrategy",
-            "InsertionEncodingVerificationStrategy",
-            "LocallyFactorableVerificationStrategy",
-            "LocalVerificationStrategy",
-            "MonotoneTreeVerificationStrategy",
-            "OneByOneVerificationStrategy",
-        ]
-        pad = max(len(s) for s in strats)
-        t = self.current().tiling
-        verts = [
-            BasicVerificationStrategy().verified(t),
-            DatabaseVerificationStrategy().verified(t),
-            ElementaryVerificationStrategy().verified(t),
-            "?",  # InsertionEncodingVerificationStrategy().verified(t),
-            LocallyFactorableVerificationStrategy().verified(t),
-            LocalVerificationStrategy(no_factors=False).verified(t),
-            MonotoneTreeVerificationStrategy().verified(t),
-            OneByOneVerificationStrategy().verified(t),
-        ]
-        print(
-            "\n".join(
-                f"{strat}{' '*(pad-len(strat))} : {str(vert)}"
-                for strat, vert in zip(strats, verts)
-            ),
-            end="\n\n",
-        )
 
 
 TPlotManager.register_event_type(CustomEvents.ON_EXPORT)
