@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 pyglet = "^1.5.5"
 pyperclip = "^1.8.0"
 tilings = "^2.0.0"
