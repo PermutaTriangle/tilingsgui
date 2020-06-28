@@ -776,6 +776,40 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 self._add_tiling(fac)
                 break
 
+    def _set_move_boundaries(
+        self,
+        indices: Tuple[int, ...],
+        gp_loc: List[Point],
+        g_perm: GriddedPerm,
+        tplot: TPlot,
+    ) -> None:
+        """Set the move boundaries so that the permutation pattern is not broken.
+
+        Args:
+            indices (Tuple[int, ...]): The indices for the permutation within either
+            obstructions or requirements.
+            gp_loc (List[Point]): The location of the gridded permutation's points.
+            g_perm (GriddedPerm): The gridded permutation that is being moved.
+            tplot (TPlot): The current tiling plot.
+        """
+        perm_elem = g_perm.patt[indices[-1]]
+        rect_x, rect_y, rect_w, rect_h = tplot.cell_to_rect(*g_perm.pos[indices[-1]])
+        mnx, mny = rect_x + TPlotManager._MIN_SPACE, rect_y + TPlotManager._MIN_SPACE
+        mxx, mxy = (
+            rect_x + rect_w - TPlotManager._MIN_SPACE,
+            rect_y + rect_h - TPlotManager._MIN_SPACE,
+        )
+        for k in range(len(g_perm)):
+            if k == indices[-1] - 1:
+                mnx = max(mnx, gp_loc[k].x + TPlotManager._MIN_SPACE)
+            if k == indices[-1] + 1:
+                mxx = min(mxx, gp_loc[k].x - TPlotManager._MIN_SPACE)
+            if g_perm.patt[k] == perm_elem - 1:
+                mny = max(mny, gp_loc[k].y + TPlotManager._MIN_SPACE)
+            if g_perm.patt[k] == perm_elem + 1:
+                mxy = min(mxy, gp_loc[k].y - TPlotManager._MIN_SPACE)
+        self._state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
+
     def _get_actions(self) -> List[Action]:
         """Construct the list of actions.
 
@@ -837,6 +871,15 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     ###########
 
     def _move(self, x: int, y: int, button: int, _modifiers: int) -> None:
+        """The moving action. Tries to find a clicked point and if so, set state
+        to it as a moving point and calculates boundaries it can move within.
+
+        Args:
+            x (int): The x coordinate of the mouse click.
+            y (int): The y coordinate of the mouse click.
+            button (int): The mouse button clicked.
+            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+        """
         if button == pyglet.window.mouse.LEFT:
             self._state.move_state.move_type = 0
         elif button == pyglet.window.mouse.RIGHT:
@@ -862,33 +905,6 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
 
         self._state.move_state.has_selected_pnt = True
         self._set_move_boundaries(idxs, gp_loc, g_perm, tplot)
-
-    def _set_move_boundaries(
-        self,
-        indices: Tuple[int, ...],
-        gp_loc: List[Point],
-        g_perm: GriddedPerm,
-        tplot: TPlot,
-    ) -> None:
-        perm_elem = g_perm.patt[indices[-1]]
-        cell_col, cell_row = g_perm.pos[indices[-1]]
-        rect_x, rect_y, rect_w, rect_h = tplot.cell_to_rect(cell_col, cell_row)
-        loc, size = (rect_x, rect_y), (rect_w, rect_h)
-        mnx, mny = loc[0] + TPlotManager._MIN_SPACE, loc[1] + TPlotManager._MIN_SPACE
-        mxx, mxy = (
-            loc[0] + size[0] - TPlotManager._MIN_SPACE,
-            loc[1] + size[1] - TPlotManager._MIN_SPACE,
-        )
-        for k in range(len(g_perm)):
-            if k == indices[-1] - 1:
-                mnx = max(mnx, gp_loc[k].x + TPlotManager._MIN_SPACE)
-            if k == indices[-1] + 1:
-                mxx = min(mxx, gp_loc[k].x - TPlotManager._MIN_SPACE)
-            if g_perm.patt[k] == perm_elem - 1:
-                mny = max(mny, gp_loc[k].y + TPlotManager._MIN_SPACE)
-            if g_perm.patt[k] == perm_elem + 1:
-                mxy = min(mxy, gp_loc[k].y - TPlotManager._MIN_SPACE)
-        self._state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
 
     def _cell_insertion(self, x: int, y: int, button: int, _modifiers: int) -> None:
         """Add a length 1 obstruction or requirement to a single cell.
