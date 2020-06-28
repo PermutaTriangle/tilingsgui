@@ -53,7 +53,6 @@ class TilingGui(pyglet.window.Window):
             self.height - TilingGui._TOP_BAR_HEIGHT,
             self.width - TilingGui._RIGHT_BAR_WIDTH,
             TilingGui._TOP_BAR_HEIGHT,
-            [self],
         )
 
         # The bar to the right of the tiling plot.
@@ -64,16 +63,22 @@ class TilingGui(pyglet.window.Window):
             self.height,
             TilingGui._TOP_BAR_HEIGHT,
             self._state,
-            [self],
         )
 
         # The tiling plot.
         self._tplot_man: TPlotManager = TPlotManager(
-            self.width, self.height, self._state, [self, self._top_bar, self._right_bar]
+            self.width, self.height, self._state
         )
 
         # export data handler.
-        self._history: History = History([self, self._right_bar, self._tplot_man])
+        self._history: History = History()
+
+        # Add dispatchers. Order matters if events are consumed. Those that add
+        # a dispatcher later will receive callbacks before.
+        self._tplot_man.add_dispatchers([self, self._top_bar, self._right_bar])
+        self._history.add_dispatchers([self, self._right_bar, self._tplot_man])
+        self._top_bar.add_dispatcher(self)
+        self._right_bar.add_dispatcher(self)
 
     def start(self) -> None:
         """Start the app.

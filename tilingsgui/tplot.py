@@ -36,26 +36,34 @@ class TPlot:
     _OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
     _REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
     _HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.ORANGE
+    _EMPTY_COLOR: ClassVar[Tuple[float, float, float]] = Color.GRAY
+    _SHADED_CELL_COLOR: ClassVar[Tuple[float, float, float]] = Color.GRAY
     _FUZZYNESS = 0.25  # Should be in [0,0.5)
+    _CLICK_PRECISION_SQUARED: int = 100
+    _POINT_SIZE = 5
+    _PRETTY_POINT_SIZE = 10
 
     @staticmethod
     def _col_row_and_count(
-        gp: GriddedPerm, grid_size: Tuple[int, int]
+        g_perm: GriddedPerm, grid_size: Tuple[int, int]
     ) -> Tuple[List[int], List[int], List[List[int]], List[List[int]]]:
-        """[summary]
+        """Computes data used to positions gridded permutations correctly.
 
         Args:
-            gp (GriddedPerm): [description]
-            grid_size (Tuple[int, int]): [description]
+            g_perm (GriddedPerm): The gridded permutations that needs to be positioned.
+            grid_size (Tuple[int, int]): The tiling's dimension.
 
         Returns:
-            Tuple[List[int], List[int], List[List[int]], List[List[int]]]: [description]
+            Tuple[List[int], List[int], List[List[int]], List[List[int]]]: The first
+            element counts how many points land in each column, the second does the
+            same but for rows. The last two contain info about which column has which
+            index of element and which row has which element.
         """
         colcount = [0] * grid_size[0]
         rowcount = [0] * grid_size[1]
         col: List[List[int]] = [[] for i in range(grid_size[0])]
         row: List[List[int]] = [[] for i in range(grid_size[1])]
-        for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt)):
+        for ind, ((c_x, c_y), val) in enumerate(zip(g_perm.pos, g_perm.patt)):
             colcount[c_x] += 1
             rowcount[c_y] += 1
             col[c_x].append(ind)
@@ -66,19 +74,19 @@ class TPlot:
 
     @staticmethod
     def gridded_perm_initial_locations(
-        gp: GriddedPerm, grid_size: Tuple[int, int], cell_size: Tuple[float, float]
+        g_perm: GriddedPerm, grid_size: Tuple[int, int], cell_size: Tuple[float, float]
     ) -> List[Point]:
-        """[summary]
+        """Calculate coordinates for all points in a gridded permutations.
 
         Args:
-            gp (GriddedPerm): [description]
-            grid_size (Tuple[int, int]): [description]
-            cell_size (Tuple[float, float]): [description]
+            g_perm (GriddedPerm): The gridded permutation to convert to positions.
+            grid_size (Tuple[int, int]): The tiling's dimension.
+            cell_size (Tuple[float, float]): The size (w,h) of each cell.
 
         Returns:
-            List[Point]: [description]
+            List[Point]: A list of positions.
         """
-        colcount, rowcount, col, row = TPlot._col_row_and_count(gp, grid_size)
+        colcount, rowcount, col, row = TPlot._col_row_and_count(g_perm, grid_size)
         return [
             Point(
                 cell_size[0]
@@ -102,10 +110,17 @@ class TPlot:
                     / (rowcount[c_y] + 1)
                 ),
             )
-            for ind, ((c_x, c_y), val) in enumerate(zip(gp.pos, gp.patt))
+            for ind, ((c_x, c_y), val) in enumerate(zip(g_perm.pos, g_perm.patt))
         ]
 
     def __init__(self, tiling: Tiling, w: float, h: float) -> None:
+        """Create an instance of a tiling plot.
+
+        Args:
+            tiling (Tiling): The tiling to draw.
+            w (float): The width of the drawing.
+            h (float): The height of the drawing.
+        """
         t_w, t_h = tiling.dimensions
 
         self.tiling: Tiling = tiling
@@ -124,8 +139,14 @@ class TPlot:
         ]
 
     def draw(self, state: GuiState, mpos: Point) -> None:
+        """Draw the tiling.
+
+        Args:
+            state (GuiState): A collection of settings.
+            mpos (Point): The current mouse position.
+        """
         if any(len(obs) == 0 for obs in self.tiling.obstructions):
-            GeoDrawer.draw_rectangle(0, 0, self._w, self._h, Color.GRAY)
+            GeoDrawer.draw_rectangle(0, 0, self._w, self._h, TPlot._EMPTY_COLOR)
         else:
             if state.shading:
                 self._draw_shaded_cells()
@@ -134,6 +155,12 @@ class TPlot:
             self._draw_requirements(state, mpos)
 
     def resize(self, width: int, height: int) -> None:
+        """Resize the image.
+
+        Args:
+            width (int): The new width.
+            height (int): The new height.
+        """
         for obs in self._obstruction_locs:
             for pnt in obs:
                 pnt.x = pnt.x / self._w * width
@@ -147,44 +174,97 @@ class TPlot:
         self._h = height
 
     def get_cell(self, mpos: Point) -> Tuple[int, int]:
+        """Get the 2d index of the cell that was clicked.
+
+        Args:
+            mpos (Point): The current mouse position.
+
+        Returns:
+            Tuple[int, int]: The 2d index (column, row).
+        """
         t_w, t_h = self.tiling.dimensions
         c_w, c_h = self._w / t_w, self._h / t_h
         c_x, c_y = int(mpos.x / c_w), int(mpos.y / c_h)
         return c_x, c_y
 
     def get_point_obs_index(self, mpos: Point) -> Optional[Tuple[int, int]]:
+        """Look for an obstruction point that collides with the mouse click.
+        If one is found, the index of its gridded permutation and its index
+        within the gridded permutation is returned. If not, None is returned.
+
+        Args:
+            mpos (Point): The current mouse position.
+
+        Returns:
+            Optional[Tuple[int, int]]: A tuple of the index of gridded permutation
+            containing point and the index of point within gridded permutation, if
+            one is found, None otherwise.
+        """
         for j, loc in enumerate(self._obstruction_locs):
             for k, pnt in enumerate(loc):
-                if mpos.dist_squared_to(pnt) <= 100:
+                if mpos.dist_squared_to(pnt) <= TPlot._CLICK_PRECISION_SQUARED:
                     return j, k
         return None
 
     def get_point_req_index(self, mpos: Point) -> Optional[Tuple[int, int, int]]:
+        """Look for an requirement point that collides with the mouse click.
+        If one is found, the index of its requirement list, gridded permutation
+        within the requirement list and its index within the gridded permutation
+        is returned. If not, None is returned.
+
+        Args:
+            mpos (Point): The current mouse position.
+
+        Returns:
+            Optional[Tuple[int, int, int]]: A tuple of the index of the requirement
+            list, the index of the gridded permutation within the requirement list
+            and the index of point within gridded permutation, that collides with
+            the click, if one is found, None otherwise.
+        """
         for i, reqlist in enumerate(self._requirement_locs):
             for j, loc in enumerate(reqlist):
                 for k, pnt in enumerate(loc):
-                    if mpos.dist_squared_to(pnt) <= 100:
+                    if mpos.dist_squared_to(pnt) <= TPlot._CLICK_PRECISION_SQUARED:
                         return i, j, k
         return None
 
     def _cell_to_rect(self, c_x: int, c_y: int) -> Tuple[float, float, float, float]:
+        """Get the rectangle for a cell.
+
+        Args:
+            c_x (int): The column of the cell.
+            c_y (int): The row of the cell.
+
+        Returns:
+            Tuple[float, float, float, float]: A tuple with (x, y, w, h) where (x, y)
+            is the coordinate of the rectangles bottom left corner and w and h are
+            his width and height respectively.
+        """
         t_w, t_h = self.tiling.dimensions
         c_w, c_h = self._w / t_w, self._h / t_h
         return c_x * c_w, c_y * c_h, c_w, c_h
 
     def _draw_shaded_cells(self) -> None:
+        """Draw all cells with a single point obstruction as a filled rectangle.
+        """
         for c_x, c_y in self.tiling.empty_cells:
-            GeoDrawer.draw_rectangle(*self._cell_to_rect(c_x, c_y), Color.GRAY)
+            GeoDrawer.draw_rectangle(
+                *self._cell_to_rect(c_x, c_y), TPlot._SHADED_CELL_COLOR
+            )
 
     def _draw_obstructions(self, state: GuiState, mpos: Point) -> None:
-        # TODO: create once, re-use ... pass through drawing functions
-        # look for more such optimizations... when done...
+        """Draw all obstructions.
+
+        Args:
+            state (GuiState): A collection of settings.
+            mpos (Point): The current mouse position.
+        """
         point_cells_with_point_perm_req = self.tiling.point_cells.intersection(
             {
                 req.pos[0]
                 for req_lis in self.tiling.requirements
                 for req in req_lis
-                if len(req) == 1
+                if req.is_point_perm()
             }
         )
         hover_cell = self.get_cell(mpos)
@@ -194,7 +274,6 @@ class TPlot:
                 and all(p in point_cells_with_point_perm_req for p in obs.pos)
             ):
                 continue
-
             col = (
                 TPlot._HIGHLIGHT_COLOR
                 if state.highlight_touching_cell
@@ -205,9 +284,15 @@ class TPlot:
             if (localized and state.show_localized) or (
                 not localized and state.show_crossing
             ):
-                GeoDrawer.draw_point_path(loc, col, 5)
+                GeoDrawer.draw_point_path(loc, col, TPlot._POINT_SIZE)
 
     def _draw_requirements(self, state: GuiState, mpos: Point) -> None:
+        """Draw all requirements.
+
+        Args:
+            state (GuiState): A collection of settings.
+            mpos (Point): The current mouse position.
+        """
         hover_index = self.get_point_req_index(mpos)
         for i, reqlist in enumerate(self._requirement_locs):
             if (
@@ -220,14 +305,15 @@ class TPlot:
                 )
             ):
                 pnt = reqlist[0][0]
-                GeoDrawer.draw_circle(pnt.x, pnt.y, 10, Color.BLACK)
+                GeoDrawer.draw_circle(
+                    pnt.x, pnt.y, TPlot._PRETTY_POINT_SIZE, Color.BLACK
+                )
                 continue
             col = (
                 TPlot._HIGHLIGHT_COLOR
                 if hover_index is not None and i == hover_index[0]
                 else TPlot._REQUIREMENT_COLOR
             )
-
             for j, loc in enumerate(reqlist):
                 localized = self.tiling.requirements[i][j].is_localized()
                 if (localized and state.show_localized) or (
@@ -236,6 +322,8 @@ class TPlot:
                     GeoDrawer.draw_point_path(loc, col, 5)
 
     def _draw_grid(self) -> None:
+        """Draw the tiling's grid.
+        """
         t_w, t_h = self.tiling.dimensions
         for i in range(t_w):
             x = self._w * i / t_w
@@ -245,210 +333,12 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
 
 
-"""
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-###############################
-"""
-
-
+# TODO: CLEAN!
 class TPlotManager(pyglet.event.EventDispatcher, Observer):
     MAX_DEQUEUE_SIZE: ClassVar[int] = 100
     MAX_SEQUENCE_SIZE = 7
 
-    def __init__(self, width: int, height: int, state: GuiState, dispatchers):
+    def __init__(self, width: int, height: int, state: GuiState, dispatchers=()):
         Observer.__init__(self, dispatchers)
         self.undo_deq: Deque[TPlot] = deque()
         self.redo_deq: Deque[TPlot] = deque()
@@ -597,13 +487,13 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         self.state.move_state.selected_point = t.get_point_obs_index(Point(x, y))
         if self.state.move_state.selected_point is not None:
             i, j = self.state.move_state.selected_point
-            gploc = t.obstruction_locs[i]
+            gploc = t._obstruction_locs[i]
             gp = t.tiling.obstructions[i]
         else:
             self.state.move_state.selected_point = t.get_point_req_index(Point(x, y))
             if self.state.move_state.selected_point is not None:
                 a, i, j = self.state.move_state.selected_point
-                gploc = t.requirement_locs[a][i]
+                gploc = t._requirement_locs[a][i]
                 gp = t.tiling.requirements[a][i]
             else:
                 self.state.move_state.reset()
@@ -641,19 +531,23 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             i, j = self.state.move_state.selected_point
             mnx, mxx, mny, mxy = self.state.move_state.point_move_bounds
             if self.state.move_state.move_type == 0:
-                t.obstruction_locs[i][j] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy))
+                t._obstruction_locs[i][j] = Point(
+                    clamp(x, mnx, mxx), clamp(y, mny, mxy)
+                )
             else:
-                for k in range(len(t.obstruction_locs[i])):
-                    ox, oy = t.obstruction_locs[i][k]
+                for k in range(len(t._obstruction_locs[i])):
+                    ox, oy = t._obstruction_locs[i][k]
                     ox += dx
                     oy += dy
-                    t.obstruction_locs[i][k] = Point(ox, oy)
+                    t._obstruction_locs[i][k] = Point(ox, oy)
         else:
             # TODO: does not support types of movement, add that
             # (was not in the original eihter...)
             i, j, k = self.state.move_state.selected_point
             mnx, mxx, mny, mxy = self.state.move_state.point_move_bounds
-            t.requirement_locs[i][j][k] = Point(clamp(x, mnx, mxx), clamp(y, mny, mxy),)
+            t._requirement_locs[i][j][k] = Point(
+                clamp(x, mnx, mxx), clamp(y, mny, mxy),
+            )
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.state.move_state.reset()
