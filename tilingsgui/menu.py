@@ -34,7 +34,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         y: int,
         w: int,
         h: int,
-        dispatchers: Iterable[pyglet.event.EventDispatcher],
+        dispatchers: Iterable[pyglet.event.EventDispatcher] = (),
     ) -> None:
         """Create the top menu.
 
@@ -44,7 +44,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
             w (int): The horizontal length of the surrounding rectangle.
             h (int): The vertical length of the surrounding rectangle.
             dispatchers (Iterable[Observer]): A collection of dispatchers that the menu
-            should listen to.
+            should listen to. Defaults to an empty tuple.
         """
         Observer.__init__(self, dispatchers)
         self._rect: Rectangle = Rectangle(x, y, w, h)
@@ -206,7 +206,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         h: int,
         top: int,
         state: GuiState,
-        dispatchers: Iterable[pyglet.event.EventDispatcher],
+        dispatchers: Iterable[pyglet.event.EventDispatcher] = (),
     ) -> None:
         """Create a right menu instance.
 
@@ -217,7 +217,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             h (int): The vertical length of the surrounding rectangle.
             top (int): The height of the top bar.
             dispatchers (Iterable[Observer]): A collection of dispatchers that the menu
-            should listen to.
+            should listen to. Defaults to an empty tuple.
         """
         Observer.__init__(self, dispatchers)
         self._rect: Rectangle = Rectangle(x, y, w, h)
@@ -459,7 +459,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             3,
             Button(
                 Images.VERIFICATION,
-                on_click=lambda: self.dispatch_event(CustomEvents.ON_VERTIFICATION),
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_VERIFICATION),
             ),
         )
         self._keyboard.add_btn(
@@ -541,4 +541,4 @@ RightMenu.register_event_type(CustomEvents.ON_ROW_COL_SEPERATION)
 RightMenu.register_event_type(CustomEvents.ON_OBSTRUCTION_TRANSIVITY)
 RightMenu.register_event_type(CustomEvents.ON_PRINT_SEQUENCE)
 RightMenu.register_event_type(CustomEvents.ON_PRINT_TILING)
-RightMenu.register_event_type(CustomEvents.ON_VERTIFICATION)
+RightMenu.register_event_type(CustomEvents.ON_VERIFICATION)

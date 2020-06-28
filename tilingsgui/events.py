@@ -11,11 +11,29 @@ class Observer:
     the observer and all its dispatchers.
     """
 
-    def __init__(self, dispatchers: Iterable[pyglet.event.EventDispatcher]):
+    def __init__(self, dispatchers: Iterable[pyglet.event.EventDispatcher] = ()):
         """Instansiate observer and setup connection wiht dispatchers.
 
         Args:
             dispatchers (Iterable[pyglet.event.EventDispatcher]): All event dispatchers
+            that this observer should listen to. Defaults to an empty tuple.
+        """
+        self.add_dispatchers(dispatchers)
+
+    def add_dispatcher(self, dispatcher: pyglet.event.EventDispatcher):
+        """Add a single dispatcher that this observer should listen to.
+
+        Args:
+            dispatcher (pyglet.event.EventDispatcher): A dispatcher
+            that this observer should listen to.
+        """
+        dispatcher.push_handlers(self)
+
+    def add_dispatchers(self, dispatchers: Iterable[pyglet.event.EventDispatcher]):
+        """Add multiple dispatchers that this observer should listen to.
+
+        Args:
+            dispatchers (Iterable[pyglet.event.EventDispatcher]): Event dispatchers
             that this observer should listen to.
         """
         for dispatcher in dispatchers:
@@ -37,4 +55,4 @@ class CustomEvents:
     ON_EXPORT = "on_export"
     ON_PRINT_SEQUENCE = "on_print_sequence"
     ON_PRINT_TILING = "on_print_tiling"
-    ON_VERTIFICATION = "on_vertification"
+    ON_VERIFICATION = "on_verification"

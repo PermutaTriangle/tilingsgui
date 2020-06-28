@@ -38,7 +38,7 @@ class GuiState:
         show_crossing           = True
         show_localized          = True
         highlight_touching_cell = False
-        strategy_selected       = 0
+        action_selected         = 0
         move_state              = MoveState init's value
     """
 
@@ -51,7 +51,7 @@ class GuiState:
         self.show_crossing: bool = True
         self.show_localized: bool = True
         self.highlight_touching_cell: bool = False
-        self.strategy_selected: int = 0
+        self.action_selected: int = 0
         self.move_state = MoveState()
 
     def toggle_shading(self) -> None:
@@ -85,4 +85,4 @@ class GuiState:
         Args:
             idx (int): The index of the action chosen.
         """
-        self.strategy_selected = idx
+        self.action_selected = idx

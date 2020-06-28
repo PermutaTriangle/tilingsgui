@@ -112,14 +112,16 @@ class History(Observer):
             History._TILING: tiling_json,
         }
 
-    def __init__(self, dispatchers: Iterable[pyglet.event.EventDispatcher]) -> None:
+    def __init__(
+        self, dispatchers: Iterable[pyglet.event.EventDispatcher] = ()
+    ) -> None:
         """Creates exports folder and file if they don't exists. If they
         do exists, the files content is loaded and used if valid JSON. If
         not, we start with a fresh one.
 
         Args:
             dispatchers (Iterable[pyglet.event.EventDispatcher]): All dispatchers that
-            dispatch events to this obserer.
+            dispatch events to this obserer. Defaults to an empty tuple.
         """
         super().__init__(dispatchers)
         export_path = PathManager.get_exports_abs_path()
