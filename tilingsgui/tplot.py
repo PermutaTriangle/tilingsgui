@@ -3,7 +3,7 @@
 
 from collections import Counter, deque
 from random import uniform
-from typing import Callable, ClassVar, Deque, Iterable, List, Optional, Tuple
+from typing import Callable, ClassVar, Deque, Iterable, List, Tuple
 
 import pyglet
 
@@ -33,6 +33,8 @@ class TPlot:
     """A single tiling image.
     """
 
+    REQ_NOT_FOUND: ClassVar[Tuple[int, int, int]] = (-1, -1, -1)
+    OBS_NOT_FOUND: ClassVar[Tuple[int, int]] = (-1, -1)
     _OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
     _REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
     _HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.ORANGE
@@ -215,53 +217,53 @@ class TPlot:
         c_x, c_y = int(mpos.x / c_w), int(mpos.y / c_h)
         return c_x, c_y
 
-    def get_point_obs_index(self, mpos: Point) -> Optional[Tuple[int, int]]:
+    def get_point_obs_index(self, mpos: Point) -> Tuple[int, int]:
         """Look for an obstruction point that collides with the mouse click.
         If one is found, the index of its gridded permutation and its index
-        within the gridded permutation is returned. If not, None is returned.
+        within the gridded permutation is returned. If not, (-1,-1) is returned.
 
         Args:
             mpos (Point): The current mouse position.
 
         Returns:
-            Optional[Tuple[int, int]]: A tuple of the index of gridded permutation
+            Tuple[int, int]: A tuple of the index of gridded permutation
             containing point and the index of point within gridded permutation, if
-            one is found, None otherwise.
+            one is found, (-1,-1) pair otherwise.
         """
         for j, loc in enumerate(self._obstruction_locs):
             for k, pnt in enumerate(loc):
                 if mpos.dist_squared_to(pnt) <= TPlot._CLICK_PRECISION_SQUARED:
                     return j, k
-        return None
+        return TPlot.OBS_NOT_FOUND
 
-    def get_point_req_index(self, mpos: Point) -> Optional[Tuple[int, int, int]]:
+    def get_point_req_index(self, mpos: Point) -> Tuple[int, int, int]:
         """Look for an requirement point that collides with the mouse click.
         If one is found, the index of its requirement list, gridded permutation
         within the requirement list and its index within the gridded permutation
-        is returned. If not, None is returned.
+        is returned. If not, (-1,-1,-1) is returned.
 
         Args:
             mpos (Point): The current mouse position.
 
         Returns:
-            Optional[Tuple[int, int, int]]: A tuple of the index of the requirement
+            Tuple[int, int, int]: A tuple of the index of the requirement
             list, the index of the gridded permutation within the requirement list
             and the index of point within gridded permutation, that collides with
-            the click, if one is found, None otherwise.
+            the click, if one is found, (-1,-1,-1) otherwise.
         """
         for i, reqlist in enumerate(self._requirement_locs):
             for j, loc in enumerate(reqlist):
                 for k, pnt in enumerate(loc):
                     if mpos.dist_squared_to(pnt) <= TPlot._CLICK_PRECISION_SQUARED:
                         return i, j, k
-        return None
+        return TPlot.REQ_NOT_FOUND
 
-    def cell_to_rect(self, c_x: float, c_y: float) -> Tuple[float, float, float, float]:
+    def cell_to_rect(self, c_x: int, c_y: int) -> Tuple[float, float, float, float]:
         """Get the rectangle for a cell.
 
         Args:
-            c_x (float): The column of the cell.
-            c_y (float): The row of the cell.
+            c_x (int): The column of the cell.
+            c_y (int): The row of the cell.
 
         Returns:
             Tuple[float, float, float, float]: A tuple with (x, y, w, h) where (x, y)
@@ -339,7 +341,7 @@ class TPlot:
                 continue
             col = (
                 TPlot._HIGHLIGHT_COLOR
-                if hover_index is not None and i == hover_index[0]
+                if hover_index != TPlot.REQ_NOT_FOUND and i == hover_index[0]
                 else TPlot._REQUIREMENT_COLOR
             )
             for j, loc in enumerate(reqlist):
@@ -383,6 +385,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         "OneByOneVerificationStrategy",
     ]
     _POINT_PERM: ClassVar[Perm] = Perm((0,))
+    _MIN_SPACE: ClassVar[int] = 10
 
     @staticmethod
     def _verify(tiling: Tiling) -> List[str]:
@@ -841,39 +844,50 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         else:
             return
 
-        t = self._current()
-        self._state.move_state.selected_point = t.get_point_obs_index(Point(x, y))
-        if self._state.move_state.selected_point is not None:
-            i, j = self._state.move_state.selected_point
-            gploc = t.get_obstruction_gridded_perm_location(i)
-            gp = t.tiling.obstructions[i]
+        tplot = self._current()
+        idxs: Tuple[int, ...] = tplot.get_point_obs_index(Point(x, y))
+        if idxs != TPlot.OBS_NOT_FOUND:
+            self._state.move_state.selected_point = idxs
+            gp_loc = tplot.get_obstruction_gridded_perm_location(idxs[0])
+            g_perm = tplot.tiling.obstructions[idxs[0]]
         else:
-            self._state.move_state.selected_point = t.get_point_req_index(Point(x, y))
-            if self._state.move_state.selected_point is not None:
-                a, i, j = self._state.move_state.selected_point
-                gploc = t.get_requirement_gridded_perm_locations(a, i)
-                gp = t.tiling.requirements[a][i]
+            idxs = tplot.get_point_req_index(Point(x, y))
+            if idxs != TPlot.REQ_NOT_FOUND:
+                self._state.move_state.selected_point = idxs
+                gp_loc = tplot.get_requirement_gridded_perm_locations(idxs[0], idxs[1])
+                g_perm = tplot.tiling.requirements[idxs[0]][idxs[1]]
             else:
                 self._state.move_state.reset()
                 return
 
         self._state.move_state.has_selected_pnt = True
-        v = gp.patt[j]
-        cell = gp.pos[j]
-        a, b, c, d = t.cell_to_rect(*cell)
-        loc, sz = (a, b), (c, d)
-        min_space = 10
-        mnx, mny = loc[0] + min_space, loc[1] + min_space
-        mxx, mxy = loc[0] + sz[0] - min_space, loc[1] + sz[1] - min_space
-        for k in range(len(gp)):
-            if k == j - 1:
-                mnx = max(mnx, gploc[k].x + min_space)
-            if k == j + 1:
-                mxx = min(mxx, gploc[k].x - min_space)
-            if gp.patt[k] == v - 1:
-                mny = max(mny, gploc[k].y + min_space)
-            if gp.patt[k] == v + 1:
-                mxy = min(mxy, gploc[k].y - min_space)
+        self._set_move_boundaries(idxs, gp_loc, g_perm, tplot)
+
+    def _set_move_boundaries(
+        self,
+        indices: Tuple[int, ...],
+        gp_loc: List[Point],
+        g_perm: GriddedPerm,
+        tplot: TPlot,
+    ) -> None:
+        perm_elem = g_perm.patt[indices[-1]]
+        cell_col, cell_row = g_perm.pos[indices[-1]]
+        rect_x, rect_y, rect_w, rect_h = tplot.cell_to_rect(cell_col, cell_row)
+        loc, size = (rect_x, rect_y), (rect_w, rect_h)
+        mnx, mny = loc[0] + TPlotManager._MIN_SPACE, loc[1] + TPlotManager._MIN_SPACE
+        mxx, mxy = (
+            loc[0] + size[0] - TPlotManager._MIN_SPACE,
+            loc[1] + size[1] - TPlotManager._MIN_SPACE,
+        )
+        for k in range(len(g_perm)):
+            if k == indices[-1] - 1:
+                mnx = max(mnx, gp_loc[k].x + TPlotManager._MIN_SPACE)
+            if k == indices[-1] + 1:
+                mxx = min(mxx, gp_loc[k].x - TPlotManager._MIN_SPACE)
+            if g_perm.patt[k] == perm_elem - 1:
+                mny = max(mny, gp_loc[k].y + TPlotManager._MIN_SPACE)
+            if g_perm.patt[k] == perm_elem + 1:
+                mxy = min(mxy, gp_loc[k].y - TPlotManager._MIN_SPACE)
         self._state.move_state.point_move_bounds = (mnx, mxx, mny, mxy)
 
     def _cell_insertion(self, x: int, y: int, button: int, _modifiers: int) -> None:
@@ -938,7 +952,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         """
         tplot = self._current()
         ind = tplot.get_point_req_index(Point(x, y))
-        if ind is not None:
+        if ind != TPlot.REQ_NOT_FOUND:
             self._add_tiling(
                 tplot.tiling.place_point_of_gridded_permutation(
                     tplot.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
@@ -959,7 +973,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         """
         tplot = self._current()
         ind = tplot.get_point_req_index(Point(x, y))
-        if ind is not None:
+        if ind != TPlot.REQ_NOT_FOUND:
             self._add_tiling(
                 tplot.tiling.partial_place_point_of_gridded_permutation(
                     tplot.tiling.requirements[ind[0]][ind[1]], ind[2], force_dir
