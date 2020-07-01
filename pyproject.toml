@@ -19,7 +19,11 @@ classifiers = [
     "Topic :: Education",
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
+<<<<<<< HEAD
 include = ["tilingsgui/resources/img/png/*.png","tilingsgui/resources/img/svg/*.svg"]
+=======
+include = ["resources/img/png/*.png","resources/img/svg/*.svg"]
+>>>>>>> b711e162541eb80052ff8be6cc2adefcf9dcbc4d
 
 [tool.poetry.dependencies]
 python = "^3.6"
