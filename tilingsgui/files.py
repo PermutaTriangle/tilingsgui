@@ -16,6 +16,7 @@ class PathManager:
     """
 
     _ROOT: ClassVar[pathlib.Path] = pathlib.Path(__file__).parent.parent.absolute()
+    _TILINGS_GUI: ClassVar[str] = "tilingsgui"
     _RESOURCES: ClassVar[str] = "resources"
     _EXPORTS: ClassVar[str] = "exports"
 
@@ -47,7 +48,9 @@ class PathManager:
         Returns:
             pathlib.Path: Absolute path of './resources'.
         """
-        return PathManager._ROOT.joinpath(PathManager._RESOURCES)
+        return PathManager._ROOT.joinpath(
+            PathManager._TILINGS_GUI, PathManager._RESOURCES
+        )
 
     @staticmethod
     def get_png_abs_path() -> pathlib.Path:
@@ -56,7 +59,9 @@ class PathManager:
         Returns:
             pathlib.Path: Absolute path of './resources/img/png'.
         """
-        return PathManager._ROOT.joinpath(PathManager._RESOURCES, "img", "png")
+        return PathManager._ROOT.joinpath(
+            PathManager._TILINGS_GUI, PathManager._RESOURCES, "img", "png"
+        )
 
     @staticmethod
     def get_exports_abs_path() -> pathlib.Path:
@@ -65,7 +70,9 @@ class PathManager:
         Returns:
             pathlib.Path: Absolute path of './exports'.
         """
-        return PathManager._ROOT.joinpath(PathManager._EXPORTS)
+        return PathManager._ROOT.joinpath(
+            PathManager._TILINGS_GUI, PathManager._EXPORTS
+        )
 
 
 class History(Observer):

@@ -142,4 +142,4 @@ dmypy.json
 .vscode/
 
 # Program's output
-exports/
+tilingsgui/exports/
