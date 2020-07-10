@@ -297,8 +297,11 @@ class TPlot:
                 if req.is_point_perm()
             }
         )
+        hover_index, _ = self.get_point_obs_index(mpos)
         hover_cell = self.get_cell(mpos)
-        for obs, loc in zip(self.tiling.obstructions, self._obstruction_locs):
+        for i, (obs, loc) in enumerate(
+            zip(self.tiling.obstructions, self._obstruction_locs)
+        ):
             if (state.shading and obs.is_point_perm()) or (
                 state.pretty_points
                 and all(p in point_cells_with_point_perm_req for p in obs.pos)
@@ -310,6 +313,8 @@ class TPlot:
                 and any(p == hover_cell for p in obs.pos)
                 else TPlot._OBSTRUCTION_COLOR
             )
+            if hover_index == i:
+                col = TPlot._HIGHLIGHT_COLOR
             localized = obs.is_localized()
             if (localized and state.show_localized) or (
                 not localized and state.show_crossing
