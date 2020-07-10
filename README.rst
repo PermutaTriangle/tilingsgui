@@ -299,122 +299,122 @@ An example output is shown below.
 
 .. _Tilings: https://github.com/PermutaTriangle/Tilings
 
-.. |add_point| image:: tilingsgui/resources/img/svg/add_point.svg
+.. |add_point| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/add_point.svg
    :scale: 200 %
    :alt: img-error
 
-.. |add_custom| image:: tilingsgui/resources/img/svg/add_custom.svg
+.. |add_custom| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/add_custom.svg
    :scale: 200 %
    :alt: img-error
 
-.. |export| image:: tilingsgui/resources/img/svg/export.svg
+.. |export| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/export.svg
    :scale: 200 %
    :alt: img-error
 
-.. |factor| image:: tilingsgui/resources/img/svg/factor.svg
+.. |factor| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/factor.svg
    :scale: 200 %
    :alt: img-error
 
-.. |factor_int| image:: tilingsgui/resources/img/svg/factor_int.svg
+.. |factor_int| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/factor_int.svg
    :scale: 200 %
    :alt: img-error
 
-.. |fusion_c| image:: tilingsgui/resources/img/svg/fusion_c.svg
+.. |fusion_c| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/fusion_c.svg
    :scale: 200 %
    :alt: img-error
 
-.. |fusion_comp_c| image:: tilingsgui/resources/img/svg/fusion_comp_c.svg
+.. |fusion_comp_c| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/fusion_comp_c.svg
    :scale: 200 %
    :alt: img-error
 
-.. |fusion_comp_r| image:: tilingsgui/resources/img/svg/fusion_comp_r.svg
+.. |fusion_comp_r| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/fusion_comp_r.svg
    :scale: 200 %
    :alt: img-error
 
-.. |fusion_r| image:: tilingsgui/resources/img/svg/fusion_r.svg
+.. |fusion_r| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/fusion_r.svg
    :scale: 200 %
    :alt: img-error
 
-.. |htc| image:: tilingsgui/resources/img/svg/htc.svg
+.. |htc| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/htc.svg
    :scale: 200 %
    :alt: img-error
 
-.. |move| image:: tilingsgui/resources/img/svg/move.svg
+.. |move| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/move.svg
    :scale: 200 %
    :alt: img-error
 
-.. |obstr_trans| image:: tilingsgui/resources/img/svg/obstr_trans.svg
+.. |obstr_trans| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/obstr_trans.svg
    :scale: 200 %
    :alt: img-error
 
-.. |place_east| image:: tilingsgui/resources/img/svg/place_east.svg
+.. |place_east| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/place_east.svg
    :scale: 200 %
    :alt: img-error
 
-.. |place_north| image:: tilingsgui/resources/img/svg/place_north.svg
+.. |place_north| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/place_north.svg
    :scale: 200 %
    :alt: img-error
 
-.. |place_south| image:: tilingsgui/resources/img/svg/place_south.svg
+.. |place_south| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/place_south.svg
    :scale: 200 %
    :alt: img-error
 
-.. |place_west| image:: tilingsgui/resources/img/svg/place_west.svg
+.. |place_west| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/place_west.svg
    :scale: 200 %
    :alt: img-error
 
-.. |pplace_east| image:: tilingsgui/resources/img/svg/pplace_east.svg
+.. |pplace_east| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/pplace_east.svg
    :scale: 200 %
    :alt: img-error
 
-.. |pplace_north| image:: tilingsgui/resources/img/svg/pplace_north.svg
+.. |pplace_north| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/pplace_north.svg
    :scale: 200 %
    :alt: img-error
 
-.. |pplace_south| image:: tilingsgui/resources/img/svg/pplace_south.svg
+.. |pplace_south| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/pplace_south.svg
    :scale: 200 %
    :alt: img-error
 
-.. |pplace_west| image:: tilingsgui/resources/img/svg/pplace_west.svg
+.. |pplace_west| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/pplace_west.svg
    :scale: 200 %
    :alt: img-error
 
-.. |pretty| image:: tilingsgui/resources/img/svg/pretty.svg
+.. |pretty| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/pretty.svg
    :scale: 200 %
    :alt: img-error
 
-.. |redo| image:: tilingsgui/resources/img/svg/redo.svg
+.. |redo| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/redo.svg
    :scale: 200 %
    :alt: img-error
 
-.. |rowcolsep| image:: tilingsgui/resources/img/svg/rowcolsep.svg
+.. |rowcolsep| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/rowcolsep.svg
    :scale: 200 %
    :alt: img-error
 
-.. |sequence| image:: tilingsgui/resources/img/svg/sequence.svg
+.. |sequence| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/sequence.svg
    :scale: 200 %
    :alt: img-error
 
-.. |shading| image:: tilingsgui/resources/img/svg/shading.svg
+.. |shading| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/shading.svg
    :scale: 200 %
    :alt: img-error
 
-.. |show_cross| image:: tilingsgui/resources/img/svg/show_cross.svg
+.. |show_cross| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/show_cross.svg
    :scale: 200 %
    :alt: img-error
 
-.. |show_local| image:: tilingsgui/resources/img/svg/show_local.svg
+.. |show_local| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/show_local.svg
    :scale: 200 %
    :alt: img-error
 
-.. |str| image:: tilingsgui/resources/img/svg/str.svg
+.. |str| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/str.svg
    :scale: 200 %
    :alt: img-error
 
-.. |undo| image:: tilingsgui/resources/img/svg/undo.svg
+.. |undo| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/undo.svg
    :scale: 200 %
    :alt: img-error
 
-.. |verification| image:: tilingsgui/resources/img/svg/verification.svg
+.. |verification| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/verification.svg
    :scale: 200 %
    :alt: img-error
