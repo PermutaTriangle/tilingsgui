@@ -699,7 +699,17 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
                 pnt = tplot.get_obstruction_gridded_perm_location(i)[j]
                 pnt.x, pnt.y = clamp(x, mnx, mxx), clamp(y, mny, mxy)
             else:
-                # Moving all with no restrictions
+                # Moving all, , must confine to the permutation's structure.
+                all_pos = tplot.tiling.obstructions[i].pos
+                for k in range(len(tplot.get_obstruction_gridded_perm_location(i))):
+                    pnt = tplot.get_obstruction_gridded_perm_location(i)[k]
+                    if (
+                        pnt.x + dx < 0
+                        or pnt.y + dy < 0
+                        or all_pos[k] != tplot.get_cell(Point(pnt.x + dx, pnt.y + dy))
+                    ):
+                        return False
+
                 for k in range(len(tplot.get_obstruction_gridded_perm_location(i))):
                     pnt = tplot.get_obstruction_gridded_perm_location(i)[k]
                     pnt.x += dx
