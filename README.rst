@@ -6,8 +6,6 @@ A graphical interface for `Tilings`_.
 Install and run
 ---------------
 
-Then run
-
 .. code:: sh
 
    pip install tilingsgui
@@ -26,7 +24,7 @@ Without them the app still works but pasting won’t.
 
 Known issues
 ------------
-* 
+* Exporting places the json in the package directory.
 
 Report a bug
 ~~~~~~~~~~~~
