@@ -2,77 +2,36 @@ language: python
 
 matrix:
   include:
-    - python: 3.6
-      os: linux
-      dist: xenial
-      
-    - python: 3.7
-      os: linux
-      dist: xenial
-    
-    # Main build
     - python: 3.8
-      os: linux
-      dist: xenial
-      script:
-        - poetry run pylint tilingsgui/
-        - poetry run flake8 tilingsgui/
-        - poetry run mypy tilingsgui/
-        - poetry run pytest
-      
-    - name: "py3-macOS"
-      os: osx
-      osx_image: xcode12
-      language: shell
-      
-    - name: "py3-win10"
-      os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.8.0
-        - python -m pip install --upgrade pip
-        - powershell "(Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python"
-        - poetry config virtualenvs.in-project true
-      env: PATH=/c/Python38:/c/Python38/Scripts:$HOME/.poetry/bin:$PATH
-      
-    - python: pypy3
-      os: linux
-      dist: xenial
-      before_install:
-        - pypy3 -mpip install --upgrade pip setuptools wheel
-        - |
-            if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
-              export PYENV_ROOT="$HOME/.pyenv"
-              if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
-                pushd "$PYENV_ROOT" && git pull && popd
-              else
-                rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
-              fi
-              export PYPY_VERSION="5.6.0"
-              "$PYENV_ROOT/bin/pyenv" install --skip-existing "pypy-$PYPY_VERSION"
-              virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
-              source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
-            fi
-        - curl -fsS -o get-poetry.py https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py
-        - python get-poetry.py --preview -y
-        - source $HOME/.poetry/env
-        # Some of these might depend on typed-ast which is not compatible with pypy
-        - sed -i '/^flake8 = /d' pyproject.toml
-        - sed -i '/^black = /d' pyproject.toml
-        - sed -i '/^pylint = /d' pyproject.toml
-        - sed -i '/^mypy = /d' pyproject.toml
-        - sed -i '/^isort = /d' pyproject.toml
-        - sed -i '/^docutils = /d' pyproject.toml
-        - sed -i '/^rstcheck = /d' pyproject.toml
-        - poetry update
+      env: TOXENV=flake8
+    - python: 3.8
+      env: TOXENV=mypy
+    - python: 3.8
+      env: TOXENV=black
 
-before_install:
-  - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3
-  - source $HOME/.poetry/env
-  - poetry config virtualenvs.in-project true
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      env: TOXENV=py37
+    - python: 3.8
+      env: TOXENV=py38
+    - python: 3.9-dev
+      env: TOXENV=py39
+    - python: pypy3
+      env: TOXENV=pypy36
+
 
 install:
-  - poetry install
-  
+  - pip install tox
+
 script:
-  - poetry run pytest
+  - tox
+
+deploy:
+  provider: pypi
+  user: henningu
+  password:
+    secure: bhjQyIm/xGmUBq7bYpYYoXyt21tJQM9XU/eymPbnEXJhX0Z+KY58JmmorTG7PslJoARsi4ZXUA3N4Oqu/n4lReo1FQ7dahbdKUNYWuFx7ZZRvJLDW/tFd1gKO07bpTMJHxXMoyIhbmSllXxgRDJ/TBtI+uvYBMcR02CiZAFW8uN+3Vg0k+c1Njx0RR7h/1Dzw3iwupBzykT/bZW4zMs5XuqFjGaqCdymcWEEmjo+b0yZQ05i0dFkonzaBpM9S1HdDG6DvD4O7KKJdPTCcpFNd4HqN3giXicMA0faH8zOqeKhJ5mON90YAuNppkGUOt49FupQAeCAl3gSAKTrQnam4GxipCGuzFOjysHvv0MQcmGQ1n2bsD249r2qSo0AiabFtyJPHoZdBrs/1cqMks7suhAjydrAnkR+xz/a//5HRV1q73SAEtOI7CFCkoTFuU6yCG8US0EmZUDDe+kcPGb0Qwpol8AO+8B+Ih2OaYfyCGTBZ6Wrx64SjWE1KDjC4R8HJmzJCPsgL99Ab8KA66xmQqiZROy6qnwtyMV4oWz/BOsvWJg577ItX6ItmEC8tOGNm/yW1QTlgUZkk/0sOd0usAbdvp4a+rZKMYd9MKin76MnktQ56tI5Vfnelk+bcRe6Cz1tIrq82NxhSl44OqK2yCJ3ksSdBBkWfxa7jp7yAkQ=
+  skip_existing: true
+  on:
+    branch: master
