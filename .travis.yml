@@ -28,8 +28,8 @@ matrix:
         - python -m pip install --upgrade pip
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
       install:
-        python setup.py develop
-        pip install pytest
+        - python setup.py develop
+        - pip install pytest
       script:
         - python -m pytest tests
         - python setup.py install
