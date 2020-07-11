@@ -1,0 +1,2 @@
+include tilingsgui/resources/img/png/*.png
+include tilingsgui/resources/img/svg/*.svg
