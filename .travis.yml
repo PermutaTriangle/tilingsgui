@@ -1,4 +1,6 @@
 language: python
+
+
 matrix:
   include:
   - python: 3.8
@@ -38,13 +40,19 @@ matrix:
     script:
     - python -m pytest tests
     - python setup.py install
+
+
 install:
 - pip install tox
+
+
 script:
 - tox
+
+
 deploy:
   provider: pypi
-  user: __token__
+  user: henningu
   password:
     secure: eWUnLHb3RaOmJxF1tpoFivjEC/lK91JV5rK+z2YHwUxnlHmb08bN3YDhjfwX16t2ftMibt1QkQQjH6ICWshREEzwIswglcIlMyjJp60ZtU09a7bo0l/FyA2QxMqWN4WJq/VLa7YTi3g3kYU9HWbYsrnVySGUOu8nBHDTvVd6uyrYDDr6poGEBUsjHcBw7TkXAVURBWzg81ieVm8c8Io/USQSyUwViP0U1jIHDHLiQZaVmLT3/CLDF/TN9iGnYg6zg/4Of/ME10aQYiStXI/9TQ+tC++9grv+HcxwTg+ckIwhDUj7rpuapwwvHDNwtErcKNtD4v2TeEyPDj1wTpwJKBqrFX5sRj3GdcfagUIEADUFWu2mty9xpzs/dhnttwGmGAQJVWCSTqv35dmoFHcTsPJHpbw2PjVF+TQWKLo4iwjyp4/x19l0S6uIP0/7AyuNkxm1SVSCCefbbmhfLIq/K2JQfcb7a5kg0wIejuRlQOVIUicHozOR1WO0ZlR99l0YLR4Hc/wH1BG2JA9nIAwI3+q4OOJBLgas7ZGE5cG6A8x4EAaD1exShJXhQ0vkM338Gg2BX6OpNgrk/+idPErTcJYWoW1cxNeSJZqRW1df1/Mptsb15krVi3YdvsyUkh+gn2CNOmjcnke4NDM7PnI4ONN4KEsRpagsxJOUEx2ZDdI=
   skip_existing: true
