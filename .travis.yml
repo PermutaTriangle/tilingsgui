@@ -26,7 +26,6 @@ matrix:
     script:
     - python3 -m pytest tests
     - python3 setup.py install
-    deploy: skip
   - name: py38-win10
     os: windows
     language: shell
@@ -39,7 +38,6 @@ matrix:
     script:
     - python -m pytest tests
     - python setup.py install
-    deploy: skip
 install:
 - pip install tox
 script:
@@ -52,3 +50,4 @@ deploy:
   skip_existing: true
   on:
     branch: master
+    condition: $TRAVIS_OS_NAME = linux
