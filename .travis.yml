@@ -1,57 +1,47 @@
 language: python
-
 matrix:
   include:
-    - python: 3.8
-      env: TOXENV=flake8
-    - python: 3.8
-      env: TOXENV=mypy
-    - python: 3.8
-      env: TOXENV=black
-    - python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
-      env: TOXENV=py37
-    - python: 3.8
-      env: TOXENV=py38
-    - python: 3.9-dev
-      env: TOXENV=py39
-    - python: pypy3
-      env: TOXENV=pypy36
-    - name: "py37-macOS"
-      os: osx
-      osx_image: xcode12
-      language: shell
-      install:
-        - pip3 install pytest
-      script:
-        - python3 -m pytest tests
-        - python3 setup.py install
-    - name: "py38-win10"
-      os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.8.0
-        - python -m pip install --upgrade pip
-      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
-      install:
-        - pip install pytest
-      script:
-        - python -m pytest tests
-        - python setup.py install
-
-
+  - python: 3.8
+    env: TOXENV=flake8
+  - python: 3.8
+    env: TOXENV=mypy
+  - python: 3.8
+    env: TOXENV=black
+  - python: 3.6
+    env: TOXENV=py36
+  - python: 3.7
+    env: TOXENV=py37
+  - python: 3.8
+    env: TOXENV=py38
+  - python: 3.9-dev
+    env: TOXENV=py39
+  - python: pypy3
+    env: TOXENV=pypy36
+  - name: py37-macOS
+    os: osx
+    osx_image: xcode12
+    language: shell
+    install:
+    - pip3 install pytest
+    script:
+    - python3 -m pytest tests
+    - python3 setup.py install
+  - name: py38-win10
+    os: windows
+    language: shell
+    before_install:
+    - choco install python --version 3.8.0
+    - python -m pip install --upgrade pip
+    env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+    install:
+    - pip install pytest
+    script:
+    - python -m pytest tests
+    - python setup.py install
 install:
-  - pip install tox
-
+- pip install tox
 script:
-  - tox
-
-#deploy:
-#  provider: pypi
-#  user: henningu
-#  password:
-#    secure: bhjQyIm/xGmUBq7bYpYYoXyt21tJQM9XU/eymPbnEXJhX0Z+KY58JmmorTG7PslJoARsi4ZXUA3N4Oqu/n4lReo1FQ7dahbdKUNYWuFx7ZZRvJLDW/tFd1gKO07bpTMJHxXMoyIhbmSllXxgRDJ/TBtI+uvYBMcR02CiZAFW8uN+3Vg0k+c1Njx0RR7h/1Dzw3iwupBzykT/bZW4zMs5XuqFjGaqCdymcWEEmjo+b0yZQ05i0dFkonzaBpM9S1HdDG6DvD4O7KKJdPTCcpFNd4HqN3giXicMA0faH8zOqeKhJ5mON90YAuNppkGUOt49FupQAeCAl3gSAKTrQnam4GxipCGuzFOjysHvv0MQcmGQ1n2bsD249r2qSo0AiabFtyJPHoZdBrs/1cqMks7suhAjydrAnkR+xz/a//5HRV1q73SAEtOI7CFCkoTFuU6yCG8US0EmZUDDe+kcPGb0Qwpol8AO+8B+Ih2OaYfyCGTBZ6Wrx64SjWE1KDjC4R8HJmzJCPsgL99Ab8KA66xmQqiZROy6qnwtyMV4oWz/BOsvWJg577ItX6ItmEC8tOGNm/yW1QTlgUZkk/0sOd0usAbdvp4a+rZKMYd9MKin76MnktQ56tI5Vfnelk+bcRe6Cz1tIrq82NxhSl44OqK2yCJ3ksSdBBkWfxa7jp7yAkQ=
-#  skip_existing: true
-#  on:
-#    branch: master
+- tox
+deploy:
+  password:
+    secure: EVjzG1gcojx9E0E5K60REn4L6p+FfyGdY75dsPwERiWwcsbPGBScj+UyyDZofuKjfhMWp1bTmUCaYdfFnbft9iBmYVMeaG7yYrAWSqrJ7RQLC8q7NVnQFP8m3pK4ApCF38LgrMqxSwVHS5KUCVmpUN3P69x2AbYzVLqSEkB4+YHIf25XrPvdouaim7p1z3o3T7w2IsWaXs+r3MOmSoNZVXZqqoVCBHO18nc4adnFtl9ud156VDsNHUNaqbv2NTH53NLwklfv4rOy0ExclVEJXNN6uLqxGY1I6VQ2nSBQVxVV+li+QsKiew0ZUoer5AElTgSGGLZ3zi0BH5dW6eAcEfNBA7AB2yyFsf0E0dV2u0qIGInBMj0BsZdZGZeFqynHTAoQGPoUuFGjf+OsPDkv9sUl5JTLlClI+SaPkeQeO4c/afR5GtCjC1YtInPGUXJvg5AnW2/b1tYCgosQQ0p/VYItbkQ5PFxrxxhDdnypX8dzRD7Ly7g6BHg7vO4bGuTkZuScBf+uf8H9NHVWP8HtrImgiDehysH6dJL9yvuezWenAbDDtFxD4ttL3f17kUEN/tjcSggw0eU3/jnzlXEDpenys/nQZUIHlfvT1gZ+rc+1stw0sP+2/m0EYfAe9NPr7ype9TutVIQMvaZm/I1tm9UHgUO8cCBC/8n5OH9ok8U=
