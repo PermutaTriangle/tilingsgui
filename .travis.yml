@@ -43,6 +43,7 @@ install:
 script:
 - tox
 deploy:
+  skip_cleanup: true
   provider: pypi
   user: henningu
   password:
