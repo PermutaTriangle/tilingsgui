@@ -1,6 +1,4 @@
 language: python
-
-
 matrix:
   include:
   - python: 3.8
@@ -40,22 +38,16 @@ matrix:
     script:
     - python -m pytest tests
     - python setup.py install
-
-
 install:
 - pip install tox
-
-
 script:
 - tox
-
-
 deploy:
   provider: pypi
   user: henningu
   password:
-    secure: eWUnLHb3RaOmJxF1tpoFivjEC/lK91JV5rK+z2YHwUxnlHmb08bN3YDhjfwX16t2ftMibt1QkQQjH6ICWshREEzwIswglcIlMyjJp60ZtU09a7bo0l/FyA2QxMqWN4WJq/VLa7YTi3g3kYU9HWbYsrnVySGUOu8nBHDTvVd6uyrYDDr6poGEBUsjHcBw7TkXAVURBWzg81ieVm8c8Io/USQSyUwViP0U1jIHDHLiQZaVmLT3/CLDF/TN9iGnYg6zg/4Of/ME10aQYiStXI/9TQ+tC++9grv+HcxwTg+ckIwhDUj7rpuapwwvHDNwtErcKNtD4v2TeEyPDj1wTpwJKBqrFX5sRj3GdcfagUIEADUFWu2mty9xpzs/dhnttwGmGAQJVWCSTqv35dmoFHcTsPJHpbw2PjVF+TQWKLo4iwjyp4/x19l0S6uIP0/7AyuNkxm1SVSCCefbbmhfLIq/K2JQfcb7a5kg0wIejuRlQOVIUicHozOR1WO0ZlR99l0YLR4Hc/wH1BG2JA9nIAwI3+q4OOJBLgas7ZGE5cG6A8x4EAaD1exShJXhQ0vkM338Gg2BX6OpNgrk/+idPErTcJYWoW1cxNeSJZqRW1df1/Mptsb15krVi3YdvsyUkh+gn2CNOmjcnke4NDM7PnI4ONN4KEsRpagsxJOUEx2ZDdI=
+    secure: kMnVWjttY65iPNcW14hZHa9YhgUZh8WUPwtC9YRWDnVWWWI7Bb98SHhnzHnG0p8ILsBShb0M1ZfqbbdVbX1KAo00d4wdybliqL/4QZHYm3GLbXXck89l9G0DgJr2tC9xJjowMSNVFGn8mIYmhWryefbD5J4Aa0w+DKGTEDWRFbJgJnSGcsED2W/oB5Yk3tlRckA8XGH1t9fGgmJdY6Qz1HdkCGcv81bz6tnAc4WYMTr2UnBW4VhxC2Uqw4/dcXy/uWX6qF4tCxvMbAOOrF8rzNuEzU41PQI8ArWUiyYDC2B00lYpwWI1sNNu5Fn/BWUB8KJwQwmvfve1scq6mEyclM/gp1fGpDOcsRmOMHQQWaRggZe9yTA3nLNFvmrXJaLsU4CXEBCMSujJeZeSYRQfmf0+GXaU2UsA1jX+8mmqAXzc4dXArTCdRk+8Eomvp6ySB2Epfov6jDeRu7FhVBzitQdwnzIp2753hdgZcFOXAXR8ZD7Fr866KEFA4K3xfG16qMqZu2/WpdEnwx4VioD3LUoag3vait87hAzb46Yp+7BcscCYwk38DjnVr66yQ1lhC3iNK0ppGiqQonYbBWmRFRrlduLQThhK0FdEL2a+xpoz1fHXKBThTyJ66dkCmkngJJW9nUdk8c3BvDu+XTOgPQC4Q4FWkv4MaYKhPbc/XAQ=
   skip_existing: true
   on:
     branch: master
-    condition: $TRAVIS_OS_NAME = linux
+    condition: "$TRAVIS_OS_NAME = linux"
