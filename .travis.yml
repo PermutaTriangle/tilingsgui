@@ -26,6 +26,7 @@ matrix:
     script:
     - python3 -m pytest tests
     - python3 setup.py install
+    deploy:
   - name: py38-win10
     os: windows
     language: shell
@@ -38,6 +39,7 @@ matrix:
     script:
     - python -m pytest tests
     - python setup.py install
+    deploy:
 install:
 - pip install tox
 script:
