@@ -73,7 +73,7 @@ The input box directly above the tiling canvas can be used to create an initial 
 **Example**:
 The following two inputs are two ways of producing the same initial tiling.
 
-.. code:: none
+.. code::
 
    1432_12345
    
