@@ -8,9 +8,17 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8").read()
 
 
+def get_version():
+    with open("tilingsgui/__init__.py", encoding="utf8") as init_file:
+        for line in init_file.readlines():
+            if line.startswith("__version__"):
+                return line.split(" = ")[1].rstrip()[1:-1]
+    raise ValueError("Version not found in tilingsgui/__init__.py")
+
+
 setup(
     name="tilingsgui",
-    version="0.1.1",
+    version=get_version(),
     author="Permuta Triangle",
     author_email="permutatriangle@gmail.com",
     description="A graphical user interface for tilings.",

@@ -3,6 +3,7 @@
 
 import json
 import pathlib
+import shutil
 from typing import Any, ClassVar, Dict, Iterable, List
 
 import pyglet
@@ -151,6 +152,9 @@ class History(Observer):
                     json.dump(self._data[1:], history_file)
                 else:
                     json.dump(self._data, history_file)
+            shutil.copy(
+                self._path.as_posix(), f"{pathlib.Path.cwd()}/tilings_export.json"
+            )
         return False
 
     def on_export(self, tiling_json: dict) -> bool:
