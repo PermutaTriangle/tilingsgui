@@ -16,6 +16,7 @@ from tilings.strategies import (
     BasicVerificationStrategy,
     DatabaseVerificationStrategy,
     ElementaryVerificationStrategy,
+    InsertionEncodingVerificationStrategy,
     LocallyFactorableVerificationStrategy,
     LocalVerificationStrategy,
     MonotoneTreeVerificationStrategy,
@@ -406,8 +407,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             str(BasicVerificationStrategy().verified(tiling)),
             str(DatabaseVerificationStrategy().verified(tiling)),
             str(ElementaryVerificationStrategy().verified(tiling)),
-            # Not implemented on Tiling's master yet, add when that is the case
-            "?",  # InsertionEncodingVerificationStrategy().verified(tiling),
+            str(InsertionEncodingVerificationStrategy().verified(tiling)),
             str(LocallyFactorableVerificationStrategy().verified(tiling)),
             str(LocalVerificationStrategy(no_factors=False).verified(tiling)),
             str(MonotoneTreeVerificationStrategy().verified(tiling)),
