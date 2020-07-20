@@ -1,6 +1,7 @@
 """The tiling drawing tools.
 """
 
+import json
 from collections import Counter, deque
 from random import uniform
 from typing import Callable, ClassVar, Deque, Iterable, List, Tuple
@@ -574,7 +575,8 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         """
         if not self._empty():
             tiling = self._current().tiling
-            print(f"{str(tiling)}\n\n{repr(tiling)}\n")
+            json_str = json.dumps(tiling.to_jsonable())
+            print(f"{str(tiling)}\n\n{repr(tiling)}\n\n{json_str}\n")
         return True
 
     def on_verification(self) -> bool:
