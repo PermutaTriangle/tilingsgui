@@ -369,6 +369,96 @@ class TPlot:
             y = self._h * i / t_h
             GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
 
+    def to_tikz(self) -> None:
+        """Output tikz drawing.
+        """
+        print("\\begin{tikzpicture}[scale=1, every node/.style={scale=1}]")
+        print("\t\\def\\xscale{1.0} % Horizontal scale factor")
+        print("\t\\def\\yscale{1.0} % Vertical scale factor")
+        print("\t\\def\\spnt{0.075} % Size of smaller points")
+        print("\t\\def\\lpnt{0.125} % Size of larger points")
+        self._tikz_shaded()
+        self._tikz_grid()
+        self._tikz_obstructions()
+        self._tikz_requirements()
+        print("\\end{tikzpicture}", flush=True)
+
+    def _tikz_shaded(self):
+        for c_x, c_y in self.tiling.empty_cells:
+            x, y, w, h = self.cell_to_rect(c_x, c_y)
+            x1, y1, x2, y2 = x / 100, y / 100, (x + w) / 100, (y + h) / 100
+            print(
+                f"\t\\fill[gray!80] ({x1}*\\xscale,{y1}*\\yscale)"
+                f" rectangle ({x2}*\\xscale,{y2}*\\yscale);"
+            )
+
+    def _tikz_grid(self) -> None:
+        t_w, t_h = self.tiling.dimensions
+        for i in range(t_w + 1):
+            x = self._w * i / t_w
+            print(
+                f"\t\\draw ({x / 100}*\\xscale, {self._h / 100}*\\yscale) -- "
+                f"({x / 100}*\\xscale, 0);"
+            )
+        for i in range(t_h + 1):
+            y = self._h * i / t_h
+            print(
+                f"\t\\draw (0, {y / 100}*\\yscale) -- "
+                f"({self._w / 100}*\\xscale, {y / 100}*\\yscale);"
+            )
+
+    def _tikz_obstructions(self) -> None:
+
+        point_cells_with_point_perm_req = self.tiling.point_cells.intersection(
+            {
+                req.pos[0]
+                for req_lis in self.tiling.requirements
+                for req in req_lis
+                if req.is_point_perm()
+            }
+        )
+        for obs, loc in zip(self.tiling.obstructions, self._obstruction_locs):
+            if obs.is_point_perm() or all(
+                p in point_cells_with_point_perm_req for p in obs.pos
+            ):
+                continue
+            TPlot._tikz_pnt_path(loc, "red")
+
+    def _tikz_requirements(self) -> None:
+        for i, reqlist in enumerate(self._requirement_locs):
+            if len(reqlist[0]) == 1 and any(
+                p in self.tiling.point_cells
+                for req in self.tiling.requirements[i]
+                for p in req.pos
+            ):
+                pnt = reqlist[0][0]
+                print(
+                    f"\t\\fill ({pnt.x/100}*\\xscale,"
+                    f"{pnt.y/100}*\\yscale) circle (\\lpnt);"
+                )
+                continue
+            for loc in reqlist:
+                TPlot._tikz_pnt_path(loc, "blue")
+
+    @staticmethod
+    def _tikz_pnt_path(loc: List[Point], col: str) -> None:
+        if not loc:
+            return
+        print(
+            f"\t\\fill[{col}] ({loc[0].x/100}*\\xscale, "
+            f"{loc[0].y/100}*\\yscale) circle (\\spnt);"
+        )
+        if len(loc) == 1:
+            return
+        path = f"({loc[0].x/100}*\\xscale, {loc[0].y/100}*\\yscale)"
+        for pnt in loc[1:]:
+            x, y = pnt.x, pnt.y
+            path += f" -- ({x/100}*\\xscale,{y/100}*\\yscale)"
+            print(
+                f"\t\\fill[{col}] ({x/100}*\\xscale, {y/100}*\\yscale) circle (\\spnt);"
+            )
+        print(f"\t\\draw[{col}] {path};")
+
 
 Action = Callable[[int, int, int, int], None]
 
@@ -577,6 +667,16 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             tiling = self._current().tiling
             json_str = json.dumps(tiling.to_jsonable())
             print(f"{str(tiling)}\n\n{repr(tiling)}\n\n{json_str}\n")
+        return True
+
+    def on_tikz(self) -> bool:
+        """Event handler for printing current tiling as tikz.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            self._current().to_tikz()
         return True
 
     def on_verification(self) -> bool:
