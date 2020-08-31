@@ -56,3 +56,4 @@ class CustomEvents:
     ON_PRINT_SEQUENCE = "on_print_sequence"
     ON_PRINT_TILING = "on_print_tiling"
     ON_VERIFICATION = "on_verification"
+    ON_TIKZ = "on_tikz"
