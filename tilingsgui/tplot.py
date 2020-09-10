@@ -32,8 +32,7 @@ from .utils import clamp
 
 
 class TPlot:
-    """A single tiling image.
-    """
+    """A single tiling image."""
 
     REQ_NOT_FOUND: ClassVar[Tuple[int, int, int]] = (-1, -1, -1)
     OBS_NOT_FOUND: ClassVar[Tuple[int, int]] = (-1, -1)
@@ -277,8 +276,7 @@ class TPlot:
         return c_x * c_w, c_y * c_h, c_w, c_h
 
     def _draw_shaded_cells(self) -> None:
-        """Draw all cells with a single point obstruction as a filled rectangle.
-        """
+        """Draw all cells with a single point obstruction as a filled rectangle."""
         for c_x, c_y in self.tiling.empty_cells:
             GeoDrawer.draw_rectangle(
                 *self.cell_to_rect(c_x, c_y), TPlot._SHADED_CELL_COLOR
@@ -359,8 +357,7 @@ class TPlot:
                     GeoDrawer.draw_point_path(loc, col, 5)
 
     def _draw_grid(self) -> None:
-        """Draw the tiling's grid.
-        """
+        """Draw the tiling's grid."""
         t_w, t_h = self.tiling.dimensions
         for i in range(t_w):
             x = self._w * i / t_w
@@ -370,8 +367,7 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
 
     def to_tikz(self) -> None:
-        """Output tikz drawing.
-        """
+        """Output tikz drawing."""
         print("\\begin{tikzpicture}[scale=1, every node/.style={scale=1}]")
         print("\t\\def\\xscale{1.0} % Horizontal scale factor")
         print("\t\\def\\yscale{1.0} % Vertical scale factor")
@@ -677,6 +673,17 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         """
         if not self._empty():
             self._current().to_tikz()
+        return True
+
+    def on_obstruction_inferral(self) -> bool:
+        """Event handler for obstruction inferral.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            tiling = self._current().tiling
+            self._add_tiling(tiling.all_obstruction_inferral(3))
         return True
 
     def on_verification(self) -> bool:
