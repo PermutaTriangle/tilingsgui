@@ -18,8 +18,7 @@ from .widgets import Button, ButtonGrid, SelectionButton, TextBox, ToggleButton
 
 
 class TopMenu(pyglet.event.EventDispatcher, Observer):
-    """A menu that sits above the tiling plot.
-    """
+    """A menu that sits above the tiling plot."""
 
     _PADDING = 1
     _INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
@@ -27,6 +26,8 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
     _TEXT_BOX_COLOR = Color.DARK_GRAY
     _BACKGROUND_COLOR = Color.BLACK
+    _V_BTN = 118
+    _CTRL_MODIFIER = 18
 
     def __init__(
         self,
@@ -77,8 +78,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
     ##################
 
     def on_draw(self):
-        """Draw event handler.
-        """
+        """Draw event handler."""
         GeoDrawer.draw_rectangle(
             self._rect.x,
             self._rect.y,
@@ -88,17 +88,20 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         )
         self._text_box.draw()
 
-    def on_key_press(self, symbol: int, _modifiers: int) -> bool:
+    def on_key_press(self, symbol: int, modifiers: int) -> bool:
         """Key pressed event handler.
 
         Args:
             symbol (int): The key pressed.
-            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+            modifiers (int): If combinded with modifiers (e.g. ctrl).
 
         Returns:
             bool: True if the event is consumed by the handler, false otherwise.
         """
         if self._text_box.has_focus():
+            if symbol == TopMenu._V_BTN and modifiers == TopMenu._CTRL_MODIFIER:
+                self._text_box.add_text(paste())
+                return True
             if symbol == pyglet.window.key.ESCAPE:
                 self._text_box.release_focus()
             elif symbol == pyglet.window.key.ENTER:
@@ -188,8 +191,7 @@ TopMenu.register_event_type(CustomEvents.ON_TILING_JSON_INPUT)
 
 
 class RightMenu(pyglet.event.EventDispatcher, Observer):
-    """A menu that sits to the right of the tiling plot.
-    """
+    """A menu that sits to the right of the tiling plot."""
 
     _PADDING = 1
     _INITIAL_MESSAGE = "12"
@@ -257,8 +259,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
     ##################
 
     def on_draw(self) -> None:
-        """Draw event handler.
-        """
+        """Draw event handler."""
         GeoDrawer.draw_rectangle(
             self._rect.x,
             self._rect.y,
@@ -358,15 +359,13 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             self.dispatch_event(CustomEvents.ON_PLACEMENT_INPUT, input_string)
 
     def _populate_keyboard(self):
-        """Populate key grid.
-        """
+        """Populate key grid."""
         self._add_selection_btns()
         self._add_btns()
         self._add_toggle_btns()
 
     def _add_selection_btns(self):
-        """Adds selection buttons to grid.
-        """
+        """Adds selection buttons to grid."""
         positions = [
             (7, 0),
             (7, 1),
@@ -408,12 +407,22 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         for pos, btn in zip(positions, buttons):
             self._keyboard.add_btn(*pos, btn)
         self._keyboard.add_selection_group(
-            positions, on_click=self._state.set_mouse_click_action,
+            positions,
+            on_click=self._state.set_mouse_click_action,
         )
 
     def _add_btns(self):
-        """Adds normal buttons to grid.
-        """
+        """Adds normal buttons to grid."""
+        self._keyboard.add_btn(
+            3,
+            1,
+            Button(
+                Images.OBSTR_INF,
+                on_click=lambda: self.dispatch_event(
+                    CustomEvents.ON_OBSTRUCTION_INFERRAL
+                ),
+            ),
+        )
         self._keyboard.add_btn(
             3,
             2,
@@ -466,7 +475,8 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
             1,
             2,
             Button(
-                Images.TIKZ, on_click=lambda: self.dispatch_event(CustomEvents.ON_TIKZ),
+                Images.TIKZ,
+                on_click=lambda: self.dispatch_event(CustomEvents.ON_TIKZ),
             ),
         )
         self._keyboard.add_btn(
@@ -491,8 +501,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
         )
 
     def _add_toggle_btns(self):
-        """Adds toggle buttons to grid.
-        """
+        """Adds toggle buttons to grid."""
         self._keyboard.add_btn(
             1,
             3,
@@ -550,3 +559,4 @@ RightMenu.register_event_type(CustomEvents.ON_PRINT_SEQUENCE)
 RightMenu.register_event_type(CustomEvents.ON_PRINT_TILING)
 RightMenu.register_event_type(CustomEvents.ON_VERIFICATION)
 RightMenu.register_event_type(CustomEvents.ON_TIKZ)
+RightMenu.register_event_type(CustomEvents.ON_OBSTRUCTION_INFERRAL)
