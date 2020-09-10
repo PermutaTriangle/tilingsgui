@@ -41,8 +41,7 @@ class Observer:
 
 
 class CustomEvents:
-    """A collection of string constants with names of custom events.
-    """
+    """A collection of string constants with names of custom events."""
 
     ON_PLACEMENT_INPUT = "on_placement_input"
     ON_FETCH_TILING_FOR_EXPORT = "on_fetch_tiling_for_export"
@@ -57,3 +56,4 @@ class CustomEvents:
     ON_PRINT_TILING = "on_print_tiling"
     ON_VERIFICATION = "on_verification"
     ON_TIKZ = "on_tikz"
+    ON_OBSTRUCTION_INFERRAL = "on_obstruction_inferral"

@@ -32,8 +32,7 @@ from .utils import clamp
 
 
 class TPlot:
-    """A single tiling image.
-    """
+    """A single tiling image."""
 
     REQ_NOT_FOUND: ClassVar[Tuple[int, int, int]] = (-1, -1, -1)
     OBS_NOT_FOUND: ClassVar[Tuple[int, int]] = (-1, -1)
@@ -277,8 +276,7 @@ class TPlot:
         return c_x * c_w, c_y * c_h, c_w, c_h
 
     def _draw_shaded_cells(self) -> None:
-        """Draw all cells with a single point obstruction as a filled rectangle.
-        """
+        """Draw all cells with a single point obstruction as a filled rectangle."""
         for c_x, c_y in self.tiling.empty_cells:
             GeoDrawer.draw_rectangle(
                 *self.cell_to_rect(c_x, c_y), TPlot._SHADED_CELL_COLOR
@@ -359,8 +357,7 @@ class TPlot:
                     GeoDrawer.draw_point_path(loc, col, 5)
 
     def _draw_grid(self) -> None:
-        """Draw the tiling's grid.
-        """
+        """Draw the tiling's grid."""
         t_w, t_h = self.tiling.dimensions
         for i in range(t_w):
             x = self._w * i / t_w
@@ -370,8 +367,7 @@ class TPlot:
             GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
 
     def to_tikz(self) -> None:
-        """Output tikz drawing.
-        """
+        """Output tikz drawing."""
         print("\\begin{tikzpicture}[scale=1, every node/.style={scale=1}]")
         print("\t\\def\\xscale{1.0} % Horizontal scale factor")
         print("\t\\def\\yscale{1.0} % Vertical scale factor")
@@ -524,7 +520,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         Observer.__init__(self, dispatchers)
         self.deques: List[Deque[TPlot]] = [deque(), deque()]
         self._mouse_pos: Point = Point(0, 0)
-        self._custom_placement: Perm = Perm((0, 1))
+        self._custom_data: str = "01"
         self._state: GuiState = state
         self._w: int = width
         self._h: int = height
@@ -594,16 +590,16 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         self._add_plot(TPlot(basis, self._w, self._h))
         return True
 
-    def on_placement_input(self, perm: Perm) -> bool:
+    def on_placement_input(self, txt: str) -> bool:
         """Event handler for setting the custom placement permutation.
 
         Args:
-            perm (Perm): The placement permutation to use.
+            txt (str): The upper right input field data.
 
         Returns:
             bool: True as we want to consume the event.
         """
-        self._custom_placement = Perm.to_standard(perm)
+        self._custom_data = txt
         return True
 
     def on_row_col_seperation(self) -> bool:
@@ -677,6 +673,20 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         """
         if not self._empty():
             self._current().to_tikz()
+        return True
+
+    def on_obstruction_inferral(self) -> bool:
+        """Event handler for obstruction inferral.
+
+        Returns:
+            bool: True as we want to consume the event.
+        """
+        if not self._empty():
+            length = 3
+            if self._custom_data and self._custom_data.isnumeric():
+                length = max(min(6, int(self._custom_data)), 0)
+            tiling = self._current().tiling
+            self._add_tiling(tiling.all_obstruction_inferral(length))
         return True
 
     def on_verification(self) -> bool:
@@ -1061,13 +1071,15 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         if button == pyglet.window.mouse.LEFT:
             self._add_tiling(
                 tplot.tiling.add_single_cell_requirement(
-                    self._custom_placement, tplot.get_cell(Point(x, y))
+                    Perm.standardize(self._custom_data),
+                    tplot.get_cell(Point(x, y)),
                 )
             )
         elif button == pyglet.window.mouse.RIGHT:
             self._add_tiling(
                 tplot.tiling.add_single_cell_obstruction(
-                    self._custom_placement, tplot.get_cell(Point(x, y))
+                    Perm.standardize(self._custom_data),
+                    tplot.get_cell(Point(x, y)),
                 )
             )
 

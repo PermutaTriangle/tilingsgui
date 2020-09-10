@@ -253,3 +253,4 @@ class Images:
     SHOW_LOCAL: ClassVar[str] = "show_local.png"
     HTC: ClassVar[str] = "htc.png"
     TIKZ: ClassVar[str] = "tikz.png"
+    OBSTR_INF: ClassVar[str] = "obs_inf.png"
