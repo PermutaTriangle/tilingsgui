@@ -27,6 +27,8 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
     _TEXT_BOX_COLOR = Color.DARK_GRAY
     _BACKGROUND_COLOR = Color.BLACK
+    _V_BTN = 118
+    _CTRL_MODIFIER = 18
 
     def __init__(
         self,
@@ -88,17 +90,20 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
         )
         self._text_box.draw()
 
-    def on_key_press(self, symbol: int, _modifiers: int) -> bool:
+    def on_key_press(self, symbol: int, modifiers: int) -> bool:
         """Key pressed event handler.
 
         Args:
             symbol (int): The key pressed.
-            _modifiers (int): If combinded with modifiers (e.g. ctrl). Unused.
+            modifiers (int): If combinded with modifiers (e.g. ctrl).
 
         Returns:
             bool: True if the event is consumed by the handler, false otherwise.
         """
         if self._text_box.has_focus():
+            if symbol == TopMenu._V_BTN and modifiers == TopMenu._CTRL_MODIFIER:
+                self._text_box.add_text(paste())
+                return True
             if symbol == pyglet.window.key.ESCAPE:
                 self._text_box.release_focus()
             elif symbol == pyglet.window.key.ENTER:
