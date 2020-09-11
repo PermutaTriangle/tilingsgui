@@ -31,7 +31,7 @@ setup(
     },
     packages=find_packages(),
     long_description=read("README.rst"),
-    install_requires=["pyperclip==1.8.0", "pyglet==1.5.7", "tilings==2.3.0"],
+    install_requires=["pyperclip==1.8.0", "pyglet==1.5.7", "tilings==2.3.1"],
     python_requires=">=3.6",
     include_package_data=True,
     classifiers=[
