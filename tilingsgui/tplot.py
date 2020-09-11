@@ -1071,14 +1071,14 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         if button == pyglet.window.mouse.LEFT:
             self._add_tiling(
                 tplot.tiling.add_single_cell_requirement(
-                    Perm.standardize(self._custom_data),
+                    Perm.to_standard(self._custom_data),
                     tplot.get_cell(Point(x, y)),
                 )
             )
         elif button == pyglet.window.mouse.RIGHT:
             self._add_tiling(
                 tplot.tiling.add_single_cell_obstruction(
-                    Perm.standardize(self._custom_data),
+                    Perm.to_standard(self._custom_data),
                     tplot.get_cell(Point(x, y)),
                 )
             )
