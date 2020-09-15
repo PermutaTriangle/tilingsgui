@@ -848,12 +848,10 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         Args:
             tiling_json (str): A tiling json in string form.
         """
-        print("yo")
         if tiling_json:
             try:
                 self._add_tiling(Tiling.from_json(tiling_json))
-            except ValueError as E:
-                print(E)
+            except ValueError:
                 pass
 
     def _undo_deq(self) -> Deque[TPlot]:
