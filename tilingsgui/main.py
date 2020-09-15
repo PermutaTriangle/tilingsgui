@@ -1,14 +1,23 @@
 """Entrypoint.
 """
 
-import sys
+import argparse
 
 from .app import TilingGui
 
 
+def get_args() -> str:
+    """Get json argument if any."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-j", "--json", type=str, default="", help="start GUI with provided tiling"
+    )
+    return parser.parse_args().json
+
+
 def main() -> None:
     """The application's starting point."""
-    app = TilingGui(sys.argv[1] if len(sys.argv) > 1 else "", resizable=True)
+    app = TilingGui(get_args(), resizable=True)
     app.start()
 
 
