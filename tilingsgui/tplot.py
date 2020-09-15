@@ -507,6 +507,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         height: int,
         state: GuiState,
         dispatchers: Iterable[pyglet.event.EventDispatcher] = (),
+        init_tiling: str = "",
     ) -> None:
         """Create an instance of a tiling plot manager.
 
@@ -516,6 +517,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
             state (GuiState): The current state for various settings.
             dispatchers (Iterable[pyglet.event.EventDispatcher], optional): A collection
             of dispatchers that this observer should listen ot. Defaults to ().
+            init_tiling (str): Initial tiling to draw. Defaluts to "".
         """
         Observer.__init__(self, dispatchers)
         self.deques: List[Deque[TPlot]] = [deque(), deque()]
@@ -526,6 +528,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         self._h: int = height
         self._actions: List[Action] = self._get_actions()
         self.position(width, height)
+        self._initial_tiling(init_tiling)
 
     def position(self, width: int, height: int) -> None:
         """Resize the tiling plot canvas.
@@ -837,6 +840,21 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     ###################
     # Private helpers #
     ###################
+
+    def _initial_tiling(self, tiling_json: str) -> None:
+        """Attempt to convert tiling_json to a tiling object and add it as
+        an initial plot.
+
+        Args:
+            tiling_json (str): A tiling json in string form.
+        """
+        print("yo")
+        if tiling_json:
+            try:
+                self._add_tiling(Tiling.from_json(tiling_json))
+            except ValueError as E:
+                print(E)
+                pass
 
     def _undo_deq(self) -> Deque[TPlot]:
         """Getter for the undo deque.

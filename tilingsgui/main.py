@@ -1,13 +1,14 @@
 """Entrypoint.
 """
 
+import sys
+
 from .app import TilingGui
 
 
 def main() -> None:
-    """The application's starting point.
-    """
-    app = TilingGui(resizable=True)
+    """The application's starting point."""
+    app = TilingGui(sys.argv[1] if len(sys.argv) > 1 else "", resizable=True)
     app.start()
 
 
