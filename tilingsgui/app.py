@@ -15,8 +15,7 @@ from .tplot import TPlotManager
 
 
 class TilingGui(pyglet.window.Window):
-    """The TilingsGui application.
-    """
+    """The TilingsGui application."""
 
     _TITLE: ClassVar[str] = "Tilings GUI"
     _MIN_WIDTH: ClassVar[int] = 500
@@ -25,11 +24,11 @@ class TilingGui(pyglet.window.Window):
     _INITIAL_HEIGHT: ClassVar[int] = 650
     _RIGHT_BAR_WIDTH: ClassVar[int] = 200
     _TOP_BAR_HEIGHT: ClassVar[int] = 24
-    _CLEAR_COLOR: ClassVar[Tuple[float, float, float, float]] = (
-        Color.alpha_extend_and_scale_to_01(Color.WHITE)
-    )
+    _CLEAR_COLOR: ClassVar[
+        Tuple[float, float, float, float]
+    ] = Color.alpha_extend_and_scale_to_01(Color.WHITE)
 
-    def __init__(self, *args, **kargs) -> None:
+    def __init__(self, init_tiling: str, *args, **kargs) -> None:
         """Instantiate the parent window class and create all
         sub components and systems for the app.
         """
@@ -67,7 +66,7 @@ class TilingGui(pyglet.window.Window):
 
         # The tiling plot.
         self._tplot_man: TPlotManager = TPlotManager(
-            self.width, self.height, self._state
+            self.width, self.height, self._state, init_tiling=init_tiling
         )
 
         # export data handler.
@@ -81,14 +80,12 @@ class TilingGui(pyglet.window.Window):
         self._right_bar.add_dispatcher(self)
 
     def start(self) -> None:
-        """Start the app.
-        """
+        """Start the app."""
         self._initial_config()
         pyglet.app.run()
 
     def _initial_config(self) -> None:
-        """Configuration done before starting.
-        """
+        """Configuration done before starting."""
 
         # Center the window within the os.
         screen = pyglet.canvas.Display().get_default_screen()
