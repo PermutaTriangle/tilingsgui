@@ -428,10 +428,10 @@ An example output is shown below.
    :scale: 200 %
    :alt: img-error
 
-.. |tikz| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/verification.svg
+.. |tikz| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/tikz.svg
    :scale: 200 %
    :alt: img-error
 
-.. |obstruction_inferral| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/verification.svg
+.. |obstruction_inferral| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/obs_inf.svg
    :scale: 200 %
    :alt: img-error
