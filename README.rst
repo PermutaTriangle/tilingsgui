@@ -10,6 +10,7 @@ Install and run
 
    pip install tilingsgui
    tilingsgui
+   tilingsgui -j 'tilingsgui json object'
 
 Note for Linux
 ~~~~~~~~~~~~~~
@@ -24,7 +25,7 @@ Without them the app still works but pasting won’t.
 
 Known issues
 ------------
-* Exporting places the json in the package directory.
+* 
 
 Report a bug
 ~~~~~~~~~~~~
@@ -65,6 +66,8 @@ Summary
 * |show_local| Show localized
 * |str| Print
 * |verification| Verification
+* |tikz| Tikz
+* |obstruction_inferral| Obstruction inferral
 
 Tiling input
 ~~~~~~~~~~~~
@@ -164,7 +167,7 @@ Obstruction transitivity
 
 Export
 ~~~~~~
-Export, |export|, will store the current tiling in memory and upon closing the app, will add all stored tilings in the session to ``./export/history.json``. There is a session limit so the file become too large. If the session limit is reached, than adding more will remove the oldest. The format of the json can be seen below with time and tiling values empty.
+Export, |export|, will store the current tiling in memory and upon closing the app, will add all stored tilings in the session to ``./export/history.json``. There is a session limit so the file become too large. If the session limit is reached, than adding more will remove the oldest. The format of the json can be seen below with time and tiling values empty. Any time export is used, a copy of the history is placed in the current working directory.
 
 .. code:: JSON
 
@@ -263,6 +266,14 @@ With crossing shown, |show_cross|, requirements and obstructions that reach acro
 Highlight hovered cell
 ~~~~~~~~~~~~~~~~~~~~~~
 Turning on the hovered cell highlighting, |htc|, obstructions in the hovered cell are colored differently.
+
+Obstruction inferral
+~~~~~~~~~~~~~~~~~~~~
+Add all obstructions up to a length that does not change the set of gridded permutations. Pressing |obstruction_inferral| will use the upper right input box to determine the lenght. It is maxed at 7 and defaults to 3.
+
+Tikz
+~~~~
+Use |tikz| to produce the current tiling with the current positions as a tikz figure.
 
 Verification
 ~~~~~~~~~~~~
@@ -414,5 +425,13 @@ An example output is shown below.
    :alt: img-error
 
 .. |verification| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/verification.svg
+   :scale: 200 %
+   :alt: img-error
+
+.. |tikz| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/tikz.svg
+   :scale: 200 %
+   :alt: img-error
+
+.. |obstruction_inferral| image:: https://raw.githubusercontent.com/PermutaTriangle/tilingsgui/develop/tilingsgui/resources/img/svg/obs_inf.svg
    :scale: 200 %
    :alt: img-error
