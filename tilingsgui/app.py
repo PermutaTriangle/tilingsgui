@@ -3,6 +3,8 @@ the only module needed to import by the script that
 runs it.
 """
 
+# pylint: disable=abstract-method
+
 from typing import ClassVar, Tuple
 
 import pyglet
