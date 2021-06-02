@@ -388,7 +388,7 @@ class TPlot:
 
     def _tikz_grid(self) -> None:
         t_w, t_h = self.tiling.dimensions
-        print("\\draw[rounded corners=2ex*\\roundscale (0,0) rectangle "
+        print("\t\\draw[rounded corners=2ex*\\roundscale] (0,0) rectangle "
             f"({self._w / 100}*\\xscale,{self._h / 100}*\\yscale);"
         )
         for i in range(1, t_w):
