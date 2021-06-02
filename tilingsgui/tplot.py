@@ -373,6 +373,7 @@ class TPlot:
         print("\t\\def\\yscale{1.0} % Vertical scale factor")
         print("\t\\def\\spnt{0.075} % Size of smaller points")
         print("\t\\def\\lpnt{0.125} % Size of larger points")
+        print("\t\\def\\roundscale{0.5} % The rounding factor")
         self._tikz_shaded()
         self._tikz_grid()
         self._tikz_obstructions()
@@ -383,20 +384,20 @@ class TPlot:
         for c_x, c_y in self.tiling.empty_cells:
             x, y, w, h = self.cell_to_rect(c_x, c_y)
             x1, y1, x2, y2 = x / 100, y / 100, (x + w) / 100, (y + h) / 100
-            print(
-                f"\t\\fill[gray!80] ({x1}*\\xscale,{y1}*\\yscale)"
-                f" rectangle ({x2}*\\xscale,{y2}*\\yscale);"
-            )
+            print(f"\t\\fill[red] ({(x1+x2)/2}*\\xscale,{(y1+y2)/2}*\\yscale) circle (\\spnt);")
 
     def _tikz_grid(self) -> None:
         t_w, t_h = self.tiling.dimensions
-        for i in range(t_w + 1):
+        print("\\draw[rounded corners=2ex*\\roundscale (0,0) rectangle "
+            f"({self._w / 100}*\\xscale,{self._h / 100}*\\yscale);"
+        )
+        for i in range(1, t_w):
             x = self._w * i / t_w
             print(
                 f"\t\\draw ({x / 100}*\\xscale, {self._h / 100}*\\yscale) -- "
                 f"({x / 100}*\\xscale, 0);"
             )
-        for i in range(t_h + 1):
+        for i in range(1, t_h):
             y = self._h * i / t_h
             print(
                 f"\t\\draw (0, {y / 100}*\\yscale) -- "
