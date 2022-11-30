@@ -21,8 +21,7 @@ class MoveState:
         self.move_type: int = 0
 
     def reset(self) -> None:
-        """Reset all values to their default values.
-        """
+        """Reset all values to their default values."""
         self.has_selected_pnt = False
         self.selected_point = tuple()
         self.point_move_bounds = tuple()
@@ -43,8 +42,7 @@ class GuiState:
     """
 
     def __init__(self) -> None:
-        """Create a state, with all values set to their default.
-        """
+        """Create a state, with all values set to their default."""
 
         self.shading: bool = True
         self.pretty_points: bool = True
@@ -55,28 +53,23 @@ class GuiState:
         self.move_state = MoveState()
 
     def toggle_shading(self) -> None:
-        """If shading is on, turn if off and vice versa.
-        """
+        """If shading is on, turn if off and vice versa."""
         self.shading = not self.shading
 
     def toggle_pretty_points(self) -> None:
-        """If pretty points is on, turn if off and vice versa.
-        """
+        """If pretty points is on, turn if off and vice versa."""
         self.pretty_points = not self.pretty_points
 
     def toggle_show_crossing(self) -> None:
-        """If show crossing is on, turn if off and vice versa.
-        """
+        """If show crossing is on, turn if off and vice versa."""
         self.show_crossing = not self.show_crossing
 
     def toggle_show_localized(self) -> None:
-        """If show localized is on, turn if off and vice versa.
-        """
+        """If show localized is on, turn if off and vice versa."""
         self.show_localized = not self.show_localized
 
     def toggle_highlight_touching_cell(self) -> None:
-        """If highlighting is on, turn if off and vice versa.
-        """
+        """If highlighting is on, turn if off and vice versa."""
         self.highlight_touching_cell = not self.highlight_touching_cell
 
     def set_mouse_click_action(self, idx: int) -> None:

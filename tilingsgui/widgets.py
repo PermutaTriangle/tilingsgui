@@ -13,8 +13,7 @@ RGBA = Tuple[float, float, float, float]
 
 
 class Text:
-    """A class for input text.
-    """
+    """A class for input text."""
 
     _LEFT_PAD: ClassVar[int] = 5
 
@@ -55,14 +54,12 @@ class Text:
         self._layout.height = h
 
     def set_focus(self) -> None:
-        """Set focus on the input text. This is needed to write to it.
-        """
+        """Set focus on the input text. This is needed to write to it."""
         self._document.text = ""
         self._caret.visible = True
 
     def release_focus(self) -> None:
-        """Remove focus from the input text.
-        """
+        """Remove focus from the input text."""
         self._caret.visible = False
         self._caret.mark = self._caret.position = 0
 
@@ -91,8 +88,7 @@ class Text:
         return self._document.text
 
     def draw(self) -> None:
-        """Draw the text.
-        """
+        """Draw the text."""
         self._batch.draw()
 
     def move_text(self, motion: int) -> None:
@@ -105,11 +101,14 @@ class Text:
 
 
 class TextBox(Text):
-    """A class for input text along with a rectangular box around it.
-    """
+    """A class for input text along with a rectangular box around it."""
 
     def __init__(
-        self, init_text: str, font_size: int, text_color: RGBA, box_color: RGB,
+        self,
+        init_text: str,
+        font_size: int,
+        text_color: RGBA,
+        box_color: RGB,
     ) -> None:
         """Create an instance of a text box.
 
@@ -121,7 +120,11 @@ class TextBox(Text):
         """
         super().__init__(init_text, font_size, text_color)
         self._vertex_list: pyglet.graphics.vertexdomain.VertexList = self._batch.add(
-            4, pyglet.gl.GL_QUADS, None, ("v2f", [0] * 8), ("c3B", box_color * 4),
+            4,
+            pyglet.gl.GL_QUADS,
+            None,
+            ("v2f", [0] * 8),
+            ("c3B", box_color * 4),
         )
 
     def position(self, x: float, y: float, w: float, h: float) -> None:
@@ -154,8 +157,7 @@ class TextBox(Text):
 
 
 class Button:
-    """A clickable rectangular GUI component.
-    """
+    """A clickable rectangular GUI component."""
 
     _BUTTON_COLOR: ClassVar[RGB] = Color.GRAY
 
@@ -169,8 +171,8 @@ class Button:
             on_click (Optional[Callable[[], None]], optional): A callback function that
             is called in click_check if the button was clicked. Defaults to None.
         """
-        self._sprite: pyglet.sprite.Sprite = (
-            pyglet.sprite.Sprite(pyglet.resource.image(image), x=0, y=0)
+        self._sprite: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
+            pyglet.resource.image(image), x=0, y=0
         )
         self._x: float = 0
         self._y: float = 0
@@ -196,8 +198,7 @@ class Button:
         return False
 
     def draw(self) -> None:
-        """Draw the button.
-        """
+        """Draw the button."""
         GeoDrawer.draw_rectangle(
             self._x, self._y, self._w, self._h, Button._BUTTON_COLOR
         )
@@ -233,8 +234,7 @@ class Button:
 
 
 class ToggleButton(Button):
-    """A button that is either on or off.
-    """
+    """A button that is either on or off."""
 
     _TOGGLE_COLOR: ClassVar[RGB] = Color.DARK_OLIVE_GREEN
 
@@ -274,21 +274,18 @@ class ToggleButton(Button):
         return False
 
     def draw(self) -> None:
-        """Draw the button.
-        """
+        """Draw the button."""
         color = ToggleButton._TOGGLE_COLOR if self._toggled else Button._BUTTON_COLOR
         GeoDrawer.draw_rectangle(self._x, self._y, self._w, self._h, color)
         self._sprite.draw()
 
     def toggle(self) -> None:
-        """If on, turn off and vice versa.
-        """
+        """If on, turn off and vice versa."""
         self._toggled = not self._toggled
 
 
 class SelectionButton(ToggleButton):
-    """A button that belongs to a group of buttons and only one can be selected.
-    """
+    """A button that belongs to a group of buttons and only one can be selected."""
 
     def __init__(self, image: str, selected: bool = False) -> None:
         """Create an instance of a selectable button.
@@ -316,8 +313,7 @@ class SelectionButton(ToggleButton):
 
 
 class SelectionGroup:
-    """A grouping of selection buttons.
-    """
+    """A grouping of selection buttons."""
 
     def __init__(
         self,
@@ -333,16 +329,15 @@ class SelectionGroup:
             selected (int, optional): The index of the button initially selected.
             Defaults to 0.
         """
-        self._rc_to_i: Dict[Tuple[int, int], int] = (
-            {(r, c): i for i, (r, c) in enumerate(grp)}
-        )
+        self._rc_to_i: Dict[Tuple[int, int], int] = {
+            (r, c): i for i, (r, c) in enumerate(grp)
+        }
         self._i_to_rc: List[Tuple[int, int]] = grp
         self._on_click: Optional[Callable[[int], None]] = on_click
         self._selected: int = selected
 
     def click(self) -> None:
-        """Call on_click for the currenty selected button.
-        """
+        """Call on_click for the currenty selected button."""
         if self._on_click is not None:
             self._on_click(self._selected)
 
@@ -376,8 +371,7 @@ class SelectionGroup:
 
 
 class ButtonGrid:
-    """A positional object to place and group buttons together.
-    """
+    """A positional object to place and group buttons together."""
 
     _PADDING: ClassVar[int] = 1
 
@@ -434,8 +428,7 @@ class ButtonGrid:
         self.buttons[r][c] = btn
 
     def draw(self) -> None:
-        """Draw the button grid and all its buttons.
-        """
+        """Draw the button grid and all its buttons."""
         for row in self.buttons:
             for button in row:
                 if button is not None:
@@ -464,8 +457,7 @@ class ButtonGrid:
                     return
 
     def _position_btns(self) -> None:
-        """Position all buttons within the grid.
-        """
+        """Position all buttons within the grid."""
         for _r, row in enumerate(self.buttons):
             for _c, btn in enumerate(row):
                 if btn is not None:

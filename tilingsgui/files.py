@@ -13,8 +13,7 @@ from .utils import get_current_time_string
 
 
 class PathManager:
-    """A collection of functions to fetch various paths.
-    """
+    """A collection of functions to fetch various paths."""
 
     _ROOT: ClassVar[pathlib.Path] = pathlib.Path(__file__).parent.parent.absolute()
     _TILINGS_GUI: ClassVar[str] = "tilingsgui"
@@ -77,8 +76,7 @@ class PathManager:
 
 
 class History(Observer):
-    """A class that handles loading and saving exported tilings.
-    """
+    """A class that handles loading and saving exported tilings."""
 
     _MAX_SESSIONS: ClassVar[int] = 10
     _FILE_NAME: ClassVar[str] = "history.json"
@@ -147,7 +145,7 @@ class History(Observer):
             bool: False as we do not want to consume this event.
         """
         if self._session_has_export():
-            with open(self._path.as_posix(), "w") as history_file:
+            with open(self._path.as_posix(), "w", encoding="utf-8") as history_file:
                 if len(self._data) > History._MAX_SESSIONS:
                     json.dump(self._data[1:], history_file)
                 else:
@@ -183,7 +181,7 @@ class History(Observer):
             List[Dict[str, Any]]: A list of sessions, including the current one.
         """
         try:
-            with open(self._path.as_posix(), "r") as history_file:
+            with open(self._path.as_posix(), "r", encoding="utf-8") as history_file:
                 data = json.load(history_file)
             data.append(History._get_empty_session_object())
             return data
@@ -219,8 +217,7 @@ class History(Observer):
 
 
 class Images:
-    """A collection of string constants with names of image files.
-    """
+    """A collection of string constants with names of image files."""
 
     ADD_POINT: ClassVar[str] = "add_point.png"
     ADD_CUSOM: ClassVar[str] = "add_custom.png"
