@@ -5,8 +5,7 @@ from typing import Iterator
 
 
 class Point:
-    """A two dimensional position.
-    """
+    """A two dimensional position."""
 
     def __init__(self, x: float, y: float) -> None:
         """Instansiate a point.
@@ -39,14 +38,12 @@ class Point:
         yield self.y
 
     def __iter__(self) -> Iterator[float]:
-        """See coords.
-        """
+        """See coords."""
         yield from self.coords()
 
 
 class Rectangle:
-    """A rectangle object.
-    """
+    """A rectangle object."""
 
     def __init__(self, x: float, y: float, w: float, h: float) -> None:
         """Instansiate a rectangle object.

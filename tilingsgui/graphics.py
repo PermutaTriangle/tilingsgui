@@ -16,8 +16,7 @@ C4I = Tuple[int, int, int, int]
 
 
 class GeoDrawer:
-    """A static class container of drawing methods.
-    """
+    """A static class container of drawing methods."""
 
     _VERTEX_MODE: ClassVar[str] = "v2f"
     _COLOR_MODE: ClassVar[str] = "c3B"
@@ -119,8 +118,7 @@ class GeoDrawer:
 
 
 class Color:
-    """A collection of color constants.
-    """
+    """A collection of color constants."""
 
     # Scraped with bs4 from https://www.rapidtables.com/web/color/RGB_Color.html.
 
