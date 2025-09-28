@@ -11,9 +11,10 @@ from typing import ClassVar, Literal, Tuple
 import pyglet
 
 # Configure pyglet for PyPy compatibility on macOS
-# PyPy doesn't support PyObjC, so we disable shadow context for high-res displays
 if sys.platform == "darwin" and sys.implementation.name == "pypy":
-    pyglet.options["shadow_window"] = False
+    print("Warning: PyPy on macOS has known compatibility issues with pyglet 2.0.")
+    print("For best results, use CPython instead of PyPy on macOS.")
+    sys.exit(1)
 
 # pylint: disable=wrong-import-position
 from .files import History, PathManager
