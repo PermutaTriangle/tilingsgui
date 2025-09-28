@@ -6,7 +6,7 @@ runs it.
 # pylint: disable=abstract-method
 
 import sys
-from typing import ClassVar, Tuple
+from typing import ClassVar, Literal, Tuple
 
 import pyglet
 
@@ -109,7 +109,7 @@ class TilingGui(pyglet.window.Window):
         pyglet.gl.glClearColor(*TilingGui._CLEAR_COLOR)
         self.push_handlers(on_draw=self.clear)  # pylint: disable=unreachable
 
-    def on_resize(self, width: int, height: int) -> bool:
+    def on_resize(self, width: int, height: int) -> Literal[True]:
         """Event handler for the window resize event.
 
         Args:
