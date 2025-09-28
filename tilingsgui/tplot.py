@@ -34,11 +34,19 @@ class TPlot:
 
     REQ_NOT_FOUND: ClassVar[Tuple[int, int, int]] = (-1, -1, -1)
     OBS_NOT_FOUND: ClassVar[Tuple[int, int]] = (-1, -1)
-    _OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.RED
-    _REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.BLUE
-    _HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.ORANGE
-    _EMPTY_COLOR: ClassVar[Tuple[float, float, float]] = Color.GRAY
-    _SHADED_CELL_COLOR: ClassVar[Tuple[float, float, float]] = Color.GRAY
+    _OBSTRUCTION_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(
+        Color.RED
+    )
+    _REQUIREMENT_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(
+        Color.BLUE
+    )
+    _HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(
+        Color.ORANGE
+    )
+    _EMPTY_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(Color.GRAY)
+    _SHADED_CELL_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(
+        Color.GRAY
+    )
     _FUZZYNESS = 0.25  # Should be in [0,0.5)
     _CLICK_PRECISION_SQUARED: int = 100
     _POINT_SIZE = 5

@@ -20,9 +20,9 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
 
     _PADDING = 1
     _INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
-    _FONT_SIZE = 12
+    _FONT_SIZE = 14
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
-    _TEXT_BOX_COLOR = Color.DARK_GRAY
+    _TEXT_BOX_COLOR = Color.scale_to_01(Color.WHITE)
     _BACKGROUND_COLOR = Color.BLACK
     _V_BTN = 118
     _CTRL_MODIFIER = 18
@@ -192,11 +192,11 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
     """A menu that sits to the right of the tiling plot."""
 
     _PADDING = 1
-    _INITIAL_MESSAGE = "12"
-    _FONT_SIZE = 12
+    _INITIAL_MESSAGE = "Req: 12"
+    _FONT_SIZE = 14
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
-    _TEXT_BOX_COLOR = Color.DARK_GRAY
-    _BACKGROUND_COLOR = Color.BLACK
+    _TEXT_BOX_COLOR = Color.scale_to_01(Color.WHITE)
+    _BACKGROUND_COLOR = Color.scale_to_01(Color.LIGHT_GRAY)
 
     def __init__(
         self,
