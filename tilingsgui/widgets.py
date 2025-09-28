@@ -32,7 +32,13 @@ class Text:
         self._document.set_style(0, 0, {"font_size": font_size, "color": color})
         self._layout: pyglet.text.layout.IncrementalTextLayout = (
             pyglet.text.layout.IncrementalTextLayout(
-                self._document, 0, 0, multiline=False, batch=self._batch
+                self._document,
+                x=0,
+                y=0,
+                width=100,
+                height=20,  # Will be updated in position()
+                multiline=False,
+                batch=self._batch,
             )
         )
         self._caret: pyglet.text.caret.Caret = pyglet.text.caret.Caret(self._layout)
@@ -47,10 +53,10 @@ class Text:
             w (float): The horizontal length of the component.
             h (float): The vertical length of the component.
         """
-        self._layout.x = x + Text._LEFT_PAD
-        self._layout.y = y
-        self._layout.width = w - Text._LEFT_PAD
-        self._layout.height = h
+        self._layout.x = int(x + Text._LEFT_PAD)
+        self._layout.y = int(y)
+        self._layout.width = int(w - Text._LEFT_PAD)
+        self._layout.height = int(h)
 
     def set_focus(self) -> None:
         """Set focus on the input text. This is needed to write to it."""
@@ -118,12 +124,20 @@ class TextBox(Text):
             box_color (Tuple[float, float, float]): The rgb color of the box.
         """
         super().__init__(init_text, font_size, text_color)
-        self._vertex_list: pyglet.graphics.vertexdomain.VertexList = self._batch.add(
-            4,
-            pyglet.gl.GL_QUADS,
-            None,
-            ("v2f", [0] * 8),
-            ("c3B", box_color * 4),
+        # Convert RGB (0-1) to RGBA (0-255) for pyglet.shapes
+        box_color_255 = (
+            int(box_color[0] * 255),
+            int(box_color[1] * 255),
+            int(box_color[2] * 255),
+            255,
+        )
+        self._rectangle = pyglet.shapes.Rectangle(
+            x=0,
+            y=0,
+            width=100,
+            height=20,  # Will be updated in position()
+            color=box_color_255,
+            batch=self._batch,
         )
 
     def position(self, x: float, y: float, w: float, h: float) -> None:
@@ -136,8 +150,10 @@ class TextBox(Text):
             h (float): The vertical length of the component.
         """
         super().position(x, y, w, h)
-        for i, vertex in enumerate((x, y, x + w, y, x + w, y + h, x, y + h)):
-            self._vertex_list.vertices[i] = vertex
+        self._rectangle.x = x
+        self._rectangle.y = y
+        self._rectangle.width = w
+        self._rectangle.height = h
 
     def hit_test(self, x: float, y: float) -> bool:
         """Is the point (x,y) inside the rectangle that the text box forms.
@@ -150,8 +166,8 @@ class TextBox(Text):
             [type]: True iff inside.
         """
         return (
-            self._vertex_list.vertices[0] < x < self._vertex_list.vertices[2]
-            and self._vertex_list.vertices[1] < y < self._vertex_list.vertices[5]
+            self._rectangle.x < x < self._rectangle.x + self._rectangle.width
+            and self._rectangle.y < y < self._rectangle.y + self._rectangle.height
         )
 
 

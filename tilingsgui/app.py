@@ -5,10 +5,17 @@ runs it.
 
 # pylint: disable=abstract-method
 
+import sys
 from typing import ClassVar, Tuple
 
 import pyglet
 
+# Configure pyglet for PyPy compatibility on macOS
+# PyPy doesn't support PyObjC, so we disable shadow context for high-res displays
+if sys.platform == "darwin" and sys.implementation.name == "pypy":
+    pyglet.options["shadow_window"] = False
+
+# pylint: disable=wrong-import-position
 from .files import History, PathManager
 from .graphics import Color
 from .menu import RightMenu, TopMenu
@@ -90,7 +97,7 @@ class TilingGui(pyglet.window.Window):
         """Configuration done before starting."""
 
         # Center the window within the os.
-        screen = pyglet.canvas.Display().get_default_screen()
+        screen = pyglet.display.Display().get_default_screen()  # type: ignore
         self.set_location(
             (screen.width - self.width) // 2, (screen.height - self.height) // 2
         )
@@ -100,7 +107,7 @@ class TilingGui(pyglet.window.Window):
 
         # Handle clearing the canvas on each draw.
         pyglet.gl.glClearColor(*TilingGui._CLEAR_COLOR)
-        self.push_handlers(on_draw=self.clear)
+        self.push_handlers(on_draw=self.clear)  # pylint: disable=unreachable
 
     def on_resize(self, width: int, height: int) -> bool:
         """Event handler for the window resize event.

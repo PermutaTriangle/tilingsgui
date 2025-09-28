@@ -21,7 +21,20 @@ Pyperclip requires clipboard tools that might not come pre-installed.
 
    sudo apt-get install xclip
 
-Without them the app still works but pasting won’t.
+Without them the app still works but pasting won't.
+
+Note for macOS
+~~~~~~~~~~~~~~
+
+PyObjC is automatically installed on macOS systems for proper Cocoa/OpenGL integration with pyglet 2.0+. If you encounter OpenGL surface errors, ensure PyObjC is installed:
+
+.. code:: sh
+
+   pip install pyobjc-core pyobjc-framework-Cocoa
+
+This is handled automatically during normal installation.
+
+**PyPy Users**: PyObjC doesn't support PyPy. TilingsGUI automatically configures pyglet to use shadow context disabled mode for PyPy compatibility on macOS.
 
 Known issues
 ------------

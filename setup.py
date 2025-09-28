@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 
 from setuptools import find_packages, setup
 
@@ -14,6 +15,18 @@ def get_version():
             if line.startswith("__version__"):
                 return line.split(" = ")[1].rstrip()[1:-1]
     raise ValueError("Version not found in tilingsgui/__init__.py")
+
+
+def get_install_requires():
+    """Get install requirements, including platform-specific dependencies."""
+    base_requires = ["pyperclip>=1.9.0", "pyglet>=2.0.0", "tilings>=2.5.0"]
+
+    # Add macOS-specific dependencies for pyglet Cocoa integration
+    # Only on CPython, not PyPy (PyObjC doesn't support PyPy)
+    if sys.platform == "darwin" and sys.implementation.name == "cpython":
+        base_requires.extend(["pyobjc-core", "pyobjc-framework-Cocoa"])
+
+    return base_requires
 
 
 setup(
@@ -31,7 +44,7 @@ setup(
     },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     long_description=read("README.rst"),
-    install_requires=["pyperclip>=1.9.0", "pyglet>=1.5.15,<2.0", "tilings>=2.5.0"],
+    install_requires=get_install_requires(),
     python_requires=">=3.8",
     include_package_data=True,
     classifiers=[
