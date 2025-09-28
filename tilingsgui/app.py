@@ -29,10 +29,10 @@ class TilingGui(pyglet.window.Window):
     _TITLE: ClassVar[str] = "Tilings GUI"
     _MIN_WIDTH: ClassVar[int] = 500
     _MIN_HEIGHT: ClassVar[int] = 400
-    _INITIAL_WIDTH: ClassVar[int] = 800
-    _INITIAL_HEIGHT: ClassVar[int] = 650
-    _RIGHT_BAR_WIDTH: ClassVar[int] = 200
-    _TOP_BAR_HEIGHT: ClassVar[int] = 40
+    _INITIAL_WIDTH: ClassVar[int] = 1600
+    _INITIAL_HEIGHT: ClassVar[int] = 1200
+    _RIGHT_BAR_WIDTH: ClassVar[int] = 400
+    _TOP_BAR_HEIGHT: ClassVar[int] = 50
     _CLEAR_COLOR: ClassVar[Tuple[float, float, float, float]] = (
         Color.alpha_extend_and_scale_to_01(Color.WHITE)
     )

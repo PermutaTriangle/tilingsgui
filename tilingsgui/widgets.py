@@ -54,7 +54,7 @@ class Text:
             h (float): The vertical length of the component.
         """
         self._layout.x = int(x + Text._LEFT_PAD)
-        self._layout.y = int(y)
+        self._layout.y = int(y - 15)
         self._layout.width = int(w - Text._LEFT_PAD)
         self._layout.height = int(h)
 
@@ -229,9 +229,15 @@ class Button:
             h (float): The vertical length of the button.
         """
         self._x, self._y, self._w, self._h = x, y, w, h
-        dim = min(w, h)
-        if dim > 0:
-            self._sprite.scale *= dim / self._sprite.width
+        if w > 0 and h > 0:
+            # Scale to fit within the button bounds while maintaining aspect ratio
+            scale_x = w / self._sprite.image.width
+            scale_y = h / self._sprite.image.height
+            # Use the smaller scale to ensure image fits within bounds
+            scale = (
+                min(scale_x, scale_y) * 0.95
+            )  # 0.95 for slightly smaller, well-proportioned images
+            self._sprite.scale = scale
             self._sprite.x = x + self._w / 2 - self._sprite.width / 2
             self._sprite.y = y + self._h / 2 - self._sprite.height / 2
 
@@ -388,7 +394,7 @@ class SelectionGroup:
 class ButtonGrid:
     """A positional object to place and group buttons together."""
 
-    _PADDING: ClassVar[int] = 1
+    _PADDING: ClassVar[int] = 2
 
     def __init__(self, r: int, c: int) -> None:
         """Create a button grid with r rows and c columns.
@@ -428,7 +434,7 @@ class ButtonGrid:
             w (float): The horizontal length of the grid.
             h (float): The vertical length of the grid.
         """
-        self.rect.x, self.rect.y, self.rect.h, self.rect.h = x, y, w, h
+        self.rect.x, self.rect.y, self.rect.w, self.rect.h = x, y, w, h
         self.button_w, self.button_h = w / len(self.buttons[0]), h / len(self.buttons)
         self._position_btns()
 

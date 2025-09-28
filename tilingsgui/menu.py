@@ -20,7 +20,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
 
     _PADDING = 1
     _INITIAL_MESSAGE = " -- Basis here -- e.g. 1234_1324"
-    _FONT_SIZE = 14
+    _FONT_SIZE = 20
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
     _TEXT_BOX_COLOR = Color.scale_to_01(Color.WHITE)
     _BACKGROUND_COLOR = Color.BLACK
@@ -193,7 +193,7 @@ class RightMenu(pyglet.event.EventDispatcher, Observer):
 
     _PADDING = 1
     _INITIAL_MESSAGE = "Req: 12"
-    _FONT_SIZE = 14
+    _FONT_SIZE = 20
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
     _TEXT_BOX_COLOR = Color.scale_to_01(Color.WHITE)
     _BACKGROUND_COLOR = Color.scale_to_01(Color.LIGHT_GRAY)
