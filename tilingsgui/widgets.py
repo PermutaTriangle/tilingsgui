@@ -231,8 +231,8 @@ class Button:
         self._x, self._y, self._w, self._h = x, y, w, h
         if w > 0 and h > 0:
             # Scale to fit within the button bounds while maintaining aspect ratio
-            scale_x = w / self._sprite.image.width
-            scale_y = h / self._sprite.image.height
+            scale_x = float(w) / float(self._sprite.image.width)
+            scale_y = float(h) / float(self._sprite.image.height)
             # Use the smaller scale to ensure image fits within bounds
             scale = (
                 min(scale_x, scale_y) * 0.95
