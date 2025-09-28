@@ -1,5 +1,4 @@
-"""A collection of various utility functionality.
-"""
+"""A collection of various utility functionality."""
 
 import datetime
 

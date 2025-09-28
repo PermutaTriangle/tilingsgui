@@ -25,7 +25,7 @@ Without them the app still works but pasting won’t.
 
 Known issues
 ------------
-* 
+*
 
 Report a bug
 ~~~~~~~~~~~~
@@ -79,9 +79,9 @@ The following two inputs are two ways of producing the same initial tiling.
 .. code::
 
    1432_12345
-   
+
    {"class_module": "tilings.tiling", "comb_class": "Tiling", "obstructions": [{"patt": [0, 3, 2, 1], "pos": [[0, 0], [0, 0], [0, 0], [0, 0]]}, {"patt": [0, 1, 2, 3, 4], "pos": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]}], "requirements": [], "assumptions": []}
-   
+
 The initial tiling in question would be the following.
 
 .. code:: sh
@@ -90,7 +90,7 @@ The initial tiling in question would be the following.
    |1|
    +-+
    1: Av(0321, 01234)
-   
+
 
 Cell insertion
 ~~~~~~~~~~~~~~
@@ -131,7 +131,7 @@ By clicking a point of a requirement, we pass its gridded permutation along with
 
 Fusion
 ~~~~~~
-Let ``c_r`` and ``c_c`` be the row and column respectively of the clicked cell. There are 4 types of fusions available. Fusion with ``row=c_r``, |fusion_r|, fusion with ``col=c_c``, |fusion_c|, component fusion with ``row=c_r``, |fusion_comp_r|, and component fusion with ``col=c_c``, |fusion_comp_c|. If the fusion are invalid, then exceptions are caught and nothing happens. 
+Let ``c_r`` and ``c_c`` be the row and column respectively of the clicked cell. There are 4 types of fusions available. Fusion with ``row=c_r``, |fusion_r|, fusion with ``col=c_c``, |fusion_c|, component fusion with ``row=c_r``, |fusion_comp_r|, and component fusion with ``col=c_c``, |fusion_comp_c|. If the fusion are invalid, then exceptions are caught and nothing happens.
 
 Fusion:
 

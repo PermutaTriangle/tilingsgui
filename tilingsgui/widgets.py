@@ -1,5 +1,4 @@
-"""Graphical UI components.
-"""
+"""Graphical UI components."""
 
 from typing import Callable, ClassVar, Dict, List, Optional, Tuple
 

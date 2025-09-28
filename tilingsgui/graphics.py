@@ -1,6 +1,4 @@
-"""Drawable objects
-"""
-
+"""Drawable objects"""
 
 from math import cos, pi, sin
 from typing import ClassVar, List, Tuple

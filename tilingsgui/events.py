@@ -1,5 +1,4 @@
-"""Event related module.
-"""
+"""Event related module."""
 
 from typing import Iterable
 

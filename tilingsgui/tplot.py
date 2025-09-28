@@ -1,5 +1,4 @@
-"""The tiling drawing tools.
-"""
+"""The tiling drawing tools."""
 
 import json
 from collections import Counter, deque
@@ -13,9 +12,8 @@ from permuta.misc import DIR_EAST, DIR_NONE, DIR_NORTH, DIR_SOUTH, DIR_WEST
 from tilings import GriddedPerm, Tiling
 from tilings.algorithms import Factor, FactorWithInterleaving
 from tilings.exception import InvalidOperationError
-from tilings.strategies import (
+from tilings.strategies import (  # DatabaseVerificationStrategy removed v4.0.0
     BasicVerificationStrategy,
-    DatabaseVerificationStrategy,
     ElementaryVerificationStrategy,
     InsertionEncodingVerificationStrategy,
     LocallyFactorableVerificationStrategy,
@@ -469,7 +467,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
     _MAX_SEQUENCE_SIZE: ClassVar[int] = 7
     _VERIFICATION_STRATS: ClassVar[List[str]] = [
         "BasicVerificationStrategy",
-        "DatabaseVerificationStrategy",
+        # "DatabaseVerificationStrategy",  # Removed in tilings 4.0.0
         "ElementaryVerificationStrategy",
         "InsertionEncodingVerificationStrategy",
         "LocallyFactorableVerificationStrategy",
@@ -492,7 +490,7 @@ class TPlotManager(pyglet.event.EventDispatcher, Observer):
         """
         return [
             str(BasicVerificationStrategy().verified(tiling)),
-            str(DatabaseVerificationStrategy().verified(tiling)),
+            # str(DatabaseVerificationStrategy().verified(tiling)),  # Removed
             str(ElementaryVerificationStrategy().verified(tiling)),
             str(InsertionEncodingVerificationStrategy().verified(tiling)),
             str(LocallyFactorableVerificationStrategy().verified(tiling)),

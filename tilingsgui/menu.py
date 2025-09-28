@@ -1,6 +1,4 @@
-"""Control stations.
-"""
-
+"""Control stations."""
 
 from typing import Iterable
 

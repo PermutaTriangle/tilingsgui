@@ -1,5 +1,4 @@
-"""A collection of file and path related functionality.
-"""
+"""A collection of file and path related functionality."""
 
 import json
 import pathlib

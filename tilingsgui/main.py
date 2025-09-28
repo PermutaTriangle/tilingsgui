@@ -1,5 +1,4 @@
-"""Entrypoint.
-"""
+"""Entrypoint."""
 
 import argparse
 
