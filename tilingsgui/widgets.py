@@ -231,8 +231,18 @@ class Button:
         self._x, self._y, self._w, self._h = x, y, w, h
         if w > 0 and h > 0:
             # Scale to fit within the button bounds while maintaining aspect ratio
-            scale_x = float(w) / float(self._sprite.image.width)
-            scale_y = float(h) / float(self._sprite.image.height)
+            # Handle both AbstractImage and Animation types
+            image = self._sprite.image
+            if hasattr(image, "width") and hasattr(image, "height"):
+                img_width = float(image.width)
+                img_height = float(image.height)
+            else:
+                # Fallback for Animation or other types - use sprite dimensions
+                img_width = float(self._sprite.width)
+                img_height = float(self._sprite.height)
+
+            scale_x = float(w) / img_width
+            scale_y = float(h) / img_height
             # Use the smaller scale to ensure image fits within bounds
             scale = (
                 min(scale_x, scale_y) * 0.95
