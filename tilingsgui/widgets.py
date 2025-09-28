@@ -29,7 +29,7 @@ class Text:
         self._document: pyglet.text.document.UnformattedDocument = (
             pyglet.text.document.UnformattedDocument(init_text)
         )
-        self._document.set_style(0, 0, dict(font_size=font_size, color=color))
+        self._document.set_style(0, 0, {"font_size": font_size, "color": color})
         self._layout: pyglet.text.layout.IncrementalTextLayout = (
             pyglet.text.layout.IncrementalTextLayout(
                 self._document, 0, 0, multiline=False, batch=self._batch

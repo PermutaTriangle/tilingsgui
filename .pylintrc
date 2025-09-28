@@ -1,8 +1,8 @@
 [MASTER]
 
 ignore-patterns=test_.*?py
-init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc())+'/tilingsgui')"
+init-hook="import os, sys; sys.path.append(os.path.join(os.path.dirname(__file__), 'tilingsgui'))"
 max-args=10
 max-module-lines=1200
-disable=too-few-public-methods,too-many-lines
+disable=too-few-public-methods,too-many-lines,too-many-positional-arguments
 good-names=r,c,x,y,h,w,i,j,k,n,x1,x2,y1,y2,g,b,dx,dy
