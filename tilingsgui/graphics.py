@@ -16,9 +16,6 @@ C4I = Tuple[int, int, int, int]
 class GeoDrawer:
     """A static class container of drawing methods."""
 
-    _VERTEX_MODE: ClassVar[str] = "v2f"
-    _COLOR_MODE: ClassVar[str] = "c3B"
-
     @staticmethod
     def draw_line_segment(
         x1: float, y1: float, x2: float, y2: float, color: C3F
@@ -32,8 +29,7 @@ class GeoDrawer:
             y2 (float): End y coordinate.
             color (Tuple[float, float, float]): RGB valued color.
         """
-        # Convert RGB (0-1) to RGBA (0-255) for pyglet.shapes
-        color_255 = (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255), 255)
+        color_255 = Color.scale_to_255(color)
         line = pyglet.shapes.Line(x1, y1, x2, y2, color=color_255)
         line.draw()
 
@@ -49,9 +45,7 @@ class GeoDrawer:
             splits (int, optional): How detailed the polygon emulating a circle should
             be. Higher values increase detail.
         """
-        # Convert RGB (0-1) to RGBA (0-255) for pyglet.shapes
-        # Note: pyglet.shapes.Circle uses segments parameter for detail level
-        color_255 = (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255), 255)
+        color_255 = Color.scale_to_255(color)
         circle = pyglet.shapes.Circle(x, y, r, color=color_255, segments=splits)
         circle.draw()
 
@@ -77,8 +71,7 @@ class GeoDrawer:
             h (float): Vertical length.
             color (Tuple[float, float, float]): Fill color.
         """
-        # Convert RGB (0-1) to RGBA (0-255) for pyglet.shapes
-        color_255 = (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255), 255)
+        color_255 = Color.scale_to_255(color)
         rectangle = pyglet.shapes.Rectangle(x, y, w, h, color=color_255)
         rectangle.draw()
 
@@ -95,12 +88,7 @@ class GeoDrawer:
         if n > 0:
             if n > 1:
                 # Draw line segments between adjacent points
-                color_255 = (
-                    int(color[0] * 255),
-                    int(color[1] * 255),
-                    int(color[2] * 255),
-                    255,
-                )
+                color_255 = Color.scale_to_255(color)
                 for i in range(n - 1):
                     p1, p2 = pnt_path[i], pnt_path[i + 1]
                     line = pyglet.shapes.Line(p1.x, p1.y, p2.x, p2.y, color=color_255)
@@ -257,13 +245,13 @@ class Color:
 
     @staticmethod
     def scale_to_01(color: C3I) -> C3F:
-        """Scale color values from 0-255 to 0-1. Color can include alpha value.
+        """Scale color values from 0-255 to 0-1.
 
         Args:
-            color (Tuple[int, int, int]): A tuple of length 3.
+            color (Tuple[int, int, int]): RGB color in 0-255 range.
 
         Returns:
-            Tuple[float, float, float]: A scaled tuple.
+            Tuple[float, float, float]: RGB color in 0-1 range.
         """
         r, g, b = color
         return r / 255, g / 255, b / 255
@@ -284,15 +272,27 @@ class Color:
     @staticmethod
     def alpha_extend_and_scale_to_01(color: C3I, alpha: int = 255) -> C4F:
         """Performs both alpha extension and 0-1 scaling of a color.
-        Use this method if you intent to do both to guarantee they
+        Use this method if you intend to do both to guarantee they
         are done in correct order.
 
         Args:
-            color (Tuple[int, int, int]): A rgb color value.
-            alpha (int, optional): The alpha value, 0-255. Defaults to 255.
+            color (Tuple[int, int, int]): RGB color in 0-255 range.
+            alpha (int, optional): Alpha value in 0-255 range. Defaults to 255.
 
         Returns:
-            Tuple[int, int, int, int]: A rgba color value, 0-1.
+            Tuple[float, float, float, float]: RGBA color in 0-1 range.
         """
         r, g, b = color
         return r / 255, g / 255, b / 255, alpha / 255
+
+    @staticmethod
+    def scale_to_255(color: C3F) -> C4I:
+        """Convert RGB (0-1) to RGBA (0-255) for pyglet.shapes.
+
+        Args:
+            color (Tuple[float, float, float]): RGB color in 0-1 range.
+
+        Returns:
+            Tuple[int, int, int, int]: RGBA color in 0-255 range.
+        """
+        return (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255), 255)

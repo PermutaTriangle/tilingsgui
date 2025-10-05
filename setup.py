@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import sys
 
 from setuptools import find_packages, setup
 
@@ -18,15 +17,8 @@ def get_version():
 
 
 def get_install_requires():
-    """Get install requirements, including platform-specific dependencies."""
-    base_requires = ["pyperclip>=1.9.0", "pyglet>=2.0.0", "tilings>=2.5.0"]
-
-    # Add macOS-specific dependencies for pyglet Cocoa integration
-    # Only on CPython, not PyPy (PyObjC doesn't support PyPy)
-    if sys.platform == "darwin" and sys.implementation.name == "cpython":
-        base_requires.extend(["pyobjc-core", "pyobjc-framework-Cocoa"])
-
-    return base_requires
+    """Get install requirements."""
+    return ["pyperclip>=1.9.0", "pyglet>=2.0.0", "tilings>=2.5.0"]
 
 
 setup(

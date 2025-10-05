@@ -124,13 +124,7 @@ class TextBox(Text):
             box_color (Tuple[float, float, float]): The rgb color of the box.
         """
         super().__init__(init_text, font_size, text_color)
-        # Convert RGB (0-1) to RGBA (0-255) for pyglet.shapes
-        box_color_255 = (
-            int(box_color[0] * 255),
-            int(box_color[1] * 255),
-            int(box_color[2] * 255),
-            255,
-        )
+        box_color_255 = Color.scale_to_255(box_color)
         self._rectangle = pyglet.shapes.Rectangle(
             x=0,
             y=0,
