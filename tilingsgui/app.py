@@ -10,10 +10,41 @@ from typing import ClassVar, Literal, Tuple
 
 import pyglet
 
-# Configure pyglet for PyPy compatibility on macOS
+# PyPy compatibility on macOS
+#
+# PyPy is not supported on macOS due to fundamental incompatibilities between PyPy's
+# ctypes implementation and macOS GUI frameworks. This issue affects ALL major Python
+# GUI libraries, not just pyglet.
+#
+# Investigation conducted (Oct 2025) found the following:
+#
+# 1. pyglet 2.0:
+#    - Fails with IndexError/AttributeError in PyPy's ctypes when interfacing with
+#      Cocoa/Objective-C bridge
+#    - pyglet.options like shadow_window=False and osx_alt_loop=True do not help
+#
+# 2. Tkinter:
+#    - Imports successfully but hangs when creating windows
+#    - PyPy's bundled Tk requires manual mainloop() calls, breaking event-driven design
+#    - Tested with PyPy 7.3.20 (Python 3.11.13) - same issues
+#
+# 3. PySide6 (Qt):
+#    - Officially supports PyPy 3.8+ but no pre-built PyPy wheels available for macOS
+#    - Would require building from source
+#
+# 4. wxPython:
+#    - Community reports indicate it does not work with PyPy
+#
+# Root cause: PyPy's ctypes has subtle differences from CPython in callback and object
+# reference handling, which breaks all macOS GUI frameworks that use ctypes to interface
+# with Cocoa/Objective-C.
+#
+# Note: PyPy may work on Linux (X11) or Windows (Win32), as the issue is specific to
+# macOS's Cocoa backend.
 if sys.platform == "darwin" and sys.implementation.name == "pypy":
-    print("Warning: PyPy on macOS has known compatibility issues with pyglet 2.0.")
-    print("For best results, use CPython instead of PyPy on macOS.")
+    print("Error: PyPy is not supported on macOS.")
+    print("Reason: PyPy's ctypes is incompatible with macOS GUI frameworks (Cocoa).")
+    print("Please use CPython on macOS, or try PyPy on Linux/Windows.")
     sys.exit(1)
 
 # pylint: disable=wrong-import-position
