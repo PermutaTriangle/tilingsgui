@@ -37,7 +37,7 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     long_description=read("README.rst"),
     install_requires=get_install_requires(),
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     include_package_data=True,
     classifiers=[
         "Topic :: Education",
@@ -46,8 +46,6 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",

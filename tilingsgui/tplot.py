@@ -43,6 +43,7 @@ class TPlot:
     _HIGHLIGHT_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(
         Color.ORANGE
     )
+    _BLACK_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(Color.BLACK)
     _EMPTY_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(Color.GRAY)
     _SHADED_CELL_COLOR: ClassVar[Tuple[float, float, float]] = Color.scale_to_01(
         Color.GRAY
@@ -347,7 +348,7 @@ class TPlot:
             ):
                 pnt = reqlist[0][0]
                 GeoDrawer.draw_circle(
-                    pnt.x, pnt.y, TPlot._PRETTY_POINT_SIZE, Color.BLACK
+                    pnt.x, pnt.y, TPlot._PRETTY_POINT_SIZE, TPlot._BLACK_COLOR
                 )
                 continue
             col = (
@@ -365,12 +366,12 @@ class TPlot:
     def _draw_grid(self) -> None:
         """Draw the tiling's grid."""
         t_w, t_h = self.tiling.dimensions
-        for i in range(t_w):
+        for i in range(t_w + 1):
             x = self._w * i / t_w
-            GeoDrawer.draw_line_segment(x, self._h, x, 0, Color.BLACK)
-        for i in range(t_h):
+            GeoDrawer.draw_line_segment(x, self._h, x, 0, TPlot._BLACK_COLOR)
+        for i in range(t_h + 1):
             y = self._h * i / t_h
-            GeoDrawer.draw_line_segment(0, y, self._w, y, Color.BLACK)
+            GeoDrawer.draw_line_segment(0, y, self._w, y, TPlot._BLACK_COLOR)
 
     def to_tikz(self) -> None:
         """Output tikz drawing."""

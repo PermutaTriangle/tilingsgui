@@ -24,12 +24,6 @@ jobs:
             os: ubuntu-latest
 
           # Python version testing (Linux)
-          - python: 3.8
-            toxenv: py38
-            os: ubuntu-latest
-          - python: 3.9
-            toxenv: py39
-            os: ubuntu-latest
           - python: "3.10"
             toxenv: py310
             os: ubuntu-latest
@@ -41,12 +35,6 @@ jobs:
             os: ubuntu-latest
           - python: "3.13"
             toxenv: py313
-            os: ubuntu-latest
-          - python: pypy-3.8
-            toxenv: pypy38
-            os: ubuntu-latest
-          - python: pypy-3.9
-            toxenv: pypy39
             os: ubuntu-latest
           - python: pypy-3.10
             toxenv: pypy310
