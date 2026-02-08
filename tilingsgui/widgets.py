@@ -25,6 +25,7 @@ class Text:
             color (Tuple[float, float, float, float]): The font color.
         """
 
+        self._font_size: int = font_size
         self._batch: pyglet.graphics.Batch = pyglet.graphics.Batch()
         self._document: pyglet.text.document.UnformattedDocument = (
             pyglet.text.document.UnformattedDocument(init_text)
@@ -41,6 +42,7 @@ class Text:
                 batch=self._batch,
             )
         )
+        self._layout.content_valign = "center"
         self._caret: pyglet.text.caret.Caret = pyglet.text.caret.Caret(self._layout)
         self._caret.visible = False
 
@@ -54,9 +56,9 @@ class Text:
             h (float): The vertical length of the component.
         """
         self._layout.x = int(x + Text._LEFT_PAD)
-        self._layout.y = int(y - 15)
+        self._layout.y = int(y - self._font_size // 4)
         self._layout.width = int(w - Text._LEFT_PAD)
-        self._layout.height = int(h)
+        self._layout.height = int(h + self._font_size // 4)
 
     def set_focus(self) -> None:
         """Set focus on the input text. This is needed to write to it."""
@@ -168,7 +170,7 @@ class TextBox(Text):
 class Button:
     """A clickable rectangular GUI component."""
 
-    _BUTTON_COLOR: ClassVar[RGB] = Color.GRAY
+    _BUTTON_COLOR: ClassVar[RGB] = Color.scale_to_01(Color.GRAY)
 
     def __init__(
         self, image: str, on_click: Optional[Callable[[], None]] = None
@@ -261,7 +263,7 @@ class Button:
 class ToggleButton(Button):
     """A button that is either on or off."""
 
-    _TOGGLE_COLOR: ClassVar[RGB] = Color.DARK_OLIVE_GREEN
+    _TOGGLE_COLOR: ClassVar[RGB] = Color.scale_to_01(Color.DARK_OLIVE_GREEN)
 
     def __init__(
         self,

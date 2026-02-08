@@ -23,9 +23,9 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
     _FONT_SIZE = 20
     _TEXT_COLOR = Color.alpha_extend(Color.BLACK)
     _TEXT_BOX_COLOR = Color.scale_to_01(Color.WHITE)
-    _BACKGROUND_COLOR = Color.BLACK
-    _V_BTN = 118
-    _CTRL_MODIFIER = 18
+    _BACKGROUND_COLOR = Color.scale_to_01(Color.BLACK)
+    _PASTE_KEY = pyglet.window.key.V
+    _PASTE_MOD = pyglet.window.key.MOD_ACCEL
 
     def __init__(
         self,
@@ -97,7 +97,7 @@ class TopMenu(pyglet.event.EventDispatcher, Observer):
             bool: True if the event is consumed by the handler, false otherwise.
         """
         if self._text_box.has_focus():
-            if symbol == TopMenu._V_BTN and modifiers == TopMenu._CTRL_MODIFIER:
+            if symbol == TopMenu._PASTE_KEY and modifiers & TopMenu._PASTE_MOD:
                 self._text_box.add_text(paste())
                 return True
             if symbol == pyglet.window.key.ESCAPE:
