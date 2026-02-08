@@ -1,5 +1,4 @@
-"""A global state for the app, in a seperate module.
-"""
+"""A global state for the app, in a seperate module."""
 
 from typing import Tuple
 

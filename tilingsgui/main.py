@@ -1,5 +1,4 @@
-"""Entrypoint.
-"""
+"""Entrypoint."""
 
 import argparse
 
@@ -17,7 +16,7 @@ def get_args() -> str:
 
 def main() -> None:
     """The application's starting point."""
-    app = TilingGui(get_args(), resizable=True)
+    app = TilingGui(get_args(), resizable=True)  # type: ignore
     app.start()
 
 

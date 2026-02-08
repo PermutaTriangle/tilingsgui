@@ -1,5 +1,4 @@
-"""Mathematical geometric objects.
-"""
+"""Mathematical geometric objects."""
 
 from typing import Iterator
 

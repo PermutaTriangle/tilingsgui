@@ -1,5 +1,4 @@
-"""Graphical UI components.
-"""
+"""Graphical UI components."""
 
 from typing import Callable, ClassVar, Dict, List, Optional, Tuple
 
@@ -30,10 +29,16 @@ class Text:
         self._document: pyglet.text.document.UnformattedDocument = (
             pyglet.text.document.UnformattedDocument(init_text)
         )
-        self._document.set_style(0, 0, dict(font_size=font_size, color=color))
+        self._document.set_style(0, 0, {"font_size": font_size, "color": color})
         self._layout: pyglet.text.layout.IncrementalTextLayout = (
             pyglet.text.layout.IncrementalTextLayout(
-                self._document, 0, 0, multiline=False, batch=self._batch
+                self._document,
+                x=0,
+                y=0,
+                width=100,
+                height=20,  # Will be updated in position()
+                multiline=False,
+                batch=self._batch,
             )
         )
         self._caret: pyglet.text.caret.Caret = pyglet.text.caret.Caret(self._layout)
@@ -48,10 +53,10 @@ class Text:
             w (float): The horizontal length of the component.
             h (float): The vertical length of the component.
         """
-        self._layout.x = x + Text._LEFT_PAD
-        self._layout.y = y
-        self._layout.width = w - Text._LEFT_PAD
-        self._layout.height = h
+        self._layout.x = int(x + Text._LEFT_PAD)
+        self._layout.y = int(y - 15)
+        self._layout.width = int(w - Text._LEFT_PAD)
+        self._layout.height = int(h)
 
     def set_focus(self) -> None:
         """Set focus on the input text. This is needed to write to it."""
@@ -119,12 +124,14 @@ class TextBox(Text):
             box_color (Tuple[float, float, float]): The rgb color of the box.
         """
         super().__init__(init_text, font_size, text_color)
-        self._vertex_list: pyglet.graphics.vertexdomain.VertexList = self._batch.add(
-            4,
-            pyglet.gl.GL_QUADS,
-            None,
-            ("v2f", [0] * 8),
-            ("c3B", box_color * 4),
+        box_color_255 = Color.scale_to_255(box_color)
+        self._rectangle = pyglet.shapes.Rectangle(
+            x=0,
+            y=0,
+            width=100,
+            height=20,  # Will be updated in position()
+            color=box_color_255,
+            batch=self._batch,
         )
 
     def position(self, x: float, y: float, w: float, h: float) -> None:
@@ -137,8 +144,10 @@ class TextBox(Text):
             h (float): The vertical length of the component.
         """
         super().position(x, y, w, h)
-        for i, vertex in enumerate((x, y, x + w, y, x + w, y + h, x, y + h)):
-            self._vertex_list.vertices[i] = vertex
+        self._rectangle.x = x
+        self._rectangle.y = y
+        self._rectangle.width = w
+        self._rectangle.height = h
 
     def hit_test(self, x: float, y: float) -> bool:
         """Is the point (x,y) inside the rectangle that the text box forms.
@@ -151,8 +160,8 @@ class TextBox(Text):
             [type]: True iff inside.
         """
         return (
-            self._vertex_list.vertices[0] < x < self._vertex_list.vertices[2]
-            and self._vertex_list.vertices[1] < y < self._vertex_list.vertices[5]
+            self._rectangle.x < x < self._rectangle.x + self._rectangle.width
+            and self._rectangle.y < y < self._rectangle.y + self._rectangle.height
         )
 
 
@@ -214,9 +223,25 @@ class Button:
             h (float): The vertical length of the button.
         """
         self._x, self._y, self._w, self._h = x, y, w, h
-        dim = min(w, h)
-        if dim > 0:
-            self._sprite.scale *= dim / self._sprite.width
+        if w > 0 and h > 0:
+            # Scale to fit within the button bounds while maintaining aspect ratio
+            # Handle both AbstractImage and Animation types
+            image = self._sprite.image
+            if hasattr(image, "width") and hasattr(image, "height"):
+                img_width = float(image.width)
+                img_height = float(image.height)
+            else:
+                # Fallback for Animation or other types - use sprite dimensions
+                img_width = float(self._sprite.width)
+                img_height = float(self._sprite.height)
+
+            scale_x = float(w) / img_width
+            scale_y = float(h) / img_height
+            # Use the smaller scale to ensure image fits within bounds
+            scale = (
+                min(scale_x, scale_y) * 0.95
+            )  # 0.95 for slightly smaller, well-proportioned images
+            self._sprite.scale = scale
             self._sprite.x = x + self._w / 2 - self._sprite.width / 2
             self._sprite.y = y + self._h / 2 - self._sprite.height / 2
 
@@ -373,7 +398,7 @@ class SelectionGroup:
 class ButtonGrid:
     """A positional object to place and group buttons together."""
 
-    _PADDING: ClassVar[int] = 1
+    _PADDING: ClassVar[int] = 2
 
     def __init__(self, r: int, c: int) -> None:
         """Create a button grid with r rows and c columns.
@@ -413,7 +438,7 @@ class ButtonGrid:
             w (float): The horizontal length of the grid.
             h (float): The vertical length of the grid.
         """
-        self.rect.x, self.rect.y, self.rect.h, self.rect.h = x, y, w, h
+        self.rect.x, self.rect.y, self.rect.w, self.rect.h = x, y, w, h
         self.button_w, self.button_h = w / len(self.buttons[0]), h / len(self.buttons)
         self._position_btns()
 

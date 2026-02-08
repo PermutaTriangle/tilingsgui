@@ -5,10 +5,49 @@ runs it.
 
 # pylint: disable=abstract-method
 
-from typing import ClassVar, Tuple
+import sys
+from typing import ClassVar, Literal, Tuple
 
 import pyglet
 
+# PyPy compatibility on macOS
+#
+# PyPy is not supported on macOS due to fundamental incompatibilities between PyPy's
+# ctypes implementation and macOS GUI frameworks. This issue affects ALL major Python
+# GUI libraries, not just pyglet.
+#
+# Investigation conducted (Oct 2025) found the following:
+#
+# 1. pyglet 2.0:
+#    - Fails with IndexError/AttributeError in PyPy's ctypes when interfacing with
+#      Cocoa/Objective-C bridge
+#    - pyglet.options like shadow_window=False and osx_alt_loop=True do not help
+#
+# 2. Tkinter:
+#    - Imports successfully but hangs when creating windows
+#    - PyPy's bundled Tk requires manual mainloop() calls, breaking event-driven design
+#    - Tested with PyPy 7.3.20 (Python 3.11.13) - same issues
+#
+# 3. PySide6 (Qt):
+#    - Officially supports PyPy 3.8+ but no pre-built PyPy wheels available for macOS
+#    - Would require building from source
+#
+# 4. wxPython:
+#    - Community reports indicate it does not work with PyPy
+#
+# Root cause: PyPy's ctypes has subtle differences from CPython in callback and object
+# reference handling, which breaks all macOS GUI frameworks that use ctypes to interface
+# with Cocoa/Objective-C.
+#
+# Note: PyPy may work on Linux (X11) or Windows (Win32), as the issue is specific to
+# macOS's Cocoa backend.
+if sys.platform == "darwin" and sys.implementation.name == "pypy":
+    print("Error: PyPy is not supported on macOS.")
+    print("Reason: PyPy's ctypes is incompatible with macOS GUI frameworks (Cocoa).")
+    print("Please use CPython on macOS, or try PyPy on Linux/Windows.")
+    sys.exit(1)
+
+# pylint: disable=wrong-import-position
 from .files import History, PathManager
 from .graphics import Color
 from .menu import RightMenu, TopMenu
@@ -22,13 +61,13 @@ class TilingGui(pyglet.window.Window):
     _TITLE: ClassVar[str] = "Tilings GUI"
     _MIN_WIDTH: ClassVar[int] = 500
     _MIN_HEIGHT: ClassVar[int] = 400
-    _INITIAL_WIDTH: ClassVar[int] = 800
-    _INITIAL_HEIGHT: ClassVar[int] = 650
-    _RIGHT_BAR_WIDTH: ClassVar[int] = 200
-    _TOP_BAR_HEIGHT: ClassVar[int] = 24
-    _CLEAR_COLOR: ClassVar[
-        Tuple[float, float, float, float]
-    ] = Color.alpha_extend_and_scale_to_01(Color.WHITE)
+    _INITIAL_WIDTH: ClassVar[int] = 1600
+    _INITIAL_HEIGHT: ClassVar[int] = 1200
+    _RIGHT_BAR_WIDTH: ClassVar[int] = 400
+    _TOP_BAR_HEIGHT: ClassVar[int] = 50
+    _CLEAR_COLOR: ClassVar[Tuple[float, float, float, float]] = (
+        Color.alpha_extend_and_scale_to_01(Color.WHITE)
+    )
 
     def __init__(self, init_tiling: str, *args, **kargs) -> None:
         """Instantiate the parent window class and create all
@@ -90,7 +129,7 @@ class TilingGui(pyglet.window.Window):
         """Configuration done before starting."""
 
         # Center the window within the os.
-        screen = pyglet.canvas.Display().get_default_screen()
+        screen = pyglet.display.Display().get_default_screen()  # type: ignore
         self.set_location(
             (screen.width - self.width) // 2, (screen.height - self.height) // 2
         )
@@ -100,9 +139,9 @@ class TilingGui(pyglet.window.Window):
 
         # Handle clearing the canvas on each draw.
         pyglet.gl.glClearColor(*TilingGui._CLEAR_COLOR)
-        self.push_handlers(on_draw=self.clear)
+        self.push_handlers(on_draw=self.clear)  # pylint: disable=unreachable
 
-    def on_resize(self, width: int, height: int) -> bool:
+    def on_resize(self, width: int, height: int) -> Literal[True]:
         """Event handler for the window resize event.
 
         Args:
